@@ -28,8 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Document routes
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::post('/documents/{document}/admin-sign', [DocumentController::class, 'adminSign'])
-        ->name('documents.adminSign');
-
+    ->name('documents.adminSign');
     // Approval routes
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
