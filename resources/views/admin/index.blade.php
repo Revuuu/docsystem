@@ -296,6 +296,22 @@
         table th, table td { padding: 0.5rem; font-size: 0.85rem; }
         .modal-box { max-width: 100%; }
     }
+
+    .nav-btn {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--ink);
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        background: var(--paper-mid);
+        text-align: left;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .nav-btn:hover {
+    background: #c0bab0;
+    }
 </style>
 </head>
 <body>
@@ -307,6 +323,20 @@
         <h2>Logged in as</h2>
         <p>{{ auth()->user()->name }}</p>
         <p class="font-semibold text-sm">{{ ucfirst(auth()->user()->role) }}</p>
+
+        <nav style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+            <button type="button"
+                onclick="showSection('signed')"
+                class="nav-btn">
+                ✅ Signed Documents
+            </button>
+
+            <button type="button"
+                onclick="showSection('users')"
+                class="nav-btn">
+                👥 Role Assignment
+            </button>
+        </nav>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn-logout">Logout</button>
@@ -316,67 +346,176 @@
     <!-- Right Content -->
     <div class="content">
      <!-- Signed Documents Section -->
-        <div style="max-width:600px;">
-            <div class="hero-eyebrow" style="margin-bottom:1rem;">
-                <div class="hero-eyebrow-line"></div>
-                <span class="hero-eyebrow-text">Completed Documents</span>
+        <div id="section-signed" class="dashboard-section">
+            <div style="max-width:600px;">
+                <div class="hero-eyebrow" style="margin-bottom:1rem;">
+                    <div class="hero-eyebrow-line"></div>
+                    <span class="hero-eyebrow-text">Completed Documents</span>
+                </div>
+                <h2 style="font-family:var(--font-display); font-size:1.5rem; color:var(--ink); margin-bottom:1.25rem;">
+                    Signed Documents
+                </h2>
+
+                @php
+                    $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
+                        ->whereNotNull('admin_signed_at')
+                        ->latest('admin_signed_at')
+                        ->get();
+                @endphp
+
+                @if($signedDocs->count() > 0)
+                    <table style="width:100%; border-collapse:collapse; background:var(--paper-warm);
+                                border:1px solid var(--paper-mid); border-radius:8px; overflow:hidden;">
+                        <thead>
+                            <tr style="background:var(--paper-mid);">
+                                <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                        font-size:0.8rem; color:var(--ink);">Title</th>
+                                <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                        font-size:0.8rem; color:var(--ink);">Signed At</th>
+                                <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                        font-size:0.8rem; color:var(--ink);">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($signedDocs as $doc)
+                            <tr style="border-top:1px solid var(--paper-mid);">
+                                <td style="padding:0.75rem 1rem; font-family:var(--font-body); font-size:0.9rem;">
+                                    {{ $doc->title }}
+                                </td>
+                                <td style="padding:0.75rem 1rem; font-family:var(--font-mono); 
+                                        font-size:0.8rem; color:var(--text-muted);">
+                                    {{ $doc->admin_signed_at ? $doc->admin_signed_at->format('M d, Y h:i A') : 'N/A' }}
+                                </td>
+                                <td style="padding:0.75rem 1rem;">
+                                    <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
+                                    target="_blank"
+                                    style="color:#2563eb; font-family:var(--font-mono); 
+                                            font-size:0.8rem; text-decoration:underline;">
+                                        Download
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <p style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-muted);
+                            padding:1rem; background:var(--paper-warm); border:1px solid var(--paper-mid);
+                            border-radius:8px;">
+                        No signed documents yet.
+                    </p>
+                @endif
             </div>
-            <h2 style="font-family:var(--font-display); font-size:1.5rem; color:var(--ink); margin-bottom:1.25rem;">
-                Signed Documents
-            </h2>
-
-            @php
-                $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
-                    ->whereNotNull('admin_signed_at')
-                    ->latest('admin_signed_at')
-                    ->get();
-            @endphp
-
-            @if($signedDocs->count() > 0)
-                <table style="width:100%; border-collapse:collapse; background:var(--paper-warm);
-                              border:1px solid var(--paper-mid); border-radius:8px; overflow:hidden;">
-                    <thead>
-                        <tr style="background:var(--paper-mid);">
-                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
-                                       font-size:0.8rem; color:var(--ink);">Title</th>
-                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
-                                       font-size:0.8rem; color:var(--ink);">Signed At</th>
-                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
-                                       font-size:0.8rem; color:var(--ink);">Download</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($signedDocs as $doc)
-                        <tr style="border-top:1px solid var(--paper-mid);">
-                            <td style="padding:0.75rem 1rem; font-family:var(--font-body); font-size:0.9rem;">
-                                {{ $doc->title }}
-                            </td>
-                            <td style="padding:0.75rem 1rem; font-family:var(--font-mono); 
-                                       font-size:0.8rem; color:var(--text-muted);">
-                                {{ $doc->admin_signed_at ? $doc->admin_signed_at->format('M d, Y h:i A') : 'N/A' }}
-                            </td>
-                            <td style="padding:0.75rem 1rem;">
-                                <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
-                                   target="_blank"
-                                   style="color:#2563eb; font-family:var(--font-mono); 
-                                          font-size:0.8rem; text-decoration:underline;">
-                                    Download
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @else
-                <p style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-muted);
-                           padding:1rem; background:var(--paper-warm); border:1px solid var(--paper-mid);
-                           border-radius:8px;">
-                    No signed documents yet.
-                </p>
-            @endif
         </div>
-    </div>
+
+        <div id="section-users" class="dashboard-section" style="display:none;">
+            <h2 class="section-title">Role Assignment</h2>
+
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-error">{{ session('error') }}</div>
+            @endif
+
+            {{-- Add New User Form --}}
+            <div style="background: var(--paper-warm); border: 1px solid var(--paper-mid);
+                        border-radius: 10px; padding: 1.5rem; max-width: 520px; margin-bottom: 2rem;">
+                <h3 style="font-family: var(--font-display); font-size: 1.1rem;
+                        color: var(--ink); margin-bottom: 1.25rem;">Add New User</h3>
+
+                <form method="POST" action="{{ route('users.store') }}"
+                    style="display: flex; flex-direction: column; gap: 1rem;">
+                    @csrf
+
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);">Name</label>
+                        <input type="text" name="name" value="{{ old('name') }}" required
+                            style="padding: 0.6rem 0.85rem; border: 1px solid var(--paper-mid);
+                                    border-radius: 6px; font-family: var(--font-body);
+                                    font-size: 0.9rem; background: var(--paper); color: var(--ink);">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);">Email</label>
+                        <input type="email" name="email" value="{{ old('email') }}" required
+                            style="padding: 0.6rem 0.85rem; border: 1px solid var(--paper-mid);
+                                    border-radius: 6px; font-family: var(--font-body);
+                                    font-size: 0.9rem; background: var(--paper); color: var(--ink);">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);">Password</label>
+                        <input type="password" name="password" required
+                            style="padding: 0.6rem 0.85rem; border: 1px solid var(--paper-mid);
+                                    border-radius: 6px; font-family: var(--font-body);
+                                    font-size: 0.9rem; background: var(--paper); color: var(--ink);">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);">Confirm Password</label>
+                        <input type="password" name="password_confirmation" required
+                            style="padding: 0.6rem 0.85rem; border: 1px solid var(--paper-mid);
+                                    border-radius: 6px; font-family: var(--font-body);
+                                    font-size: 0.9rem; background: var(--paper); color: var(--ink);">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);">Assign Role</label>
+                        <select name="role" required
+                                style="padding: 0.6rem 0.85rem; border: 1px solid var(--paper-mid);
+                                    border-radius: 6px; font-family: var(--font-body);
+                                    font-size: 0.9rem; background: var(--paper); color: var(--ink);">
+                            <option value="">-- Select Role --</option>
+                            <option value="approver"  {{ old('role') === 'approver'  ? 'selected' : '' }}>Approver</option>
+                            <option value="requestor" {{ old('role') === 'requestor' ? 'selected' : '' }}>Requestor</option>
+                        </select>
+                    </div>
+
+                    @if($errors->any())
+                        <div class="alert alert-error">
+                            <ul style="margin: 0; padding-left: 1rem;">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <button type="submit"
+                            style="padding: 0.7rem 1rem; background: var(--gold); color: var(--ink);
+                                border: none; border-radius: 6px; font-family: var(--font-mono);
+                                font-size: 0.85rem; font-weight: 600; cursor: pointer;
+                                transition: background 0.2s;"
+                            onmouseover="this.style.background='var(--gold-light)'"
+                            onmouseout="this.style.background='var(--gold)'">
+                        Create User
+                    </button>
+                </form>
+        </div>
 </div>
 
+    </div>
+</div>
+<script>
+function showSection(section) {
+
+    const signed = document.getElementById('section-signed');
+    const users = document.getElementById('section-users');
+
+    // hide all sections
+    signed.style.display = 'none';
+    users.style.display = 'none';
+
+    // show selected section
+    if (section === 'signed') {
+        signed.style.display = 'block';
+    }
+
+    if (section === 'users') {
+        users.style.display = 'block';
+    }
+}
+</script>
 </body>
 </html>
