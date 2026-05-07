@@ -18,6 +18,7 @@ class DocumentController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'file'  => 'required|mimes:pdf|max:10240',
+            'approver_id' => 'required|exists:users,id',
         ]);
 
         $path = $request->file('file')->store('documents', 'public');
@@ -26,17 +27,15 @@ class DocumentController extends Controller
             'title'       => $request->title,
             'file_path'   => $path,
             'uploaded_by' => Auth::id(),
+            'approver_id' => $request->approver_id,
             'status'      => 'pending',
         ]);
 
-        $approverIds = User::where('role', 'approver')->pluck('id');
-        foreach ($approverIds as $userId) {
-            Approval::create([
-                'document_id' => $document->id,
-                'user_id'     => $userId,
-                'status'      => 'pending',
-            ]);
-        }
+        Approval::create([
+    'document_id' => $document->id,
+    'user_id'     => $request->approver_id,
+    'status'      => 'pending',
+]);
 
         return redirect()->route('dashboard')->with('success', 'Document uploaded successfully!');
     }

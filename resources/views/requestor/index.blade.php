@@ -248,6 +248,34 @@
                 </div>
 
                 <div>
+                    <label for="approver_id">Choose Approver</label>
+
+                    <select 
+                        name="approver_id" 
+                        id="approver_id" 
+                        required
+                        style="
+                            padding: 0.75rem 1rem;
+                            border-radius:6px;
+                            border:1px solid var(--paper-mid);
+                            font-family: var(--font-body);
+                            font-size:1rem;
+                            width:100%;
+                            background: white;
+                            color: var(--text-body);
+                        "
+                    >
+                        <option value="">Select Approver</option>
+
+                        @foreach(\App\Models\User::where('role', 'approver')->get() as $approver)
+                        <option value="{{ $approver->id }}">
+                            {{ $approver->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
                     <label for="file">Upload PDF</label>
                     <input type="file" name="file" id="file" accept="application/pdf" required>
                 </div>
@@ -255,7 +283,7 @@
                 <button type="submit">Upload Document</button>
             </form>
         </div>
- <!-- Signed Documents Section -->
+        <!-- Signed Documents Section -->
         <div style="max-width:600px;">
             <div class="hero-eyebrow" style="margin-bottom:1rem;">
                 <div class="hero-eyebrow-line"></div>
