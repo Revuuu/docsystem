@@ -2,89 +2,136 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Approval;
 use App\Models\AuditLog;
-use App\Models\Document;
 use Carbon\Carbon;
-use setasign\Fpdi\Tcpdf\Fpdi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use setasign\Fpdi\Tcpdf\Fpdi;
 
 class ApprovalController extends Controller
 {
-    /**
-     * Show all pending approvals for logged-in approvers.
-     */
     public function index()
     {
-        // Fetch pending approvals assigned to the logged-in approver
-        $approvals = Approval::with('document.uploader')
+        $user = auth()->user();
+
+        if ($user->role !== 'approver') {
+            abort(403, 'Unauthorized');
+        }
+
+        $approvals = Approval::with(['document.uploader'])
             ->where('status', 'pending')
-            ->where('user_id', auth()->id()) // only show approvals for current approver
+            ->where('user_id', $user->id)
+            ->latest()
             ->get();
 
         return view('approvals.index', compact('approvals'));
     }
 
-    /**
-     * Approve a document.
-     */
-    public function approve(Approval $approval)
+    public function approve(Request $request, Approval $approval)
     {
-        // Optional: restrict to specific approver
-        // if ($approval->user_id !== auth()->id()) {
-        //     abort(403, 'You are not authorized to approve this document.');
-        // }
+        // 1. Sign the PDF and get back the saved path
+        $signedPath = $this->signPdf($approval, $request);
 
-        // Update approval status
+        // 2. Mark approval as approved
         $approval->update([
             'status'    => 'approved',
             'signed_at' => Carbon::now(),
         ]);
 
-        // Sign the PDF
-        $this->signPdf($approval);
+        // 3. Update document status + store signed file path
+        $approval->document->update([
+    'status'           => 'approved',
+    'signed_file_path' => $signedPath,
+    'admin_signed_at'  => Carbon::now(), // this was missing
+]);
 
-        // Log the approval action
+        // 4. Audit log
         AuditLog::create([
             'user_id'     => auth()->id(),
             'document_id' => $approval->document_id,
             'action'      => 'approved',
-            'ip_address'  => request()->ip(),
+            'ip_address'  => $request->ip(),
         ]);
 
-        return back()->with('success', 'Document approved successfully!');
+        return back()->with('success', 'Document approved and signed successfully!');
     }
 
-    /**
-     * Optional: Sign the PDF with approver's name and timestamp
-     */
-    protected function signPdf(Approval $approval)
-{
-    $filePath = storage_path('app/public/' . $approval->document->file_path);
+    protected function signPdf(Approval $approval, Request $request): ?string
+    {
+        $originalPath = storage_path('app/public/' . $approval->document->file_path);
 
-    if (!file_exists($filePath) || pathinfo($filePath, PATHINFO_EXTENSION) !== 'pdf') {
-        return;
-    }
-
-    $pdf = new Fpdi();
-    $pdf->SetAutoPageBreak(false);
-    $pageCount = $pdf->setSourceFile($filePath);
-
-    for ($i = 1; $i <= $pageCount; $i++) {
-        $tpl = $pdf->importPage($i);
-        $size = $pdf->getTemplateSize($tpl);
-        $pdf->AddPage($size['width'] > $size['height'] ? 'L' : 'P', [$size['width'], $size['height']]);
-        $pdf->useTemplate($tpl);
-
-        if ($i === $pageCount) {
-            $pdf->SetFont('helvetica', 'B', 8);
-            $pdf->SetTextColor(0, 0, 200);
-            $pdf->SetXY(10, $size['height'] - 10);
-            $pdf->Write(0, "Approved by: " . auth()->user()->name . " on " . now()->toDateTimeString());
+        if (!file_exists($originalPath)) {
+            return null;
         }
-    }
 
-    $pdf->Output($filePath, 'F');
-}
+        $pdf = new Fpdi();
+        $pdf->SetAutoPageBreak(false);
+
+        $pageCount = $pdf->setSourceFile($originalPath);
+
+        $sigX    = (float) ($request->sig_x    ?? 0.1);
+        $sigY    = (float) ($request->sig_y    ?? 0.8);
+        $sigW    = (float) ($request->sig_w    ?? 0.2);
+        $sigH    = (float) ($request->sig_h    ?? 0.05);
+        $sigPage = (int)   ($request->sig_page ?? 1);
+
+        for ($i = 1; $i <= $pageCount; $i++) {
+            $tpl  = $pdf->importPage($i);
+            $size = $pdf->getTemplateSize($tpl);
+
+            $pdf->AddPage(
+                $size['width'] > $size['height'] ? 'L' : 'P',
+                [$size['width'], $size['height']]
+            );
+            $pdf->useTemplate($tpl);
+
+            if ($i === $sigPage) {
+                $x = $sigX * $size['width'];
+                $y = $sigY * $size['height'];
+
+                    $sigImgPath = public_path('signature.png');
+// DEBUG - check in laravel.log
+    \Log::info('Signature image path: ' . $sigImgPath);
+    \Log::info('File exists: ' . (file_exists($sigImgPath) ? 'YES' : 'NO'));
+    \Log::info('sig_x=' . $sigX . ' sig_y=' . $sigY . ' sig_w=' . $sigW . ' sig_h=' . $sigH);
+    \Log::info('Computed x=' . $x . ' y=' . $y . ' page_w=' . $size['width'] . ' page_h=' . $size['height']);
+                    // Signature image above the line
+    if (file_exists($sigImgPath)) {
+        $imgW = $sigW * $size['width'];
+        $imgH = $sigH * $size['height'];
+        $pdf->Image($sigImgPath, $x, $y - $imgH - 2, $imgW, $imgH, 'PNG');
+    }
+        // Draw a line below the signature image
+    $pdf->SetDrawColor(0, 0, 128);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line($x, $y, $x + ($sigW * $size['width']), $y);
+                // Approver name in bold blue
+                $pdf->SetFont('helvetica', 'B', 10);
+                $pdf->SetTextColor(0, 0, 128);
+                $pdf->SetXY($x, $y);
+                $pdf->Write(0, 'Approved by: ' . auth()->user()->name);
+
+                // Timestamp below name
+                $pdf->SetXY($x, $y + 5);
+                $pdf->SetFont('helvetica', '', 8);
+                $pdf->SetTextColor(80, 80, 80);
+                $pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
+            }
+        }
+
+        // Save as a NEW signed file — never overwrite the original
+        $signedRelativePath = 'documents/signed/signed_' . basename($approval->document->file_path);
+        $signedAbsolutePath = storage_path('app/public/' . $signedRelativePath);
+
+        // Ensure the signed/ directory exists
+        $signedDir = dirname($signedAbsolutePath);
+        if (!is_dir($signedDir)) {
+            mkdir($signedDir, 0755, true);
+        }
+
+        $pdf->Output($signedAbsolutePath, 'F');
+
+        return $signedRelativePath;
+    }
 }

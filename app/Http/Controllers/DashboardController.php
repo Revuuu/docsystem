@@ -8,24 +8,34 @@ use App\Models\Approval;
 
 class DashboardController extends Controller
 {
-    public function index()
+   public function index()
 {
     $user = auth()->user();
+
     $approvals = collect();
     $pendingDocuments = collect();
 
-    if ($user->role === 'admin') {
-        $pendingDocuments = Document::where('status', 'pending')
-            ->whereNull('admin_signed_at')
-            ->get();
-    }
-
     if ($user->role === 'approver') {
+
         $approvals = Approval::with('document.uploader')
             ->where('status', 'pending')
+            ->where('user_id', $user->id) // ✅ IMPORTANT FIX
+            ->latest()
+            ->get();
+
+        $pendingDocuments = $approvals->map(fn($a) => $a->document);
+    }
+
+    if ($user->role === 'requestor') {
+        $pendingDocuments = Document::where('uploaded_by', $user->id)
+            ->latest()
             ->get();
     }
 
-    return view('dashboard', compact('approvals', 'pendingDocuments'));
+    $signedDocuments = Document::whereNotNull('signed_file_path')
+        ->latest('admin_signed_at')
+        ->get();
+
+    return view('dashboard', compact('approvals', 'pendingDocuments', 'signedDocuments'));
 }
 }

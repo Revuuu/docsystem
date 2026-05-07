@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DOCSYSTEM - Approvals</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
 
 <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +23,7 @@
         --font-mono:    'DM Mono', monospace;
     }
 
-    body {
+     body {
         background-color: var(--paper);
         font-family: var(--font-body);
         min-height: 100vh;
@@ -40,7 +38,7 @@
         display: grid;
         grid-template-columns: 220px 1fr;
         width: 100vw;
-        min-height: 100vh;
+        height: 100vh;
     }
 
     /* Sidebar */
@@ -81,112 +79,148 @@
         transition: background 0.25s;
     }
 
-    .btn-logout:hover { background-color: #9a2828; }
+    .btn-logout:hover {
+        background-color: #9a2828;
+    }
 
     /* Right Content */
     .content {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 3rem;
         padding: 2rem;
         overflow-y: auto;
     }
+    h1 { font-size: 24px; margin-bottom: 1rem; }
 
-    h1.page-title {
-        font-family: var(--font-display);
-        font-size: clamp(2rem,5vw,3rem);
-        font-weight: 900;
-        color: var(--ink);
-        margin-bottom: 1rem;
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+    th { background: #e8c97a; }
+
+    .btn-sign {
+        background: #2563eb; color: white; border: none;
+        padding: 6px 12px; cursor: pointer; border-radius: 5px;
     }
+    .btn-sign:hover { background: #1e40af; }
+    .no-data { color: #6b7890; font-style: italic; }
 
-    .hero-subtitle {
-        font-size: 1rem;
-        line-height: 1.6;
-        color: var(--text-muted);
-        margin-bottom: 2rem;
+    /* MODAL */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
     }
+    .modal-overlay.active { display: flex; }
 
-    .alert-success {
-        background-color: #d1fae5;
-        color: #065f46;
-        padding: 1rem;
+    .modal-box {
+        width: 70%;
+        height: 90vh;
+        background: white;
+        display: flex;
+        flex-direction: column;
         border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-
-    .alert-danger {
-        background-color: #fee2e2;
-        color: #991b1b;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-
-    /* Approvals Table */
-    table.approvals-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: var(--paper-warm);
-        border: 1px solid var(--paper-mid);
-        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(13,17,23,0.1);
     }
 
-    table.approvals-table th,
-    table.approvals-table td {
-        padding: 0.75rem 1rem;
-        text-align: left;
-        font-family: var(--font-body);
-        font-size: 0.95rem;
-        border-bottom: 1px solid var(--paper-mid);
+    .modal-header {
+        padding: 12px 16px;
+        background: #e8c97a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 { margin: 0; }
+    .modal-close {
+        background: none; border: none;
+        font-size: 22px; cursor: pointer; font-weight: bold;
     }
 
-    table.approvals-table th {
-        background: var(--paper-mid);
-        font-family: var(--font-mono);
-        font-weight: 600;
-        color: var(--ink);
+    .page-selector {
+        padding: 8px 16px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    .page-selector input {
+        width: 60px; padding: 4px 8px;
+        border: 1px solid #ccc; border-radius: 4px;
     }
 
-    table.approvals-table tr:last-child td {
-        border-bottom: none;
+    /* PDF wrapper: this must be position:relative so the overlay sits on top */
+    .pdf-wrapper {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #555;
     }
 
-    .btn-approve {
-        background-color: #16a34a;
-        color: white;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
+    .pdf-frame {
+        width: 100%;
+        height: 100%;
         border: none;
-        cursor: pointer;
-        transition: background 0.25s;
+        display: block;
     }
 
-    .btn-approve:hover {
-        background-color: #15803d;
+    /* Transparent click layer sitting on top of the iframe */
+    .pdf-click-layer {
+        position: absolute;
+        inset: 0;
+        cursor: crosshair;
+        z-index: 10;
     }
 
-    p.no-approvals {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-        font-style: italic;
+    /* Ghost signature that follows the click */
+    .sig-ghost {
+        position: absolute;
+        display: none;
+        border: 2px dashed #2563eb;
+        background: rgba(37, 99, 235, 0.08);
+        padding: 6px 10px;
+        pointer-events: none;
+        z-index: 20;
+        font-size: 13px;
+        color: #1e3a8a;
+        white-space: nowrap;
+        border-radius: 4px;
+        transform: translate(0, -50%);
     }
 
-    @media(max-width:900px){
-        .main-container { grid-template-columns: 1fr; }
-        .content { padding: 1rem; }
-        table.approvals-table th, table.approvals-table td { font-size: 0.85rem; padding: 0.5rem; }
+    .modal-footer {
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        background: #eee;
+        border-top: 1px solid #ddd;
+    }
+
+    .btn-cancel {
+        background: #b83232; color: white; border: none;
+        padding: 8px 14px; cursor: pointer; border-radius: 5px;
+    }
+    .btn-confirm {
+        background: #16a34a; color: white; border: none;
+        padding: 8px 14px; cursor: pointer; border-radius: 5px;
+    }
+    .btn-confirm:disabled {
+        background: #9ca3af; cursor: not-allowed;
+    }
+    .btn-confirm:not(:disabled):hover { background: #15803d; }
+
+    .hint {
+        font-size: 12px; color: #6b7280;
+        align-self: center;
     }
 </style>
 </head>
+
 <body>
-
 <div class="main-container">
-
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>Logged in as</h2>
@@ -197,20 +231,12 @@
             <button type="submit" class="btn-logout">Logout</button>
         </form>
     </div>
-
-    <!-- Content -->
+<!-- Content -->            
     <div class="content">
-        <h1 class="page-title">Pending Approvals</h1>
-        <p class="hero-subtitle">Review documents and approve them securely on DOCSYSTEM.</p>
-
-        @if(session('success'))
-            <div class="alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+        <h1>Pending Approvals</h1>
 
         @if($approvals->count() > 0)
-            <table class="approvals-table">
+            <table>
                 <thead>
                     <tr>
                         <th>Title</th>
@@ -220,31 +246,182 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($approvals as $approval)
+                @foreach($approvals as $approval)
                     <tr>
-                        <td>{{ $approval->document->title ?? 'Document missing' }}</td>
-                        <td>{{ $approval->document->uploader->name ?? 'Uploader missing' }}</td>
-                        <td>{{ ucfirst($approval->status ?? 'N/A') }}</td>
+                        <td>{{ $approval->document->title ?? 'Missing' }}</td>
+                        <td>{{ $approval->document->uploader->name ?? 'Missing' }}</td>
+                        <td>{{ ucfirst($approval->status) }}</td>
                         <td>
                             @if($approval->status === 'pending')
-                            <form method="POST" action="{{ route('approvals.approve', $approval->id) }}">
-                                @csrf
-                                <button type="submit" class="btn-approve">Approve</button>
-                            </form>
+                                <button class="btn-sign"
+                                    onclick="openSignModal(
+                                        {{ $approval->id }},
+                                        '{{ asset('storage/' . $approval->document->file_path) }}',
+                                        '{{ route('approvals.approve', $approval->id) }}'
+                                    )">
+                                    Sign
+                                </button>
                             @else
-                                <span style="color: var(--text-muted)">-</span>
+                                -
                             @endif
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        @else
+            <p class="no-data">No pending approvals.</p>
+
+        @endif
+
+        {{-- Signed Documents --}}
+        <h1>Signed Documents</h1>
+
+        @php
+            $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
+                ->whereNotNull('admin_signed_at')
+                ->latest('admin_signed_at')
+                ->get();
+        @endphp
+
+        @if($signedDocs->count() > 0)
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Signed At</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($signedDocs as $doc)
+                    <tr>
+                        <td>{{ $doc->title }}</td>
+                        <td>{{ $doc->admin_signed_at ? $doc->admin_signed_at->format('M d, Y h:i A') : 'N/A' }}</td>
+                        <td>
+                            <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
+                               target="_blank"
+                               style="color:#2563eb; text-decoration:underline;">
+                                Download
+                            </a>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         @else
-            <p class="no-approvals">No pending approvals.</p>
+            <p class="no-data">No signed documents yet.</p>
         @endif
+    </div>
+</div>
+{{-- MODAL --}}
+<div class="modal-overlay" id="signModal">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <h3>Place Signature</h3>
+            <button onclick="closeSignModal()" class="modal-close">×</button>
+        </div>
+
+        <div class="page-selector">
+            <label for="sigPageInput">Page:</label>
+            <input type="number" id="sigPageInput" value="1" min="1">
+        </div>
+
+        <div class="pdf-wrapper" id="pdfWrapper">
+            <iframe class="pdf-frame" id="pdfFrame"></iframe>
+
+            {{-- Click layer sits on top of iframe to capture clicks --}}
+            <div class="pdf-click-layer" id="pdfClickLayer"></div>
+
+            {{-- Ghost shows where signature will be placed --}}
+            <div class="sig-ghost" id="sigGhost">
+                ✍ {{ auth()->user()->name }}
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeSignModal()">Cancel</button>
+            <span class="hint" id="hintText">Click anywhere on the document to place your signature</span>
+            <button class="btn-confirm" id="btnConfirm" onclick="submitSignature()" disabled>
+                ✔ Approve & Sign
+            </button>
+        </div>
 
     </div>
 </div>
+
+<form id="signatureForm" method="POST" action="">
+    @csrf
+    <input type="hidden" name="sig_x" id="formSigX">
+    <input type="hidden" name="sig_y" id="formSigY">
+    <input type="hidden" name="sig_w" id="formSigW">
+    <input type="hidden" name="sig_h" id="formSigH">
+    <input type="hidden" name="sig_page" id="formSigPage">
+</form>
+
+<script>
+let sigX = 0, sigY = 0;
+const sigW = 200, sigH = 40; // fixed pixel size of ghost box
+let placed = false;
+
+const ghost   = document.getElementById('sigGhost');
+const layer   = document.getElementById('pdfClickLayer');
+const wrapper = document.getElementById('pdfWrapper');
+const btn     = document.getElementById('btnConfirm');
+const hint    = document.getElementById('hintText');
+
+function openSignModal(docId, pdfUrl, signUrl) {
+    document.getElementById('pdfFrame').src = pdfUrl;
+    document.getElementById('signatureForm').action = signUrl;
+    document.getElementById('sigPageInput').value = 1;
+
+    ghost.style.display = 'none';
+    placed = false;
+    btn.disabled = true;
+    hint.textContent = 'Click anywhere on the document to place your signature';
+
+    document.getElementById('signModal').classList.add('active');
+}
+
+function closeSignModal() {
+    document.getElementById('signModal').classList.remove('active');
+    document.getElementById('pdfFrame').src = '';
+}
+
+layer.addEventListener('click', (e) => {
+    const rect = wrapper.getBoundingClientRect();
+
+    // Position relative to the wrapper
+    sigX = e.clientX - rect.left;
+    sigY = e.clientY - rect.top;
+
+    // Show ghost at click point (centered vertically on click)
+    ghost.style.left  = sigX + 'px';
+    ghost.style.top   = sigY + 'px';
+    ghost.style.display = 'block';
+
+    placed = true;
+    btn.disabled = false;
+    hint.textContent = 'Signature placed! Click again to reposition, or click Approve & Sign.';
+});
+
+function submitSignature() {
+    if (!placed) return;
+
+    const canvasW = wrapper.clientWidth;
+    const canvasH = wrapper.clientHeight;
+
+    // Send normalized coordinates (0.0 – 1.0) to the backend
+    document.getElementById('formSigX').value = (sigX / canvasW).toFixed(6);
+    document.getElementById('formSigY').value = (sigY / canvasH).toFixed(6);
+    document.getElementById('formSigW').value = (sigW / canvasW).toFixed(6);
+    document.getElementById('formSigH').value = (sigH / canvasH).toFixed(6);
+    document.getElementById('formSigPage').value = document.getElementById('sigPageInput').value;
+
+    document.getElementById('signatureForm').submit();
+}
+</script>
 
 </body>
 </html>

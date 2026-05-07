@@ -255,10 +255,67 @@
                 <button type="submit">Upload Document</button>
             </form>
         </div>
+ <!-- Signed Documents Section -->
+        <div style="max-width:600px;">
+            <div class="hero-eyebrow" style="margin-bottom:1rem;">
+                <div class="hero-eyebrow-line"></div>
+                <span class="hero-eyebrow-text">Completed Documents</span>
+            </div>
+            <h2 style="font-family:var(--font-display); font-size:1.5rem; color:var(--ink); margin-bottom:1.25rem;">
+                Signed Documents
+            </h2>
 
+            @php
+                $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
+                    ->whereNotNull('admin_signed_at')
+                    ->latest('admin_signed_at')
+                    ->get();
+            @endphp
+
+            @if($signedDocs->count() > 0)
+                <table style="width:100%; border-collapse:collapse; background:var(--paper-warm);
+                              border:1px solid var(--paper-mid); border-radius:8px; overflow:hidden;">
+                    <thead>
+                        <tr style="background:var(--paper-mid);">
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Title</th>
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Signed At</th>
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($signedDocs as $doc)
+                        <tr style="border-top:1px solid var(--paper-mid);">
+                            <td style="padding:0.75rem 1rem; font-family:var(--font-body); font-size:0.9rem;">
+                                {{ $doc->title }}
+                            </td>
+                            <td style="padding:0.75rem 1rem; font-family:var(--font-mono); 
+                                       font-size:0.8rem; color:var(--text-muted);">
+                                {{ $doc->admin_signed_at ? $doc->admin_signed_at->format('M d, Y h:i A') : 'N/A' }}
+                            </td>
+                            <td style="padding:0.75rem 1rem;">
+                                <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
+                                   target="_blank"
+                                   style="color:#2563eb; font-family:var(--font-mono); 
+                                          font-size:0.8rem; text-decoration:underline;">
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-muted);
+                           padding:1rem; background:var(--paper-warm); border:1px solid var(--paper-mid);
+                           border-radius:8px;">
+                    No signed documents yet.
+                </p>
+            @endif
+        </div>
     </div>
-
 </div>
-
 </body>
 </html>

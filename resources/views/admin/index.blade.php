@@ -313,330 +313,70 @@
         </form>
     </div>
 
-    <!-- Content -->
+    <!-- Right Content -->
     <div class="content">
-        <h2 class="section-title">Pending Documents for Admin</h2>
-
-        @if(session('error'))
-            <div class="alert alert-error">{{ session('error') }}</div>
-        @endif
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if(isset($pendingDocuments) && $pendingDocuments->count() > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>File</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($pendingDocuments as $doc)
-                <tr>
-                    <td>{{ $doc->title }}</td>
-                    <td>
-                        <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank">View Document</a>
-                    </td>
-                    <td>
-                        <button
-                            type="button"
-                            class="btn-action btn-place"
-                            onclick="openSignModal(
-                                {{ $doc->id }},
-                                '{{ asset('storage/' . $doc->file_path) }}',
-                                '{{ route('documents.adminSign', $doc->id) }}'
-                            )">
-                            Place Signature
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-            <p>No pending documents.</p>
-        @endif
-
-        @php
-            $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')->get();
-        @endphp
-
-        @if($signedDocs->count() > 0)
-        <h2 class="section-title">Signed Documents</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Signed At</th>
-                    <th>Download</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($signedDocs as $doc)
-                <tr>
-                    <td>{{ $doc->title }}</td>
-                    <td>{{ $doc->admin_signed_at }}</td>
-                    <td>
-                        <a href="{{ asset('storage/' . $doc->signed_file_path) }}" target="_blank">Download Signed PDF</a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @endif
-    </div>
-
-</div>
-
-<!-- Signature Placement Modal -->
-<div class="modal-overlay" id="signModal">
-    <div class="modal-box">
-
-        <div class="modal-header">
-            <h3>Place Your Signature</h3>
-            <button class="modal-close" onclick="closeSignModal()" title="Close">&#215;</button>
-        </div>
-
-        <div class="modal-instructions">
-            <div class="dot"></div>
-            Click anywhere on the document to place your signature box, then drag to reposition it.
-        </div>
-
-        <div class="page-selector">
-            <label for="sigPageInput">Page:</label>
-            <input type="number" id="sigPageInput" value="1" min="1" max="999">
-            <span style="font-size:0.75rem;color:var(--text-muted);">
-                Enter the page number where the signature should appear.
-            </span>
-        </div>
-
-        <div class="pdf-wrapper" id="pdfWrapper">
-            <iframe class="pdf-frame" id="pdfFrame" src=""></iframe>
-            <div class="pdf-click-layer" id="pdfClickLayer"></div>
-            <div class="sig-ghost" id="sigGhost">
-                <div class="sig-ghost-inner">
-                    <div class="sig-ghost-line" id="sigName">Admin Signature</div>
-                    <div class="sig-ghost-label">AUTHORIZED SIGNATORY</div>
-                </div>
-                <div class="resize-handle br" id="resizeHandle"></div>
+     <!-- Signed Documents Section -->
+        <div style="max-width:600px;">
+            <div class="hero-eyebrow" style="margin-bottom:1rem;">
+                <div class="hero-eyebrow-line"></div>
+                <span class="hero-eyebrow-text">Completed Documents</span>
             </div>
-        </div>
+            <h2 style="font-family:var(--font-display); font-size:1.5rem; color:var(--ink); margin-bottom:1.25rem;">
+                Signed Documents
+            </h2>
 
-        <div class="modal-footer">
-            <div class="placement-info">
-                Position — X: <span id="infoX">—</span>&nbsp;
-                Y: <span id="infoY">—</span>&nbsp;|&nbsp;
-                W: <span id="infoW">200</span>px&nbsp;
-                H: <span id="infoH">60</span>px&nbsp;|&nbsp;
-                Page: <span id="infoPage">1</span>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel-sig" onclick="closeSignModal()">Cancel</button>
-                <button class="btn-confirm-sig" id="btnConfirm" onclick="submitSignature()">
-                    Confirm &amp; Sign
-                </button>
-            </div>
-        </div>
+            @php
+                $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
+                    ->whereNotNull('admin_signed_at')
+                    ->latest('admin_signed_at')
+                    ->get();
+            @endphp
 
+            @if($signedDocs->count() > 0)
+                <table style="width:100%; border-collapse:collapse; background:var(--paper-warm);
+                              border:1px solid var(--paper-mid); border-radius:8px; overflow:hidden;">
+                    <thead>
+                        <tr style="background:var(--paper-mid);">
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Title</th>
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Signed At</th>
+                            <th style="padding:0.75rem 1rem; text-align:left; font-family:var(--font-mono);
+                                       font-size:0.8rem; color:var(--ink);">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($signedDocs as $doc)
+                        <tr style="border-top:1px solid var(--paper-mid);">
+                            <td style="padding:0.75rem 1rem; font-family:var(--font-body); font-size:0.9rem;">
+                                {{ $doc->title }}
+                            </td>
+                            <td style="padding:0.75rem 1rem; font-family:var(--font-mono); 
+                                       font-size:0.8rem; color:var(--text-muted);">
+                                {{ $doc->admin_signed_at ? $doc->admin_signed_at->format('M d, Y h:i A') : 'N/A' }}
+                            </td>
+                            <td style="padding:0.75rem 1rem;">
+                                <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
+                                   target="_blank"
+                                   style="color:#2563eb; font-family:var(--font-mono); 
+                                          font-size:0.8rem; text-decoration:underline;">
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-muted);
+                           padding:1rem; background:var(--paper-warm); border:1px solid var(--paper-mid);
+                           border-radius:8px;">
+                    No signed documents yet.
+                </p>
+            @endif
+        </div>
     </div>
 </div>
-
-<!-- Hidden form submitted programmatically -->
-<form id="signatureForm" method="POST" action="">
-    @csrf
-    <input type="hidden" name="sig_x"    id="formSigX">
-    <input type="hidden" name="sig_y"    id="formSigY">
-    <input type="hidden" name="sig_w"    id="formSigW">
-    <input type="hidden" name="sig_h"    id="formSigH">
-    <input type="hidden" name="sig_page" id="formSigPage">
-</form>
-
-<script>
-let ghostPlaced = false;
-let sigX = 0, sigY = 0, sigW = 200, sigH = 60;
-
-const ghost        = document.getElementById('sigGhost');
-const clickLayer   = document.getElementById('pdfClickLayer');
-const wrapper      = document.getElementById('pdfWrapper');
-const pdfFrame     = document.getElementById('pdfFrame');
-const btnConfirm   = document.getElementById('btnConfirm');
-const resizeHandle = document.getElementById('resizeHandle');
-const sigPageInput = document.getElementById('sigPageInput');
-
-// ── Open / Close ──────────────────────────────────────────────────────────────
-function openSignModal(docId, pdfUrl, signUrl) {
-    pdfFrame.src = pdfUrl;
-    document.getElementById('signatureForm').action = signUrl;
-
-    ghostPlaced = false;
-    ghost.classList.remove('placed', 'confirmed');
-    sigW = 200; sigH = 60;
-    ghost.style.width  = sigW + 'px';
-    ghost.style.height = sigH + 'px';
-    btnConfirm.classList.remove('ready');
-    updateInfo();
-
-    document.getElementById('sigName').textContent = '{{ auth()->user()->name }}';
-    document.getElementById('signModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeSignModal() {
-    document.getElementById('signModal').classList.remove('active');
-    document.body.style.overflow = '';
-    pdfFrame.src = '';
-}
-
-// ── Place on click ────────────────────────────────────────────────────────────
-clickLayer.addEventListener('click', function(e) {
-    const rect = wrapper.getBoundingClientRect();
-    sigX = e.clientX - rect.left  + wrapper.scrollLeft - sigW / 2;
-    sigY = e.clientY - rect.top   + wrapper.scrollTop  - sigH / 2;
-    clampGhost();
-    positionGhost();
-    if (!ghostPlaced) {
-        ghost.classList.add('placed');
-        ghostPlaced = true;
-        btnConfirm.classList.add('ready');
-    }
-    ghost.classList.remove('confirmed');
-});
-
-// ── Drag ──────────────────────────────────────────────────────────────────────
-let dragging = false, dragOffX = 0, dragOffY = 0;
-
-ghost.addEventListener('mousedown', function(e) {
-    if (e.target === resizeHandle) return;
-    dragging = true;
-    dragOffX = e.clientX - ghost.getBoundingClientRect().left;
-    dragOffY = e.clientY - ghost.getBoundingClientRect().top;
-    ghost.classList.remove('confirmed');
-    e.preventDefault();
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
-    const rect = wrapper.getBoundingClientRect();
-    sigX = e.clientX - rect.left - dragOffX + wrapper.scrollLeft;
-    sigY = e.clientY - rect.top  - dragOffY + wrapper.scrollTop;
-    clampGhost();
-    positionGhost();
-});
-
-document.addEventListener('mouseup', function() { dragging = false; });
-
-// ── Resize ────────────────────────────────────────────────────────────────────
-let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
-
-resizeHandle.addEventListener('mousedown', function(e) {
-    resizing     = true;
-    resizeStartX = e.clientX;
-    resizeStartY = e.clientY;
-    resizeStartW = sigW;
-    resizeStartH = sigH;
-    e.preventDefault();
-    e.stopPropagation();
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (!resizing) return;
-    sigW = Math.max(80, resizeStartW + (e.clientX - resizeStartX));
-    sigH = Math.max(30, resizeStartH + (e.clientY - resizeStartY));
-    ghost.style.width  = sigW + 'px';
-    ghost.style.height = sigH + 'px';
-    updateInfo();
-});
-
-document.addEventListener('mouseup', function() { resizing = false; });
-
-// ── Touch support ─────────────────────────────────────────────────────────────
-clickLayer.addEventListener('touchstart', function(e) {
-    const touch = e.touches[0];
-    const rect  = wrapper.getBoundingClientRect();
-    sigX = touch.clientX - rect.left + wrapper.scrollLeft - sigW / 2;
-    sigY = touch.clientY - rect.top  + wrapper.scrollTop  - sigH / 2;
-    clampGhost();
-    positionGhost();
-    if (!ghostPlaced) {
-        ghost.classList.add('placed');
-        ghostPlaced = true;
-        btnConfirm.classList.add('ready');
-    }
-    e.preventDefault();
-}, { passive: false });
-
-ghost.addEventListener('touchstart', function(e) {
-    const touch = e.touches[0];
-    dragging = true;
-    dragOffX = touch.clientX - ghost.getBoundingClientRect().left;
-    dragOffY = touch.clientY - ghost.getBoundingClientRect().top;
-    e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('touchmove', function(e) {
-    if (!dragging) return;
-    const touch = e.touches[0];
-    const rect  = wrapper.getBoundingClientRect();
-    sigX = touch.clientX - rect.left - dragOffX + wrapper.scrollLeft;
-    sigY = touch.clientY - rect.top  - dragOffY + wrapper.scrollTop;
-    clampGhost();
-    positionGhost();
-    e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('touchend', function() { dragging = false; });
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function clampGhost() {
-    sigX = Math.max(0, Math.min(sigX, wrapper.scrollWidth  - sigW));
-    sigY = Math.max(0, Math.min(sigY, wrapper.scrollHeight - sigH));
-}
-
-function positionGhost() {
-    ghost.style.left = sigX + 'px';
-    ghost.style.top  = sigY + 'px';
-    updateInfo();
-}
-
-function updateInfo() {
-    document.getElementById('infoX').textContent    = Math.round(sigX);
-    document.getElementById('infoY').textContent    = Math.round(sigY);
-    document.getElementById('infoW').textContent    = Math.round(sigW);
-    document.getElementById('infoH').textContent    = Math.round(sigH);
-    document.getElementById('infoPage').textContent = sigPageInput.value;
-}
-
-sigPageInput.addEventListener('input', updateInfo);
-
-// ── Submit ────────────────────────────────────────────────────────────────────
-function submitSignature() {
-    if (!ghostPlaced) return;
-    const canvasW = wrapper.scrollWidth;
-    const canvasH = wrapper.scrollHeight;
-
-    document.getElementById('formSigX').value    = (sigX / canvasW).toFixed(4);
-    document.getElementById('formSigY').value    = (sigY / canvasH).toFixed(4);
-    document.getElementById('formSigW').value    = (sigW / canvasW).toFixed(4);
-    document.getElementById('formSigH').value    = (sigH / canvasH).toFixed(4);
-    document.getElementById('formSigPage').value = sigPageInput.value;
-
-    ghost.classList.add('confirmed');
-    btnConfirm.textContent = 'Signing…';
-    btnConfirm.classList.remove('ready');
-    document.getElementById('signatureForm').submit();
-}
-
-// Close on overlay click or Escape key
-document.getElementById('signModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSignModal();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeSignModal();
-});
-</script>
 
 </body>
 </html>

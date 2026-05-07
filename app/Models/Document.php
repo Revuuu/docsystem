@@ -18,7 +18,9 @@ class Document extends Model
     'status',
     'admin_signed_at',
 ];
-
+protected $casts = [
+    'admin_signed_at' => 'datetime',
+];
     // Relationship to get uploader user
     public function uploader()
     {

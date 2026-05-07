@@ -32,6 +32,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Approval routes
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
+
+    Route::get('/auth-test', function () {
+    return [
+        'user' => auth()->user(),
+        'id' => auth()->id(),
+    ];
+});
 });
 
 require __DIR__.'/auth.php';
