@@ -59,3 +59,95 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+let sigX = 0;
+let sigY = 0;
+
+const sigW = 200;
+const sigH = 40;
+
+let placed = false;
+
+const ghost = document.getElementById('sigGhost');
+const layer = document.getElementById('pdfClickLayer');
+const wrapper = document.getElementById('pdfWrapper');
+const btn = document.getElementById('btnConfirm');
+const hint = document.getElementById('hintText');
+
+function openSignModal(docId, pdfUrl, signUrl) {
+
+    document.getElementById('pdfFrame').src = pdfUrl;
+
+    document.getElementById('signatureForm').action = signUrl;
+
+    document.getElementById('sigPageInput').value = 1;
+
+    ghost.style.display = 'none';
+
+    placed = false;
+
+    btn.disabled = true;
+
+    hint.textContent =
+        'Click anywhere on the document to place your signature';
+
+    document.getElementById('signModal')
+        .classList.add('active');
+}
+
+function closeSignModal() {
+
+    document.getElementById('signModal')
+        .classList.remove('active');
+
+    document.getElementById('pdfFrame').src = '';
+}
+
+if (layer) {
+
+    layer.addEventListener('click', (e) => {
+
+        const rect = wrapper.getBoundingClientRect();
+
+        sigX = e.clientX - rect.left;
+        sigY = e.clientY - rect.top;
+
+        ghost.style.left = sigX + 'px';
+        ghost.style.top = sigY + 'px';
+
+        ghost.style.display = 'block';
+
+        placed = true;
+
+        btn.disabled = false;
+
+        hint.textContent =
+            'Signature placed! Click again to reposition, or click Approve & Sign.';
+    });
+
+}
+
+function submitSignature() {
+
+    if (!placed) return;
+
+    const canvasW = wrapper.clientWidth;
+    const canvasH = wrapper.clientHeight;
+
+    document.getElementById('formSigX').value =
+        (sigX / canvasW).toFixed(6);
+
+    document.getElementById('formSigY').value =
+        (sigY / canvasH).toFixed(6);
+
+    document.getElementById('formSigW').value =
+        (sigW / canvasW).toFixed(6);
+
+    document.getElementById('formSigH').value =
+        (sigH / canvasH).toFixed(6);
+
+    document.getElementById('formSigPage').value =
+        document.getElementById('sigPageInput').value;
+
+    document.getElementById('signatureForm').submit();
+}
