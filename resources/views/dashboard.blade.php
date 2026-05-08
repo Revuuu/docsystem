@@ -7,7 +7,11 @@
             {{-- Content / Form or Table --}}
             <div class="login-right p-6 bg-paper-warm rounded-lg shadow-md">
                 @if(auth()->user()->role === 'requestor')
-                    @include('requestor.index')
+                    @include('requestor.index', [
+                        'section'         => $section,
+                        'documents'       => $documents,
+                        'signedDocuments' => $signedDocuments,
+                    ])
 
                 @elseif(auth()->user()->role === 'approver')
                     @include('approvals.index', ['approvals' => $approvals])

@@ -6,6 +6,7 @@
 <title>DOCSYSTEM - Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 
 <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,6 +36,45 @@
         padding: 0;
     }
 
+    /* ── Hamburger ─────────────────────────────────────── */
+    .hamburger {
+        display: none;
+        position: fixed;
+        top: 1rem; left: 1rem;
+        z-index: 1000;
+        background: var(--paper-warm);
+        border: 1.5px solid var(--paper-mid);
+        border-radius: 8px;
+        padding: 0.5rem;
+        cursor: pointer;
+        flex-direction: column;
+        gap: 5px;
+        width: 40px; height: 40px;
+        align-items: center;
+        justify-content: center;
+    }
+    .hamburger span {
+        display: block;
+        width: 20px; height: 2px;
+        background: var(--ink);
+        border-radius: 2px;
+        transition: transform 0.25s, opacity 0.25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── Overlay ────────────────────────────────────────── */
+    .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(13,17,23,0.4);
+        z-index: 800;
+        transition: opacity 0.3s;
+    }
+    .overlay.show { display: block; }
+
     .main-container {
         display: grid;
         grid-template-columns: 220px 1fr;
@@ -43,6 +83,7 @@
     }
 
     .sidebar {
+        width: 220px;
         background: var(--paper-warm);
         padding: 2rem 1rem;
         border-radius: 0 12px 12px 0;
@@ -54,10 +95,40 @@
         height: 100vh;
         position: sticky;
         top: 0;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--ink);
+        border-bottom: 2px solid var(--gold);
+        padding-bottom: 0.5rem;
+        width: 100%;
+        text-align: center;
     }
 
     .sidebar h2 { font-family: var(--font-display); font-size: 1.25rem; color: var(--ink); }
     .sidebar p  { font-family: var(--font-body); color: var(--text-muted); font-size: 0.9rem; }
+
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }
+
+    .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+    }
+    .sidebar-nav a:hover  { background: var(--paper-mid); color: var(--ink); }
+    .sidebar-nav a.active { background: var(--gold); color: white; }
+    .sidebar-nav a i { font-size: 16px; }
 
     .btn-logout {
         padding: 0.5rem 1rem;
@@ -297,6 +368,32 @@
         .modal-box { max-width: 100%; }
     }
 
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 860px) {
+        .hamburger { display: flex; }
+        .main-container { grid-template-columns: 1fr; }
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 900;
+            transform: translateX(-100%);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+        }
+        .sidebar.open { transform: translateX(0); }
+        .content { padding: 1.25rem 1rem 2rem; padding-top: 4.5rem; }
+        .hero-section { flex-direction: column; align-items: flex-start; }
+        .doc-stack { display: none; }
+        .upload-form, .section-wrap { max-width: 100%; }
+        .hero-title { font-size: clamp(1.6rem, 7vw, 2.8rem); }
+    }
+    @media (max-width: 480px) {
+        .content { padding: 1rem 0.75rem 2rem; padding-top: 4rem; }
+        .upload-form { padding: 1.25rem; }
+        .hero-title { font-size: 1.9rem; }
+        .docs-table th:nth-child(2),
+        .docs-table td:nth-child(2) { display: none; }
+    }
     .nav-btn {
         font-family: var(--font-mono);
         font-size: 0.8rem;
@@ -315,6 +412,13 @@
 </style>
 </head>
 <body>
+{{-- Hamburger Button (mobile only) --}}
+<button class="hamburger" id="hamburger" aria-label="Open navigation menu">
+    <span></span><span></span><span></span>
+</button>
+
+{{-- Overlay --}}
+<div class="overlay" id="overlay"></div>
 
 <div class="main-container">
 
@@ -516,6 +620,43 @@ function showSection(section) {
         users.style.display = 'block';
     }
 }
+
+const hamburger = document.getElementById('hamburger');
+const sidebar   = document.querySelector('.sidebar');
+const overlay   = document.getElementById('overlay');
+
+function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+    hamburger.classList.remove('open');
+}
+
+function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+    hamburger.classList.add('open');
+}
+
+hamburger.addEventListener('click', () => {
+    const isOpen = sidebar.classList.contains('open');
+
+    if (isOpen) {
+        closeSidebar();
+    } else {
+        openSidebar();
+    }
+});
+
+overlay.addEventListener('click', closeSidebar);
+
+// Optional: auto-close after clicking nav buttons on mobile
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (window.innerWidth <= 860) {
+            closeSidebar();
+        }
+    });
+});
 </script>
 </body>
 </html>
