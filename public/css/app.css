@@ -1,0 +1,446 @@
+/* =========================================================
+   RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+:root {
+    --ink: #0d1117;
+    --paper: #f5f0e8;
+    --paper-warm: #ede8dc;
+    --paper-mid: #d4cfc3;
+
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+
+    --red-acc: #b83232;
+    --blue-acc: #2563eb;
+
+    --text-body: #1c2333;
+    --text-muted: #6b7890;
+
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Libre Baskerville', Georgia, serif;
+    --font-mono: 'DM Mono', monospace;
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+    background: var(--paper);
+    font-family: var(--font-body);
+    color: var(--text-body);
+    min-height: 100vh;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.main-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    background: var(--paper-warm);
+    border-right: 1px solid var(--paper-mid);
+
+    padding: 2rem 1rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    position: sticky;
+    top: 0;
+
+    height: 100vh;
+
+    transition: transform 0.3s ease;
+    z-index: 900;
+}
+
+.sidebar h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--ink);
+}
+
+.sidebar p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   NAV BUTTONS
+========================================================= */
+
+.nav-btn {
+    width: 100%;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 0.8rem 1rem;
+
+    background: var(--paper-mid);
+    color: var(--ink);
+
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: #c4beb2;
+}
+
+/* =========================================================
+   LOGOUT BUTTON
+========================================================= */
+
+.btn-logout {
+    margin-top: auto;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 0.75rem 1rem;
+
+    background: var(--red-acc);
+    color: white;
+
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.btn-logout:hover {
+    background: #982727;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content {
+    padding: 2rem;
+    overflow-x: auto;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    color: var(--ink);
+
+    margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+   ALERTS
+========================================================= */
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    background: var(--paper-warm);
+
+    border-radius: 10px;
+    overflow: hidden;
+
+    border: 1px solid var(--paper-mid);
+}
+
+thead {
+    background: var(--paper-mid);
+}
+
+th,
+td {
+    padding: 1rem;
+    text-align: left;
+
+    border-bottom: 1px solid var(--paper-mid);
+}
+
+th {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink);
+}
+
+td {
+    font-size: 0.92rem;
+}
+
+td a {
+    color: var(--blue-acc);
+    text-decoration: underline;
+}
+
+/* =========================================================
+   FORM CARD
+========================================================= */
+
+.form-card {
+    background: var(--paper-warm);
+
+    border: 1px solid var(--paper-mid);
+    border-radius: 12px;
+
+    padding: 1.5rem;
+
+    max-width: 550px;
+}
+
+.form-card h3 {
+    font-family: var(--font-display);
+    margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+
+    padding: 0.8rem 1rem;
+
+    border: 1px solid var(--paper-mid);
+    border-radius: 8px;
+
+    background: var(--paper);
+
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+/* =========================================================
+   SUBMIT BUTTON
+========================================================= */
+
+.btn-submit {
+    border: none;
+    border-radius: 8px;
+
+    padding: 0.9rem 1rem;
+
+    background: var(--gold);
+    color: var(--ink);
+
+    font-family: var(--font-mono);
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.btn-submit:hover {
+    background: var(--gold-light);
+}
+
+/* =========================================================
+   HAMBURGER
+========================================================= */
+
+.hamburger {
+    display: none;
+
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+
+    z-index: 1000;
+
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid var(--paper-mid);
+    border-radius: 8px;
+
+    background: var(--paper-warm);
+
+    cursor: pointer;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.hamburger span {
+    width: 20px;
+    height: 2px;
+
+    background: var(--ink);
+
+    border-radius: 5px;
+
+    transition: 0.25s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.overlay {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,0.4);
+
+    z-index: 800;
+}
+
+.overlay.show {
+    display: block;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 860px) {
+
+    .hamburger {
+        display: flex;
+    }
+
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+
+        width: 240px;
+
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .content {
+        padding: 5rem 1rem 2rem;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    th,
+    td {
+        padding: 0.7rem;
+        font-size: 0.82rem;
+    }
+
+    .form-card {
+        padding: 1rem;
+    }
+}
