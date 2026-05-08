@@ -2,11 +2,9 @@ function showSection(section) {
     const signed = document.getElementById('section-signed');
     const users = document.getElementById('section-users');
 
-    // Hide all sections
     if (signed) signed.style.display = 'none';
     if (users) users.style.display = 'none';
 
-    // Show selected section
     if (section === 'signed' && signed) {
         signed.style.display = 'block';
     }
@@ -16,50 +14,59 @@ function showSection(section) {
     }
 }
 
-// Mobile sidebar
 document.addEventListener('DOMContentLoaded', () => {
 
+    // =========================
+    // SAFE ELEMENT REFERENCES
+    // =========================
     const hamburger = document.getElementById('hamburger');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('overlay');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('overlay');
 
-    if (!hamburger || !sidebar || !overlay) return;
-
-    function closeSidebar() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('show');
-        hamburger.classList.remove('open');
+    if (!hamburger || !sidebar || !overlay) {
+        console.log("Sidebar elements not found on this page.");
+        return;
     }
 
-    function openSidebar() {
+    // =========================
+    // SIDEBAR FUNCTIONS
+    // =========================
+    function openMenu() {
         sidebar.classList.add('open');
-        overlay.classList.add('show');
         hamburger.classList.add('open');
+        overlay.classList.add('show');
     }
 
-    hamburger.addEventListener('click', () => {
-        const isOpen = sidebar.classList.contains('open');
+    function closeMenu() {
+        sidebar.classList.remove('open');
+        hamburger.classList.remove('open');
+        overlay.classList.remove('show');
+    }
 
-        if (isOpen) {
-            closeSidebar();
-        } else {
-            openSidebar();
-        }
-    });
+    function toggleMenu() {
+        sidebar.classList.contains('open') ? closeMenu() : openMenu();
+    }
 
-    overlay.addEventListener('click', closeSidebar);
+    // =========================
+    // EVENTS
+    // =========================
+    hamburger.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', closeMenu);
 
-    // Auto close sidebar on mobile after nav click
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-nav a, .nav-btn').forEach(el => {
+        el.addEventListener('click', () => {
             if (window.innerWidth <= 860) {
-                closeSidebar();
+                closeMenu();
             }
         });
     });
 
 });
 
+
+// =========================
+// SIGNATURE MODULE
+// =========================
 let sigX = 0;
 let sigY = 0;
 
@@ -77,33 +84,28 @@ const hint = document.getElementById('hintText');
 function openSignModal(docId, pdfUrl, signUrl) {
 
     document.getElementById('pdfFrame').src = pdfUrl;
-
     document.getElementById('signatureForm').action = signUrl;
-
     document.getElementById('sigPageInput').value = 1;
 
-    ghost.style.display = 'none';
+    if (ghost) ghost.style.display = 'none';
 
     placed = false;
 
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
 
-    hint.textContent =
-        'Click anywhere on the document to place your signature';
+    if (hint) {
+        hint.textContent = 'Click anywhere on the document to place your signature';
+    }
 
-    document.getElementById('signModal')
-        .classList.add('active');
+    document.getElementById('signModal').classList.add('active');
 }
 
 function closeSignModal() {
-
-    document.getElementById('signModal')
-        .classList.remove('active');
-
+    document.getElementById('signModal').classList.remove('active');
     document.getElementById('pdfFrame').src = '';
 }
 
-if (layer) {
+if (layer && wrapper && ghost) {
 
     layer.addEventListener('click', (e) => {
 
@@ -114,17 +116,16 @@ if (layer) {
 
         ghost.style.left = sigX + 'px';
         ghost.style.top = sigY + 'px';
-
         ghost.style.display = 'block';
 
         placed = true;
 
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
 
-        hint.textContent =
-            'Signature placed! Click again to reposition, or click Approve & Sign.';
+        if (hint) {
+            hint.textContent = 'Signature placed! Click again to reposition or confirm.';
+        }
     });
-
 }
 
 function submitSignature() {
@@ -134,17 +135,10 @@ function submitSignature() {
     const canvasW = wrapper.clientWidth;
     const canvasH = wrapper.clientHeight;
 
-    document.getElementById('formSigX').value =
-        (sigX / canvasW).toFixed(6);
-
-    document.getElementById('formSigY').value =
-        (sigY / canvasH).toFixed(6);
-
-    document.getElementById('formSigW').value =
-        (sigW / canvasW).toFixed(6);
-
-    document.getElementById('formSigH').value =
-        (sigH / canvasH).toFixed(6);
+    document.getElementById('formSigX').value = (sigX / canvasW).toFixed(6);
+    document.getElementById('formSigY').value = (sigY / canvasH).toFixed(6);
+    document.getElementById('formSigW').value = (sigW / canvasW).toFixed(6);
+    document.getElementById('formSigH').value = (sigH / canvasH).toFixed(6);
 
     document.getElementById('formSigPage').value =
         document.getElementById('sigPageInput').value;
