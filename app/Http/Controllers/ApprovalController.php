@@ -152,7 +152,7 @@ $signedPath = $this->signPdf($approval, $request, $latestPath);
                 $pdf->SetFont('helvetica', 'B', 10);
                 $pdf->SetTextColor(0, 0, 128);
                 $pdf->SetXY($x, $y);
-                $pdf->Write(0, 'Approved by: ' . auth()->user()->name);
+                $pdf->Write(0, auth()->user()->name);
 
                 // Timestamp below name
                 $pdf->SetXY($x, $y + 5);
