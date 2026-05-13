@@ -42,7 +42,11 @@ class ApprovalController extends Controller
     \DB::transaction(function () use ($request, $approval, &$signedPath) {
 
         // Generate signed PDF
-        $signedPath = $this->signPdf($approval, $request);
+        $latestPath = $approval->document->signed_file_path
+    ? storage_path('app/public/' . $approval->document->signed_file_path)
+    : storage_path('app/public/' . $approval->document->file_path);
+
+$signedPath = $this->signPdf($approval, $request, $latestPath);
 
         // APPROVE CURRENT STEP
         $approval->update([
@@ -61,22 +65,18 @@ class ApprovalController extends Controller
             ->first();
 
         // IF NEXT APPROVER EXISTS
+        // In the "next approver exists" branch, also update signed_file_path:
         if ($nextApproval) {
+            $nextApproval->update(['status' => 'pending']);
 
-            // CHANGE waiting -> pending
-            $nextApproval->update([
-                'status' => 'pending',
-            ]);
-
-            // UPDATE DOCUMENT
             $approval->document()->update([
-                'status'      => 'in_progress',
-                'approver_id' => $nextApproval->user_id,
+                'status'           => 'in_progress',
+                'approver_id'      => $nextApproval->user_id,
+                'signed_file_path' => $signedPath, // ← ADD THIS
             ]);
 
         } else {
-
-            // FINAL APPROVAL
+            // Final approval — this part stays the same
             $approval->document()->update([
                 'status'           => 'approved',
                 'signed_file_path' => $signedPath,
@@ -99,18 +99,18 @@ class ApprovalController extends Controller
         ->with('success', 'Document approved successfully.');
 }
 
-    protected function signPdf(Approval $approval, Request $request): ?string
+    protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string
     {
-        $originalPath = storage_path('app/public/' . $approval->document->file_path);
+        
 
-        if (!file_exists($originalPath)) {
+        if (!file_exists($inputPath)) {
             return null;
         }
 
         $pdf = new Fpdi();
         $pdf->SetAutoPageBreak(false);
 
-        $pageCount = $pdf->setSourceFile($originalPath);
+        $pageCount = $pdf->setSourceFile($inputPath);
 
         $sigX    = (float) ($request->sig_x    ?? 0.1);
         $sigY    = (float) ($request->sig_y    ?? 0.8);
@@ -163,7 +163,7 @@ class ApprovalController extends Controller
         }
 
         // Save as a NEW signed file — never overwrite the original
-        $signedRelativePath = 'documents/signed/signed_' . basename($approval->document->file_path);
+        $signedRelativePath = 'documents/signed/signed_step' . $approval->step_order . '_' . basename($approval->document->file_path);
         $signedAbsolutePath = storage_path('app/public/' . $signedRelativePath);
 
         // Ensure the signed/ directory exists
