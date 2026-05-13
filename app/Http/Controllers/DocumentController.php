@@ -14,31 +14,57 @@ class DocumentController extends Controller
      * Store uploaded document 
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'file'  => 'required|mimes:pdf|max:10240',
-            'approver_id' => 'required|exists:users,id',
-        ]);
+{
+    $request->validate([
 
-        $path = $request->file('file')->store('documents', 'public');
+        'title' => 'required|string|max:255',
 
-        $document = Document::create([
-            'title'       => $request->title,
-            'file_path'   => $path,
-            'uploaded_by' => Auth::id(),
-            'approver_id' => $request->approver_id,
-            'status'      => 'pending',
-        ]);
+        'file' => 'required|mimes:pdf|max:10240',
 
-        Approval::create([
-    'document_id' => $document->id,
-    'user_id'     => $request->approver_id,
-    'status'      => 'pending',
-]);
+        'approvers' => 'required|array|min:1',
 
-        return redirect()->route('dashboard')->with('success', 'Document uploaded successfully!');
-    }
+        'approvers.*' => 'exists:users,id',
+
+    ]);
+
+    // Upload PDF
+    $path = $request->file('file')->store('documents', 'public');
+
+    // Create document
+    $document = Document::create([
+
+        'title'       => $request->title,
+
+        'file_path'   => $path,
+
+        'uploaded_by' => Auth::id(),
+
+        // FIRST approver becomes initial approver
+        'approver_id' => $request->approvers[0],
+
+        'status'      => 'pending',
+    ]);
+
+    // Create approval workflow
+    foreach ($request->approvers as $index => $approverId) {
+
+    Approval::create([
+        'document_id' => $document->id,
+        'user_id'     => $approverId,
+
+        // IMPORTANT: workflow order
+        'step_order'  => $index + 1,
+
+        // first approver starts, others wait
+        'status'      => $index === 0 ? 'pending' : 'waiting',
+    ]);
+
+}
+
+    return redirect()
+        ->route('dashboard')
+        ->with('success', 'Document uploaded successfully!');
+}
 
     /**
      * Admin signs document with dynamic placement.

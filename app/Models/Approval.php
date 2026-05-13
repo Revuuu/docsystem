@@ -17,6 +17,7 @@ class Approval extends Model
         'user_id',
         'status',
         'signed_at',
+        'step_order',
     ];
 
     public function document()

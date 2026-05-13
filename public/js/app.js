@@ -145,3 +145,70 @@ function submitSignature() {
 
     document.getElementById('signatureForm').submit();
 }
+let approverStep = 1;
+
+function addApprover() {
+
+    approverStep++;
+
+    const container = document.getElementById('approver-container');
+
+    const row = document.createElement('div');
+
+    row.classList.add('approver-row');
+
+    row.innerHTML = `
+        <div class="approver-step">
+            Step ${approverStep}
+        </div>
+
+        <select name="approvers[]" required>
+
+            <option value="">
+                Select Approver
+            </option>
+
+            ${approverOptions}
+
+        </select>
+
+        <button type="button"
+                class="remove-approver"
+                onclick="removeApprover(this)">
+
+            ✕
+
+        </button>
+    `;
+
+    container.appendChild(row);
+
+    updateSteps();
+}
+
+function removeApprover(button) {
+
+    const rows = document.querySelectorAll('.approver-row');
+
+    if (rows.length <= 1) {
+        return;
+    }
+
+    button.parentElement.remove();
+
+    updateSteps();
+}
+
+function updateSteps() {
+
+    const rows = document.querySelectorAll('.approver-row');
+
+    approverStep = rows.length;
+
+    rows.forEach((row, index) => {
+
+        row.querySelector('.approver-step').innerText =
+            `Step ${index + 1}`;
+
+    });
+}

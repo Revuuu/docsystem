@@ -28,34 +28,76 @@ class ApprovalController extends Controller
         return view('approvals.index', compact('approvals'));
     }
 
-    public function approve(Request $request, Approval $approval)
-    {
-        // 1. Sign the PDF and get back the saved path
+ public function approve(Request $request, Approval $approval)
+{
+    // SECURITY CHECKS
+    if ($approval->user_id !== auth()->id()) {
+        abort(403, 'Unauthorized approval.');
+    }
+
+    if ($approval->status !== 'pending') {
+        return back()->with('error', 'This approval is not active.');
+    }
+
+    \DB::transaction(function () use ($request, $approval, &$signedPath) {
+
+        // Generate signed PDF
         $signedPath = $this->signPdf($approval, $request);
 
-        // 2. Mark approval as approved
+        // APPROVE CURRENT STEP
         $approval->update([
             'status'    => 'approved',
-            'signed_at' => Carbon::now(),
+            'signed_at' => now(),
         ]);
 
-        // 3. Update document status + store signed file path
-        $approval->document->update([
-    'status'           => 'approved',
-    'signed_file_path' => $signedPath,
-    'admin_signed_at'  => Carbon::now(), // this was missing
-]);
+        // IMPORTANT: reload fresh data
+        $approval->refresh();
 
-        // 4. Audit log
+        // FIND NEXT WAITING APPROVER
+        $nextApproval = Approval::where('document_id', $approval->document_id)
+            ->where('status', 'waiting')
+            ->where('step_order', '>', $approval->step_order)
+            ->orderBy('step_order', 'asc')
+            ->first();
+
+        // IF NEXT APPROVER EXISTS
+        if ($nextApproval) {
+
+            // CHANGE waiting -> pending
+            $nextApproval->update([
+                'status' => 'pending',
+            ]);
+
+            // UPDATE DOCUMENT
+            $approval->document()->update([
+                'status'      => 'in_progress',
+                'approver_id' => $nextApproval->user_id,
+            ]);
+
+        } else {
+
+            // FINAL APPROVAL
+            $approval->document()->update([
+                'status'           => 'approved',
+                'signed_file_path' => $signedPath,
+                'admin_signed_at'  => now(),
+                'approver_id'      => null,
+            ]);
+        }
+
+        // AUDIT LOG
         AuditLog::create([
             'user_id'     => auth()->id(),
             'document_id' => $approval->document_id,
             'action'      => 'approved',
             'ip_address'  => $request->ip(),
         ]);
+    });
 
-        return back()->with('success', 'Document approved and signed successfully!');
-    }
+    return redirect()
+        ->route('approvals.index')
+        ->with('success', 'Document approved successfully.');
+}
 
     protected function signPdf(Approval $approval, Request $request): ?string
     {

@@ -195,47 +195,78 @@
 
                     <div class="form-group">
 
-                        <label for="approver_id">
-                            Choose Approver
+                        <label>
+                            Approval Workflow
                         </label>
 
-                        <select name="approver_id"
-                                id="approver_id"
-                                required>
+                        <div id="approver-container">
 
-                            <option value="">
-                                Select Approver
-                            </option>
+                            {{-- STEP 1 --}}
+                            <div class="approver-row">
 
-                            @foreach(\App\Models\User::where('role', 'approver')->get() as $approver)
+                                <div class="approver-step">
+                                    Step 1
+                                </div>
 
-                                <option value="{{ $approver->id }}"
-                                    {{ old('approver_id') == $approver->id ? 'selected' : '' }}>
+                                <select name="approvers[]" required>
 
-                                    {{ $approver->name }}
+                                    <option value="">
+                                        Select Approver
+                                    </option>
 
-                                </option>
+                                    @foreach(\App\Models\User::where('role', 'approver')->get() as $approver)
 
-                            @endforeach
+                                        <option value="{{ $approver->id }}">
 
-                        </select>
+                                            {{ $approver->name }}
+
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+                                <button type="button"
+                                        class="remove-approver"
+                                        onclick="removeApprover(this)">
+
+                                    ✕
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        {{-- ADD BUTTON --}}
+                        <button type="button"
+                                class="add-approver-btn"
+                                onclick="addApprover()">
+
+                            + Add Another Approver
+
+                        </button>
+
+                        <small class="workflow-note">
+
+                            Approval follows the order above.
+                            The first approver signs first,
+                            followed by the next approver.
+
+                        </small>
 
                     </div>
-
                     <div class="form-group">
-
                         <label for="file">
                             Upload PDF
                         </label>
 
                         <input type="file"
-                               name="file"
-                               id="file"
-                               accept="application/pdf"
-                               required>
-
+                            name="file"
+                            id="file"
+                            accept="application/pdf"
+                            required>
                     </div>
-
                     <button type="submit" class="btn-submit">
 
                         <i class="ti ti-upload"></i>
@@ -400,4 +431,17 @@
 
 </div>
 
+<script>
+
+const approverOptions = `
+    @foreach(\App\Models\User::where('role', 'approver')->get() as $approver)
+
+        <option value="{{ $approver->id }}">
+            {{ $approver->name }}
+        </option>
+
+    @endforeach
+`;
+
+</script>
 @endsection
