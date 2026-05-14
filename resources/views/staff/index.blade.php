@@ -98,17 +98,44 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Select Approver</label>
 
-                    <select name="approvers[]" required>
-                        <option value="">-- Select Approver --</option>
+                    <label>Select Approvers</label>
 
-                        @foreach($approvers as $approver)
-                            <option value="{{ $approver->id }}">
-                                {{ $approver->name }} ({{ ucfirst($approver->role) }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <div id="approver-container">
+
+                        <div class="approver-row">
+
+                            <select name="approvers[]" required>
+
+                                <option value="">
+                                    -- Select Approver --
+                                </option>
+
+                                @foreach($approvers as $approver)
+
+                                    <option value="{{ $approver->id }}">
+
+                                        {{ $approver->name }}
+                                        ({{ ucfirst($approver->role) }})
+
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-add-approver"
+                            onclick="addApprover()">
+
+                        + Add Another Approver
+
+                    </button>
+
                 </div>
 
                 <button type="submit" class="btn-submit">

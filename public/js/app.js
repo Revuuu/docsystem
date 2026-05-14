@@ -238,3 +238,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+function addApprover()
+{
+    const container = document.getElementById('approver-container');
+
+    if (!container) return;
+
+    const firstRow = container.querySelector('.approver-row');
+
+    if (!firstRow) return;
+
+    const clone = firstRow.cloneNode(true);
+
+    clone.querySelector('select').value = '';
+
+    container.appendChild(clone);
+}

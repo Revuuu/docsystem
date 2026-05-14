@@ -13,59 +13,79 @@ class DashboardController extends Controller
         $user = auth()->user();
         $section = request()->query('section', 'upload');
 
-        if ($user->role === 'staff') {
-            $documents = Document::where('uploaded_by', $user->id)
-                ->latest()
-                ->get();
+        $userRole = $user->roles->first()?->name ?? $user->role;
 
-            $signedDocuments = Document::whereNotNull('signed_file_path')
-                ->whereNotNull('admin_signed_at')
-                ->where('uploaded_by', $user->id)
-                ->latest('admin_signed_at')
-                ->get();
+        $hierarchy = [
+            'staff' => 1,
+            'supervisor' => 2,
+            'depthead' => 3,
+            'division' => 4,
+            'executive' => 5,
+            'admin' => 6,
+        ];
 
-            $approvers = User::whereIn('role', [
-                'supervisor',
-                'depthead',
-                'division',
-                'executive',
-            ])->get();
+        if (! isset($hierarchy[$userRole])) {
+            abort(403, 'Unauthorized role.');
+        }
 
-            return view('staff.index', compact(
+        $allowedRoles = collect($hierarchy)
+            ->filter(fn ($level) => $level > $hierarchy[$userRole])
+            ->keys()
+            ->toArray();
+
+        $approvers = User::whereIn('role', $allowedRoles)
+            ->orderByRaw("
+                CASE role
+                    WHEN 'staff' THEN 1
+                    WHEN 'supervisor' THEN 2
+                    WHEN 'depthead' THEN 3
+                    WHEN 'division' THEN 4
+                    WHEN 'executive' THEN 5
+                    WHEN 'admin' THEN 6
+                END
+            ")
+            ->get();
+
+        $documents = Document::where('uploaded_by', $user->id)
+            ->latest()
+            ->get();
+
+        $signedDocuments = Document::whereNotNull('signed_file_path')
+            ->where('uploaded_by', $user->id)
+            ->latest('updated_at')
+            ->get();
+
+        $approvals = Approval::with('document.uploader')
+            ->where('status', 'pending')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        $pendingDocuments = $approvals->map(fn ($approval) => $approval->document);
+
+        if ($userRole === 'admin') {
+            $users = User::latest()->get();
+            $allDocuments = Document::latest()->get();
+
+            return view('admin.index', compact(
+                'users',
+                'allDocuments',
                 'documents',
                 'signedDocuments',
+                'approvals',
+                'pendingDocuments',
                 'approvers',
                 'section'
             ));
         }
 
-        if (in_array($user->role, ['supervisor', 'depthead', 'division', 'executive'])) {
-            $approvals = Approval::with('document.uploader')
-                ->where('status', 'pending')
-                ->where('user_id', $user->id)
-                ->latest()
-                ->get();
-
-            $pendingDocuments = $approvals->map(fn ($approval) => $approval->document);
-
-            return view($user->role . '.index', compact(
-                'approvals',
-                'pendingDocuments',
-                'section'
-            ));
-        }
-
-        if ($user->role === 'admin') {
-            $documents = Document::latest()->get();
-            $users = User::latest()->get();
-
-            return view('admin.index', compact(
-                'documents',
-                'users',
-                'section'
-            ));
-        }
-
-        abort(403, 'Unauthorized role.');
+        return view($userRole . '.index', compact(
+            'documents',
+            'signedDocuments',
+            'approvals',
+            'pendingDocuments',
+            'approvers',
+            'section'
+        ));
     }
 }

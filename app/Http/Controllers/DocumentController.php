@@ -14,58 +14,69 @@ class DocumentController extends Controller
      * Store uploaded document 
      */
     public function store(Request $request)
-{
-    $request->validate([
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'file' => 'required|mimes:pdf|max:10240',
+            'approvers' => 'required|array|min:1',
+            'approvers.*' => 'exists:users,id',
+        ]);
 
-        'title' => 'required|string|max:255',
+        $hierarchy = [
+            'staff' => 1,
+            'supervisor' => 2,
+            'depthead' => 3,
+            'division' => 4,
+            'executive' => 5,
+            'admin' => 6,
+        ];
 
-        'file' => 'required|mimes:pdf|max:10240',
+        $uploader = Auth::user();
+        $uploaderRole = $uploader->roles->first()?->name ?? $uploader->role;
+        $uploaderLevel = $hierarchy[$uploaderRole];
 
-        'approvers' => 'required|array|min:1',
+        $approvers = User::whereIn('id', $request->approvers)
+            ->get()
+            ->filter(function ($approver) use ($hierarchy, $uploaderLevel) {
+                $approverRole = $approver->roles->first()?->name ?? $approver->role;
 
-        'approvers.*' => 'exists:users,id',
+                return isset($hierarchy[$approverRole])
+                    && $hierarchy[$approverRole] > $uploaderLevel;
+            })
+            ->sortBy(function ($approver) use ($hierarchy) {
+                $approverRole = $approver->roles->first()?->name ?? $approver->role;
 
-    ]);
+                return $hierarchy[$approverRole];
+            })
+            ->values();
 
-    // Upload PDF
-    $path = $request->file('file')->store('documents', 'public');
+        if ($approvers->isEmpty()) {
+            return back()->with('error', 'Please select at least one valid approver above your role.');
+        }
 
-    // Create document
-    $document = Document::create([
+        $path = $request->file('file')->store('documents', 'public');
 
-        'title'       => $request->title,
+        $document = Document::create([
+            'title' => $request->title,
+            'file_path' => $path,
+            'uploaded_by' => Auth::id(),
+            'approver_id' => $approvers->first()->id,
+            'status' => 'pending',
+        ]);
 
-        'file_path'   => $path,
+        foreach ($approvers as $index => $approver) {
+            Approval::create([
+                'document_id' => $document->id,
+                'user_id' => $approver->id,
+                'step_order' => $index + 1,
+                'status' => $index === 0 ? 'pending' : 'waiting',
+            ]);
+        }
 
-        'uploaded_by' => Auth::id(),
-
-        // FIRST approver becomes initial approver
-        'approver_id' => $request->approvers[0],
-
-        'status'      => 'pending',
-    ]);
-
-    // Create approval workflow
-    foreach ($request->approvers as $index => $approverId) {
-
-    Approval::create([
-        'document_id' => $document->id,
-        'user_id'     => $approverId,
-
-        // IMPORTANT: workflow order
-        'step_order'  => $index + 1,
-
-        // first approver starts, others wait
-        'status'      => $index === 0 ? 'pending' : 'waiting',
-    ]);
-
-}
-
-    return redirect()
-        ->route('dashboard')
-        ->with('success', 'Document uploaded successfully!');
-}
-
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Document uploaded successfully!');
+    }
     /**
      * Admin signs document with dynamic placement.
      *

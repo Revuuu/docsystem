@@ -556,6 +556,25 @@ td a {
     display: block;
 }
 
+.approver-row {
+    margin-bottom: 10px;
+}
+
+.btn-add-approver {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    background: #1f2937;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-add-approver:hover {
+    opacity: 0.9;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 900px) {

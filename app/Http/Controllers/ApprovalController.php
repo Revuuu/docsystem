@@ -13,19 +13,7 @@ class ApprovalController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-
-        if ($user->role !== 'approver') {
-            abort(403, 'Unauthorized');
-        }
-
-        $approvals = Approval::with(['document.uploader'])
-            ->where('status', 'pending')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
-
-        return view('approvals.index', compact('approvals'));
+        return redirect()->route('dashboard');
     }
 
  public function approve(Request $request, Approval $approval)
@@ -95,7 +83,7 @@ $signedPath = $this->signPdf($approval, $request, $latestPath);
     });
 
     return redirect()
-    ->route('approvals.index')
+    ->route('dashboard')
     ->with('success', 'Document approved successfully.');
 }
 
