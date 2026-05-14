@@ -574,6 +574,55 @@ td a {
 .btn-add-approver:hover {
     opacity: 0.9;
 }
+.signature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.signature-preview-card {
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-mid);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 550px;
+    margin-bottom: 1.5rem;
+}
+
+.signature-preview-card h3 {
+    font-family: var(--font-display);
+    margin-bottom: 1rem;
+}
+
+.signature-preview {
+    max-width: 100%;
+    height: 120px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--paper-mid);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.signature-canvas {
+    width: 100%;
+    height: 200px;
+    background: white;
+    border: 1px solid var(--paper-mid);
+    border-radius: 8px;
+    cursor: crosshair;
+}
+
+.btn-clear-signature {
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    background: var(--red-acc);
+    color: white;
+    font-family: var(--font-mono);
+    cursor: pointer;
+}
+
 
 /* RESPONSIVE */
 
@@ -616,6 +665,9 @@ td a {
 
 @media (max-width: 860px) {
 
+    .signature-grid {
+        grid-template-columns: 1fr;
+    }
     .hamburger {
         display: flex;
     }

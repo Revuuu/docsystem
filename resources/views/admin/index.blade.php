@@ -44,6 +44,10 @@
 
         </nav>
 
+        <a class="nav-btn" href="{{ route('signature.index') }}">
+            My Signature
+        </a>
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
 

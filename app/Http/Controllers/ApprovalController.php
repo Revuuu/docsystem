@@ -120,14 +120,16 @@ $signedPath = $this->signPdf($approval, $request, $latestPath);
                 $x = $sigX * $size['width'];
                 $y = $sigY * $size['height'];
 
-                    $sigImgPath = public_path('signature.png');
+                $sigImgPath = auth()->user()->signature_path
+                    ? storage_path('app/public/' . auth()->user()->signature_path)
+                    : null;
 // DEBUG - check in laravel.log
     \Log::info('Signature image path: ' . $sigImgPath);
     \Log::info('File exists: ' . (file_exists($sigImgPath) ? 'YES' : 'NO'));
     \Log::info('sig_x=' . $sigX . ' sig_y=' . $sigY . ' sig_w=' . $sigW . ' sig_h=' . $sigH);
     \Log::info('Computed x=' . $x . ' y=' . $y . ' page_w=' . $size['width'] . ' page_h=' . $size['height']);
                     // Signature image above the line
-    if (file_exists($sigImgPath)) {
+    if ($sigImgPath && file_exists($sigImgPath)) {
         $imgW = $sigW * $size['width'];
         $imgH = $sigH * $size['height'];
         $pdf->Image($sigImgPath, $x, $y - $imgH - 2, $imgW, $imgH, 'PNG');

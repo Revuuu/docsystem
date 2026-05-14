@@ -6,6 +6,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SignatureController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,6 +45,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])
             ->name('users.destroy');
     });
+
+    Route::get('/signature', [SignatureController::class, 'index'])
+    ->name('signature.index');
+
+    Route::post('/signature/upload', [SignatureController::class, 'upload'])
+        ->name('signature.upload');
+
+    Route::post('/signature/draw', [SignatureController::class, 'draw'])
+        ->name('signature.draw');
 });
 
 require __DIR__.'/auth.php';

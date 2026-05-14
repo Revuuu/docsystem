@@ -24,6 +24,7 @@ class User extends Authenticatable implements LaratrustUser
         'email',
         'password',
         'role',
+        'signature_path',
     ];
 
     /**
