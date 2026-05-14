@@ -548,6 +548,14 @@ td a {
     align-self: center;
 }
 
+.dashboard-section {
+    display: none;
+}
+
+.dashboard-section.active {
+    display: block;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 900px) {

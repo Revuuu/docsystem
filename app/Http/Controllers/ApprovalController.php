@@ -95,8 +95,8 @@ $signedPath = $this->signPdf($approval, $request, $latestPath);
     });
 
     return redirect()
-        ->route('approvals.index')
-        ->with('success', 'Document approved successfully.');
+    ->route('approvals.index')
+    ->with('success', 'Document approved successfully.');
 }
 
     protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string

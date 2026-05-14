@@ -212,3 +212,29 @@ function updateSteps() {
 
     });
 }
+
+function showSection(section)
+{
+    document.querySelectorAll('.dashboard-section')
+        .forEach((el) => {
+            el.style.display = 'none';
+        });
+
+    const target = document.getElementById('section-' + section);
+
+    if (target) {
+        target.style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    if (document.getElementById('section-upload')) {
+        showSection('upload');
+    }
+
+     if (document.getElementById('section-approvals')) {
+        showSection('approvals');
+    }
+
+});
