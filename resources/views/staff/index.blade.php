@@ -40,9 +40,9 @@
                 My Documents
             </button>
 
-            <button class="nav-btn" onclick="showSection('signed')">
+            {{-- <button class="nav-btn" onclick="showSection('signed')">
                 Signed Documents
-            </button>
+            </button> --}}
 
             <button class="nav-btn" onclick="showSection('signature')">
                 My Signature
@@ -303,7 +303,7 @@
         </div>
 
         {{-- Signed Documents --}}
-        <div id="section-signed" class="dashboard-section">
+        {{-- <div id="section-signed" class="dashboard-section">
 
             <h1 class="section-title">
                 Signed Documents
@@ -373,7 +373,7 @@
 
             @endif
 
-        </div>
+        </div> --}}
 
         {{-- My Signature --}}
         <div id="section-signature" class="dashboard-section">
