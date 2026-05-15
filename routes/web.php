@@ -54,6 +54,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/signature/draw', [SignatureController::class, 'draw'])
         ->name('signature.draw');
+
+    Route::delete('/signature/remove', [SignatureController::class, 'remove'])
+    ->name('signature.remove');
 });
 
 require __DIR__.'/auth.php';

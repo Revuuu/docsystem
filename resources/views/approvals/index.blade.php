@@ -73,14 +73,13 @@
                                     @if($approval->status === 'pending')
 
                                         <button class="btn-sign"
-                                            onclick="openSignModal(
+                                            onclick="checkSignatureAndOpenModal(
+                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                 {{ $approval->id }},
                                                 '{{ asset('storage/' . $approval->document->file_path) }}',
                                                 '{{ route('approvals.approve', $approval->id) }}'
                                             )">
-
                                             Sign
-
                                         </button>
 
                                     @else

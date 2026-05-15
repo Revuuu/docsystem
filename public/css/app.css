@@ -613,7 +613,7 @@ td a {
     cursor: crosshair;
 }
 
-.btn-clear-signature {
+.btn-clear-signature, .btn-remove-signature {
     border: none;
     border-radius: 8px;
     padding: 0.8rem 1rem;

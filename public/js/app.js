@@ -81,6 +81,17 @@ const wrapper = document.getElementById('pdfWrapper');
 const btn = document.getElementById('btnConfirm');
 const hint = document.getElementById('hintText');
 
+function checkSignatureAndOpenModal(hasSignature, docId, pdfUrl, signUrl)
+{
+    if (!hasSignature)
+    {
+        alert('You do not have a signature uploaded yet. Please upload or draw your signature first.');
+        return;
+    }
+
+    openSignModal(docId, pdfUrl, signUrl);
+}
+
 function openSignModal(docId, pdfUrl, signUrl) {
 
     document.getElementById('pdfFrame').src = pdfUrl;

@@ -93,7 +93,8 @@
                                 <td>
                                     @if($approval->status === 'pending')
                                         <button class="btn-sign"
-                                            onclick="openSignModal(
+                                            onclick="checkSignatureAndOpenModal(
+                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                 {{ $approval->id }},
                                                 '{{ asset('storage/' . $approval->document->file_path) }}',
                                                 '{{ route('approvals.approve', $approval->id) }}'
@@ -186,11 +187,26 @@
 
             @if(auth()->user()->signature_path)
                 <div class="signature-preview-card">
+
                     <h3>Current Signature</h3>
 
                     <img src="{{ asset('storage/' . auth()->user()->signature_path) }}"
                         class="signature-preview"
                         alt="Signature">
+
+                    <form method="POST"
+                        action="{{ route('signature.remove') }}"
+                        onsubmit="return confirm('Are you sure you want to remove your signature?')">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit" class="btn-remove-signature">
+                            Remove Signature
+                        </button>
+
+                    </form>
+
                 </div>
             @endif
 

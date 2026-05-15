@@ -60,4 +60,23 @@ class SignatureController extends Controller
 
         return back()->with('success', 'Signature saved successfully.');
     }
+    public function remove()
+    {
+        $user = auth()->user();
+
+        if ($user->signature_path)
+        {
+            \Illuminate\Support\Facades\Storage::disk('public')
+                ->delete($user->signature_path);
+
+            $user->signature_path = null;
+
+            $user->save();
+        }
+
+        return back()->with(
+            'success',
+            'Signature removed successfully.'
+        );
+    }
 }
