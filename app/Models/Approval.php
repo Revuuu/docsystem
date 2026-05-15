@@ -13,11 +13,13 @@ class Approval extends Model
     use HasFactory;
 
     protected $fillable = [
-        'document_id',
-        'user_id',
-        'status',
-        'signed_at',
-        'step_order',
+    'document_id',
+    'user_id',
+    'status',
+    'signed_at',
+    'step_order',
+    'remarks',
+    'rejected_at',
     ];
 
     public function document()

@@ -181,19 +181,41 @@
                                 </td>
 
                                 <td>
+
                                     @if($approval->status === 'pending')
-                                        <button class="btn-sign"
-                                            onclick="checkSignatureAndOpenModal(
-                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
-                                                {{ $approval->id }},
-                                                '{{ asset('storage/' . $approval->document->file_path) }}',
-                                                '{{ route('approvals.approve', $approval->id) }}'
-                                            )">
-                                            Sign
-                                        </button>
+
+                                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
+                                            {{-- APPROVE --}}
+                                            <button class="btn-sign"
+                                                onclick="checkSignatureAndOpenModal(
+                                                    {{ auth()->user()->signature_path ? 'true' : 'false' }},
+                                                    {{ $approval->id }},
+                                                    '{{ asset('storage/' . $approval->document->file_path) }}',
+                                                    '{{ route('approvals.approve', $approval->id) }}'
+                                                )">
+
+                                                ✔ Approve & Sign
+
+                                            </button>
+
+                                            {{-- REJECT --}}
+                                            <button type="button"
+                                                    class="btn-reject"
+                                                    onclick="openRejectModal({{ $approval->id }})">
+
+                                                Reject
+
+                                            </button>
+
+                                        </div>
+
                                     @else
+
                                         -
+
                                     @endif
+
                                 </td>
                             </tr>
                         @endforeach
@@ -230,6 +252,7 @@
                         <tr>
                             <th>Title</th>
                             <th>Status</th>
+                            <th>Remarks</th>
                             <th>Download</th>
                         </tr>
                     </thead>
@@ -240,7 +263,16 @@
                                 <td>{{ $doc->title }}</td>
 
                                 <td>{{ ucfirst($doc->status) }}</td>
+                                <td> 
+                                    @php
+                                        $rejectedApproval = $doc->approvals()
+                                            ->where('status', 'rejected')
+                                            ->latest('rejected_at')
+                                            ->first();
+                                    @endphp
 
+                                    {{ $rejectedApproval->remarks ?? '-' }}
+                                </td>
                                 <td>
                                     <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
                                        target="_blank">
@@ -430,7 +462,74 @@
     </div>
 
 </div>
+{{-- Reject Modal --}}
+<div class="modal-overlay"
+     id="rejectModal"
+     style="display:none;">
 
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h3>
+                Reject Document
+            </h3>
+
+            <button onclick="closeRejectModal()"
+                    class="modal-close">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <form method="POST"
+              id="rejectForm">
+
+            @csrf
+
+            <div class="form-group">
+
+                <label>
+                    Reason for rejection
+                </label>
+
+                <textarea
+                    name="remarks"
+                    rows="5"
+                    required
+                    style="width:100%;
+                           padding:12px;
+                           border:1px solid #ccc;
+                           border-radius:8px;"></textarea>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn-cancel"
+                        onclick="closeRejectModal()">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn-reject">
+
+                    Reject
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 <form id="signatureForm" method="POST" action="">
     @csrf
 

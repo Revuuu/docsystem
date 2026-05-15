@@ -623,6 +623,19 @@ td a {
     cursor: pointer;
 }
 
+.btn-reject {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-reject:hover {
+    background: #b91c1c;
+}
+
 
 /* RESPONSIVE */
 

@@ -32,6 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])
         ->name('approvals.approve');
 
+    Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])
+    ->name('approvals.reject');
+
     Route::post('/documents/{document}/admin-sign', [DocumentController::class, 'adminSign'])
         ->name('documents.adminSign');
 

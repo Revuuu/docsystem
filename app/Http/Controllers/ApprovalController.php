@@ -34,7 +34,7 @@ class ApprovalController extends Controller
     ? storage_path('app/public/' . $approval->document->signed_file_path)
     : storage_path('app/public/' . $approval->document->file_path);
 
-$signedPath = $this->signPdf($approval, $request, $latestPath);
+    $signedPath = $this->signPdf($approval, $request, $latestPath);
 
         // APPROVE CURRENT STEP
         $approval->update([
@@ -85,6 +85,66 @@ $signedPath = $this->signPdf($approval, $request, $latestPath);
     return redirect()
     ->route('dashboard')
     ->with('success', 'Document approved successfully.');
+}
+public function reject(Request $request, Approval $approval)
+{
+    // SECURITY
+    if ($approval->user_id !== auth()->id()) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // MUST BE PENDING
+    if ($approval->status !== 'pending') {
+        return back()->with(
+            'error',
+            'This approval is not active.'
+        );
+    }
+
+    $request->validate([
+        'remarks' => 'required|string|max:1000',
+    ]);
+
+    \DB::transaction(function () use ($approval, $request) {
+
+        // CURRENT APPROVAL = REJECTED
+        $approval->update([
+            'status'       => 'rejected',
+            'remarks'      => $request->remarks,
+            'rejected_at'  => now(),
+        ]);
+
+        // DOCUMENT = REJECTED
+        $approval->document()->update([
+            'status'      => 'rejected',
+            'approver_id' => null,
+        ]);
+
+        // OPTIONAL:
+        // Cancel remaining waiting approvals
+        Approval::where('document_id', $approval->document_id)
+            ->where('id', '!=', $approval->id)
+            ->whereIn('status', ['waiting', 'pending'])
+            ->update([
+                'status' => 'cancelled'
+            ]);
+
+        // AUDIT LOG
+        AuditLog::create([
+            'user_id'     => auth()->id(),
+            'document_id' => $approval->document_id,
+            'action'      => 'rejected',
+            'ip_address'  => $request->ip(),
+        ]);
+
+    });
+
+    return redirect()
+        ->route('dashboard')
+        ->with(
+            'success',
+            'Document rejected successfully.'
+        );
 }
 
     protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string

@@ -343,3 +343,22 @@ function saveDrawnSignature() {
 
     input.value = canvas.toDataURL('image/png');
 }
+
+function openRejectModal(approvalId)
+{
+    const modal = document.getElementById('rejectModal');
+
+    const form = document.getElementById('rejectForm');
+
+    form.action = '/approvals/' + approvalId + '/reject';
+
+    modal.style.display = 'flex';
+}
+
+function closeRejectModal()
+{
+    document.getElementById('rejectModal')
+        .style.display = 'none';
+}
+
+
