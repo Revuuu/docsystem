@@ -36,22 +36,23 @@ class DocumentController extends Controller
         $uploaderLevel = $hierarchy[$uploaderRole];
 
         $approvers = User::whereIn('id', $request->approvers)
+            ->where('id', '!=', Auth::id())
             ->get()
-            ->filter(function ($approver) use ($hierarchy, $uploaderLevel) {
-                $approverRole = $approver->roles->first()?->name ?? $approver->role;
-
-                return isset($hierarchy[$approverRole])
-                    && $hierarchy[$approverRole] > $uploaderLevel;
-            })
             ->sortBy(function ($approver) use ($hierarchy) {
-                $approverRole = $approver->roles->first()?->name ?? $approver->role;
 
-                return $hierarchy[$approverRole];
+                $approverRole = $approver->roles->first()?->name
+                    ?? $approver->role;
+
+                return $hierarchy[$approverRole] ?? 999;
             })
             ->values();
 
         if ($approvers->isEmpty()) {
-            return back()->with('error', 'Please select at least one valid approver above your role.');
+
+            return back()->with(
+                'error',
+                'Please select at least one valid approver.'
+            );
         }
 
         $path = $request->file('file')->store('documents', 'public');

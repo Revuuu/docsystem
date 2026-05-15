@@ -28,12 +28,7 @@ class DashboardController extends Controller
             abort(403, 'Unauthorized role.');
         }
 
-        $allowedRoles = collect($hierarchy)
-            ->filter(fn ($level) => $level > $hierarchy[$userRole])
-            ->keys()
-            ->toArray();
-
-        $approvers = User::whereIn('role', $allowedRoles)
+        $approvers = User::where('id', '!=', $user->id)
             ->orderByRaw("
                 CASE role
                     WHEN 'staff' THEN 1
@@ -44,6 +39,7 @@ class DashboardController extends Controller
                     WHEN 'admin' THEN 6
                 END
             ")
+            ->orderBy('name')
             ->get();
 
         $documents = Document::where('uploaded_by', $user->id)
