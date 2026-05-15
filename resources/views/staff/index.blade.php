@@ -309,7 +309,12 @@
                 Signed Documents
             </h1>
 
-            @if($signedDocuments->count())
+            @php
+                $approvedDocuments = $signedDocuments
+                    ->where('status', 'approved');
+            @endphp
+
+            @if($approvedDocuments->count())
 
                 <table>
 
@@ -325,7 +330,7 @@
 
                     <tbody>
 
-                        @foreach($signedDocuments as $doc)
+                        @foreach($approvedDocuments as $doc)
 
                             <tr>
 
