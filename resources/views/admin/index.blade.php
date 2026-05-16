@@ -104,7 +104,7 @@
                                 <td>
                                     <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
                                        target="_blank">
-                                        Download
+                                        View PDF
                                     </a>
                                 </td>
 
