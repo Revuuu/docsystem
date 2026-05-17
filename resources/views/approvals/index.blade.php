@@ -76,7 +76,7 @@
                                             onclick="checkSignatureAndOpenModal(
                                                 {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                 {{ $approval->id }},
-                                                '{{ asset('storage/' . $approval->document->file_path) }}',
+                                                '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
                                                 '{{ route('approvals.approve', $approval->id) }}'
                                             )">
                                             Sign
@@ -214,11 +214,10 @@
 
         <div class="pdf-wrapper" id="pdfWrapper">
 
-            <iframe class="pdf-frame"
-                    id="pdfFrame"></iframe>
+            <canvas id="pdfCanvas"></canvas>
 
-            <div class="pdf-click-layer"
-                 id="pdfClickLayer"></div>
+<div class="pdf-click-layer"
+     id="pdfClickLayer"></div>
 
             <div class="sig-ghost"
                  id="sigGhost">

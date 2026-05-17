@@ -152,6 +152,12 @@
             <h1 class="section-title">
                 Pending Approvals
             </h1>
+            
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
             @if($approvals->count())
 
@@ -186,7 +192,7 @@
                                             onclick="checkSignatureAndOpenModal(
                                                 {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                 {{ $approval->id }},
-                                                '{{ asset('storage/' . $approval->document->file_path) }}',
+                                                '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
                                                 '{{ route('approvals.approve', $approval->id) }}'
                                             )">
                                             Sign
@@ -241,12 +247,20 @@
 
                                 <td>{{ ucfirst($doc->status) }}</td>
 
-                                <td>
-                                    <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
-                                       target="_blank">
-                                        View PDF
-                                    </a>
-                                </td>
+                              <td>
+    @php
+        $isUploader = $doc->uploaded_by === auth()->id();
+
+        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
+            ? $doc->file_path
+            : ($doc->signed_file_path ?? $doc->file_path);
+    @endphp
+
+    <a href="{{ asset('storage/' . $viewPath) }}"
+       target="_blank">
+        View PDF
+    </a>
+</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -390,8 +404,7 @@
 
         <div class="pdf-wrapper" id="pdfWrapper">
 
-            <iframe class="pdf-frame"
-                    id="pdfFrame"></iframe>
+            <canvas id="pdfCanvas"></canvas>
 
             <div class="pdf-click-layer"
                  id="pdfClickLayer"></div>

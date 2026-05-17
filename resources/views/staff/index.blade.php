@@ -160,6 +160,12 @@
                 Pending Approvals
             </h1>
 
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             @if($approvals->count())
 
                 <table>
@@ -199,7 +205,7 @@
                                             onclick="checkSignatureAndOpenModal(
                                                 {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                 {{ $approval->id }},
-                                                '{{ asset('storage/' . $approval->document->file_path) }}',
+                                                '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
                                                 '{{ route('approvals.approve', $approval->id) }}'
                                             )">
 
@@ -240,7 +246,11 @@
                 My Documents
             </h1>
 
-            @if($documents->count())
+            @php
+                $myDocuments = $documents;
+            @endphp
+
+            @if($myDocuments->count())
 
                 <table>
 
@@ -250,6 +260,7 @@
                             <th>Title</th>
                             <th>Status</th>
                             <th>Uploaded</th>
+                            <th>Remarks</th>
                             <th>File</th>
                         </tr>
 
@@ -257,32 +268,47 @@
 
                     <tbody>
 
-                        @foreach($documents as $document)
+                        @foreach($myDocuments as $doc)
 
                             <tr>
 
                                 <td>
-                                    {{ $document->title }}
+                                    {{ $doc->title }}
                                 </td>
 
                                 <td>
-                                    {{ ucfirst($document->status) }}
+                                    {{ ucfirst($doc->status) }}
                                 </td>
 
                                 <td>
-                                    {{ $document->created_at->format('M d, Y h:i A') }}
+                                    {{ $doc->created_at->format('M d, Y h:i A') }}
                                 </td>
 
-                                <td>
+                                <td> 
+                                    @php
+                                        $rejectedApproval = \App\Models\Approval::where('document_id', $doc->id)
+                                            ->where('status', 'rejected')
+                                            ->latest('rejected_at')
+                                            ->first();
+                                    @endphp
 
-                                    <a href="{{ asset('storage/' . $document->file_path) }}"
-                                       target="_blank">
-
-                                        View PDF
-
-                                    </a>
-
+                                    {{ $rejectedApproval->remarks ?? '-' }}
                                 </td>
+
+                               <td>
+    @php
+        $isUploader = $doc->uploaded_by === auth()->id();
+
+        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
+            ? $doc->file_path
+            : ($doc->signed_file_path ?? $doc->file_path);
+    @endphp
+
+    <a href="{{ asset('storage/' . $viewPath) }}"
+       target="_blank">
+        View PDF
+    </a>
+</td>
 
                             </tr>
 
@@ -505,8 +531,7 @@
 
         <div class="pdf-wrapper" id="pdfWrapper">
 
-            <iframe class="pdf-frame"
-                    id="pdfFrame"></iframe>
+            <canvas id="pdfCanvas"></canvas>
 
             <div class="pdf-click-layer"
                  id="pdfClickLayer"></div>

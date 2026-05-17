@@ -102,8 +102,16 @@
                                 </td>
 
                                 <td>
-                                    <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
-                                       target="_blank">
+                                    @php
+                                        $isUploader = $doc->uploaded_by === auth()->id();
+
+                                        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
+                                            ? $doc->file_path
+                                            : ($doc->signed_file_path ?? $doc->file_path);
+                                    @endphp
+
+                                    <a href="{{ asset('storage/' . $viewPath) }}"
+                                    target="_blank">
                                         View PDF
                                     </a>
                                 </td>

@@ -153,6 +153,12 @@
                 Pending Approvals
             </h1>
 
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             @if($approvals->count())
 
                 <table>
@@ -182,17 +188,37 @@
 
                                 <td>
                                     @if($approval->status === 'pending')
-                                        <button class="btn-sign"
-                                            onclick="checkSignatureAndOpenModal(
-                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
-                                                {{ $approval->id }},
-                                                '{{ asset('storage/' . $approval->document->file_path) }}',
-                                                '{{ route('approvals.approve', $approval->id) }}'
-                                            )">
-                                            Sign
-                                        </button>
+
+                                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
+                                            {{-- APPROVE --}}
+                                            <button class="btn-sign"
+                                                onclick="checkSignatureAndOpenModal(
+                                                    {{ auth()->user()->signature_path ? 'true' : 'false' }},
+                                                    {{ $approval->id }},
+                                                    '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
+                                                    '{{ route('approvals.approve', $approval->id) }}'
+                                                )">
+
+                                                ✔ Approve & Sign
+
+                                            </button>
+
+                                            {{-- REJECT --}}
+                                            <button type="button"
+                                                    class="btn-reject"
+                                                    onclick="openRejectModal({{ $approval->id }})">
+
+                                                Reject
+
+                                            </button>
+
+                                        </div>
+
                                     @else
+
                                         -
+
                                     @endif
                                 </td>
                             </tr>
@@ -230,6 +256,7 @@
                         <tr>
                             <th>Title</th>
                             <th>Status</th>
+                            <th>Remarks</th>
                             <th>Download</th>
                         </tr>
                     </thead>
@@ -241,12 +268,31 @@
 
                                 <td>{{ ucfirst($doc->status) }}</td>
 
-                                <td>
-                                    <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
-                                       target="_blank">
-                                        View PDF
-                                    </a>
+                                <td> 
+                                    @php
+                                        $rejectedApproval = \App\Models\Approval::where('document_id', $doc->id)
+                                            ->where('status', 'rejected')
+                                            ->latest('rejected_at')
+                                            ->first();
+                                    @endphp
+
+                                    {{ $rejectedApproval->remarks ?? '-' }}
                                 </td>
+
+                               <td>
+    @php
+        $isUploader = $doc->uploaded_by === auth()->id();
+
+        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
+            ? $doc->file_path
+            : ($doc->signed_file_path ?? $doc->file_path);
+    @endphp
+
+    <a href="{{ asset('storage/' . $viewPath) }}"
+       target="_blank">
+        View PDF
+    </a>
+</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -391,8 +437,7 @@
 
         <div class="pdf-wrapper" id="pdfWrapper">
 
-            <iframe class="pdf-frame"
-                    id="pdfFrame"></iframe>
+            <canvas id="pdfCanvas"></canvas>
 
             <div class="pdf-click-layer"
                  id="pdfClickLayer"></div>
@@ -425,6 +470,74 @@
             </button>
 
         </div>
+
+    </div>
+
+</div>
+{{-- Reject Modal --}}
+<div class="modal-overlay"
+     id="rejectModal"
+     style="display:none;">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h3>
+                Reject Document
+            </h3>
+
+            <button onclick="closeRejectModal()"
+                    class="modal-close">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <form method="POST"
+              id="rejectForm">
+
+            @csrf
+
+            <div class="form-group">
+
+                <label>
+                    Reason for rejection
+                </label>
+
+                <textarea
+                    name="remarks"
+                    rows="5"
+                    required
+                    style="width:100%;
+                           padding:12px;
+                           border:1px solid #ccc;
+                           border-radius:8px;"></textarea>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn-cancel"
+                        onclick="closeRejectModal()">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn-reject">
+
+                    Reject
+
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 

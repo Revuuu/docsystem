@@ -18,6 +18,7 @@ class ApprovalController extends Controller
 
  public function approve(Request $request, Approval $approval)
 {
+    
     // SECURITY CHECKS
     if ($approval->user_id !== auth()->id()) {
         abort(403, 'Unauthorized approval.');
@@ -34,13 +35,23 @@ class ApprovalController extends Controller
     ? storage_path('app/public/' . $approval->document->signed_file_path)
     : storage_path('app/public/' . $approval->document->file_path);
 
+    
+    $this->validateSignatureOverlap($approval, $request);
     $signedPath = $this->signPdf($approval, $request, $latestPath);
 
         // APPROVE CURRENT STEP
         $approval->update([
-            'status'    => 'approved',
-            'signed_at' => now(),
-        ]);
+    'status'    => 'approved',
+    'signed_at' => now(),
+
+    'sig_x'     => $request->sig_x,
+    'sig_y'     => $request->sig_y,
+
+    'sig_w'     => $request->sig_w,
+    'sig_h'     => $request->sig_h,
+
+    'sig_page'  => $request->sig_page,
+]);
 
         // IMPORTANT: reload fresh data
         $approval->refresh();
@@ -189,26 +200,30 @@ public function reject(Request $request, Approval $approval)
     \Log::info('sig_x=' . $sigX . ' sig_y=' . $sigY . ' sig_w=' . $sigW . ' sig_h=' . $sigH);
     \Log::info('Computed x=' . $x . ' y=' . $y . ' page_w=' . $size['width'] . ' page_h=' . $size['height']);
                     // Signature image above the line
-    if ($sigImgPath && file_exists($sigImgPath)) {
-        $imgW = $sigW * $size['width'];
-        $imgH = $sigH * $size['height'];
-        $pdf->Image($sigImgPath, $x, $y - $imgH - 2, $imgW, $imgH, 'PNG');
-    }
-        // Draw a line below the signature image
-    $pdf->SetDrawColor(0, 0, 128);
-    $pdf->SetLineWidth(0.4);
-    $pdf->Line($x, $y, $x + ($sigW * $size['width']), $y);
-                // Approver name in bold blue
-                $pdf->SetFont('helvetica', 'B', 10);
-                $pdf->SetTextColor(0, 0, 128);
-                $pdf->SetXY($x, $y);
-                $pdf->Write(0, auth()->user()->name);
+    $blockW = $sigW * $size['width'];
 
-                // Timestamp below name
-                $pdf->SetXY($x, $y + 5);
-                $pdf->SetFont('helvetica', '', 8);
-                $pdf->SetTextColor(80, 80, 80);
-                $pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
+    $imgW = $blockW * 0.65;
+    $imgH = 18;
+
+    if ($sigImgPath && file_exists($sigImgPath)) {
+        $pdf->Image($sigImgPath, $x, $y, $imgW, $imgH, 'PNG');
+    }
+
+    $lineY = $y + $imgH + 4;
+
+$pdf->SetDrawColor(0, 0, 128);
+$pdf->SetLineWidth(0.4);
+$pdf->Line($x, $lineY, $x + $blockW, $lineY);
+
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->SetTextColor(0, 0, 128);
+$pdf->SetXY($x, $lineY + 2);
+$pdf->Write(0, auth()->user()->name);
+
+$pdf->SetFont('helvetica', '', 8);
+$pdf->SetTextColor(80, 80, 80);
+$pdf->SetXY($x, $lineY + 7);
+$pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
             }
         }
 
@@ -226,4 +241,41 @@ public function reject(Request $request, Approval $approval)
 
         return $signedRelativePath;
     }
+   protected function validateSignatureOverlap(Approval $approval, Request $request)
+{
+    $x = (float) $request->sig_x;
+    $y = (float) $request->sig_y;
+    $w = (float) $request->sig_w;
+    $h = (float) $request->sig_h;
+    $page = (int) $request->sig_page;
+
+    $existingSignatures = Approval::where('document_id', $approval->document_id)
+        ->where('status', 'approved')
+        ->whereNotNull('sig_x')
+        ->get();
+
+    foreach ($existingSignatures as $existing) {
+        if ((int) $existing->sig_page !== $page) {
+            continue;
+        }
+
+        $existingX = (float) $existing->sig_x;
+        $existingY = (float) $existing->sig_y;
+        $existingW = (float) $existing->sig_w;
+        $existingH = (float) $existing->sig_h;
+
+        $hasOverlap = !(
+            $x + $w <= $existingX ||
+            $x >= $existingX + $existingW ||
+            $y + $h <= $existingY ||
+            $y >= $existingY + $existingH
+        );
+
+        if ($hasOverlap) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'signature' => 'Signature overlaps with an existing approver signature. Please choose another position.',
+            ]);
+        }
+    }
+}
 }

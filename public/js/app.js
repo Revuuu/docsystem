@@ -69,22 +69,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // =========================
 let sigX = 0;
 let sigY = 0;
-
-const sigW = 200;
-const sigH = 40;
-
 let placed = false;
+
+let currentPdf = null;
+let currentPdfUrl = null;
+let currentPage = 1;
 
 const ghost = document.getElementById('sigGhost');
 const layer = document.getElementById('pdfClickLayer');
 const wrapper = document.getElementById('pdfWrapper');
+const canvas = document.getElementById('pdfCanvas');
 const btn = document.getElementById('btnConfirm');
 const hint = document.getElementById('hintText');
+const pageInput = document.getElementById('sigPageInput');
 
-function checkSignatureAndOpenModal(hasSignature, docId, pdfUrl, signUrl)
-{
-    if (!hasSignature)
-    {
+function checkSignatureAndOpenModal(hasSignature, docId, pdfUrl, signUrl) {
+    if (!hasSignature) {
         alert('You do not have a signature uploaded yet. Please upload or draw your signature first.');
         return;
     }
@@ -92,16 +92,15 @@ function checkSignatureAndOpenModal(hasSignature, docId, pdfUrl, signUrl)
     openSignModal(docId, pdfUrl, signUrl);
 }
 
-function openSignModal(docId, pdfUrl, signUrl) {
+async function openSignModal(docId, pdfUrl, signUrl) {
+    currentPdfUrl = pdfUrl;
+    currentPage = 1;
 
-    document.getElementById('pdfFrame').src = pdfUrl;
     document.getElementById('signatureForm').action = signUrl;
-    document.getElementById('sigPageInput').value = 1;
+    pageInput.value = 1;
 
     if (ghost) ghost.style.display = 'none';
-
     placed = false;
-
     if (btn) btn.disabled = true;
 
     if (hint) {
@@ -109,18 +108,69 @@ function openSignModal(docId, pdfUrl, signUrl) {
     }
 
     document.getElementById('signModal').classList.add('active');
+
+    currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+    await renderPdfPage(currentPage);
+}
+
+async function renderPdfPage(pageNumber) {
+    const page = await currentPdf.getPage(pageNumber);
+
+    const scale = 1.5;
+    const viewport = page.getViewport({ scale });
+
+    const context = canvas.getContext('2d');
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    canvas.style.width = viewport.width + 'px';
+    canvas.style.height = viewport.height + 'px';
+
+    wrapper.style.width = viewport.width + 'px';
+    wrapper.style.height = viewport.height + 'px';
+
+    layer.style.width = viewport.width + 'px';
+    layer.style.height = viewport.height + 'px';
+
+    await page.render({
+        canvasContext: context,
+        viewport: viewport
+    }).promise;
 }
 
 function closeSignModal() {
     document.getElementById('signModal').classList.remove('active');
-    document.getElementById('pdfFrame').src = '';
+
+    if (canvas) {
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }
 
-if (layer && wrapper && ghost) {
+if (pageInput) {
+    pageInput.addEventListener('change', async () => {
+        if (!currentPdf) return;
 
+        let page = parseInt(pageInput.value);
+
+        if (page < 1) page = 1;
+        if (page > currentPdf.numPages) page = currentPdf.numPages;
+
+        currentPage = page;
+        pageInput.value = page;
+
+        if (ghost) ghost.style.display = 'none';
+        placed = false;
+        if (btn) btn.disabled = true;
+
+        await renderPdfPage(currentPage);
+    });
+}
+
+if (layer && wrapper && ghost && canvas) {
     layer.addEventListener('click', (e) => {
-
-        const rect = wrapper.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
 
         sigX = e.clientX - rect.left;
         sigY = e.clientY - rect.top;
@@ -140,22 +190,23 @@ if (layer && wrapper && ghost) {
 }
 
 function submitSignature() {
-
     if (!placed) return;
 
-    const canvasW = wrapper.clientWidth;
-    const canvasH = wrapper.clientHeight;
+    const canvasW = canvas.clientWidth;
+    const canvasH = canvas.clientHeight;
+
+    const actualSigW = 300;
+    const actualSigH = 180;
 
     document.getElementById('formSigX').value = (sigX / canvasW).toFixed(6);
     document.getElementById('formSigY').value = (sigY / canvasH).toFixed(6);
-    document.getElementById('formSigW').value = (sigW / canvasW).toFixed(6);
-    document.getElementById('formSigH').value = (sigH / canvasH).toFixed(6);
-
-    document.getElementById('formSigPage').value =
-        document.getElementById('sigPageInput').value;
+    document.getElementById('formSigW').value = (actualSigW / canvasW).toFixed(6);
+    document.getElementById('formSigH').value = (actualSigH / canvasH).toFixed(6);
+    document.getElementById('formSigPage').value = currentPage;
 
     document.getElementById('signatureForm').submit();
 }
+
 let approverStep = 1;
 
 function addApprover() {

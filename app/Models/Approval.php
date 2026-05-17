@@ -20,6 +20,11 @@ class Approval extends Model
     'step_order',
     'remarks',
     'rejected_at',
+    'sig_x',
+    'sig_y',
+    'sig_w',
+    'sig_h',
+    'sig_page',
     ];
 
     public function document()

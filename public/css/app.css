@@ -470,10 +470,11 @@ td a {
 }
 
 .pdf-wrapper {
-    flex: 1;
     position: relative;
-    overflow: hidden;
-    background: #555;
+    overflow: auto;
+}
+#pdfCanvas {
+    display: block;
 }
 
 .pdf-frame {
@@ -485,24 +486,22 @@ td a {
 
 .pdf-click-layer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     cursor: crosshair;
-    z-index: 10;
+    z-index: 2;
 }
 
 .sig-ghost {
+    width: 300px;
+    height: 180px;
     position: absolute;
-    display: none;
-    border: 2px dashed #2563eb;
-    background: rgba(37, 99, 235, 0.08);
-    padding: 6px 10px;
+    z-index: 3;
     pointer-events: none;
-    z-index: 20;
-    font-size: 13px;
-    color: #1e3a8a;
-    white-space: nowrap;
-    border-radius: 4px;
-    transform: translate(0, -50%);
+    border: 2px dashed #2563eb;
+    background: rgba(255,255,255,0.35);
+    color: #1e40af;
+    font-weight: bold;
 }
 
 .modal-footer {
