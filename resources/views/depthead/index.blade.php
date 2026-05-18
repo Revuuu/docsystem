@@ -6,7 +6,7 @@
 
 {{-- Hamburger Menu --}}
     @include('partials.hamburger')
-    
+
 <div class="main-container">
 
     {{-- Sidebar --}}
@@ -15,242 +15,9 @@
     {{-- Content --}}
     <div class="content">
         {{-- Upload Section --}}
-        <div id="section-upload" class="dashboard-section">
-
-            <h1 class="section-title">
-                Upload Document
-            </h1>
-
-            <form method="POST"
-                  action="{{ route('documents.store') }}"
-                  enctype="multipart/form-data"
-                  class="upload-form">
-
-                @csrf
-
-                <div class="form-group">
-
-                    <label>
-                        Document Title
-                    </label>
-
-                    <input type="text"
-                           name="title"
-                           required>
-
-                </div>
-
-                <div class="form-group">
-
-                    <label>
-                        PDF File
-                    </label>
-
-                    <input type="file"
-                           name="file"
-                           accept=".pdf"
-                           required>
-
-                </div>
-
-                <div class="form-group">
-
-                    <label>Select Approvers</label>
-
-                    <div id="approver-container">
-
-                        <div class="approver-row">
-
-                            <select name="approvers[]" required>
-
-                                <option value="">
-                                    -- Select Approver --
-                                </option>
-
-                                @foreach($approvers as $approver)
-
-                                    <option value="{{ $approver->id }}">
-
-                                        {{ $approver->name }}
-                                        ({{ ucfirst($approver->role) }})
-
-                                    </option>
-
-                                @endforeach
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-                    <button type="button"
-                            class="btn-add-approver"
-                            onclick="addApprover()">
-
-                        + Add Another Approver
-
-                    </button>
-
-                </div>
-
-                <button type="submit" class="btn-submit">
-                    Upload Document
-                </button>
-
-            </form>
-
-        </div>
+        @include('partials.upload-section')
         {{-- Pending Approvals --}}
-        <div id="section-approvals" class="dashboard-section">
-
-            <h1 class="section-title">
-                Pending Approvals
-            </h1>
-
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    {{ $errors->first() }}
-                </div>
-            @endif
-            
-            @if($approvals->count())
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Uploaded By</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach($approvals as $approval)
-                            <tr>
-                                <td>
-                                    {{ $approval->document->title ?? 'Missing' }}
-                                </td>
-
-                                <td>
-                                    {{ $approval->document->uploader->name ?? 'Missing' }}
-                                </td>
-
-                               <td>
-
-    @if($approval->status === 'waiting')
-
-        <span class="status-upcoming">
-            Upcoming
-        </span>
-
-    @elseif($approval->status === 'pending')
-
-        <span class="status-pending">
-            Pending
-        </span>
-
-        <br>
-
-        <small class="status-time">
-
-            Pending for
-
-            {{
-                $approval->received_at
-                    ? $approval->received_at->diffForHumans(now(), true)
-                    : 'Just now'
-            }}
-
-        </small>
-
-    @elseif($approval->status === 'approved')
-
-        <span class="status-approved">
-            Approved
-        </span>
-
-        <br>
-
-        <small class="status-time">
-
-            Completed in
-
-            {{
-                $approval->duration_seconds
-                    ? gmdate('H:i:s', (int) $approval->duration_seconds)
-                    : 'N/A'
-            }}
-
-        </small>
-
-    @elseif($approval->status === 'rejected')
-
-        <span class="status-rejected">
-            Rejected
-        </span>
-
-    @else
-
-        {{ ucfirst($approval->status) }}
-
-    @endif
-
-</td>
-                                
-                                <td>
-
-                                    @if($approval->status === 'pending')
-
-                                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-
-                                            {{-- APPROVE --}}
-                                            <button class="btn-sign"
-                                                onclick="checkSignatureAndOpenModal(
-                                                    {{ auth()->user()->signature_path ? 'true' : 'false' }},
-                                                    {{ $approval->id }},
-                                                    '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
-                                                    '{{ route('approvals.approve', $approval->id) }}'
-                                                )">
-
-                                                ✔ Approve & Sign
-
-                                            </button>
-
-                                            {{-- REJECT --}}
-                                            <button type="button"
-                                                    class="btn-reject"
-                                                    onclick="openRejectModal({{ $approval->id }})">
-
-                                                Reject
-
-                                            </button>
-
-                                        </div>
-
-                                    @else
-
-                                        -
-
-                                    @endif
-
-                                </td>
-                            </tr>
-                        @endforeach
-
-                    </tbody>
-                </table>
-
-            @else
-
-                <p class="no-data">
-                    No pending approvals.
-                </p>
-
-            @endif
-
-        </div>
+        @include('partials.approvals-section')
 
         {{-- My Documents --}}
         <div id="section-documents" class="dashboard-section">
@@ -260,12 +27,10 @@
             </h1>
 
             @php
-                $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
-                    ->latest('updated_at')
-                    ->get();
+                $myDocuments = $documents;
             @endphp
 
-            @if($signedDocs->count())
+            @if($myDocuments->count())
 
                 <table>
                     <thead>
@@ -278,7 +43,7 @@
                     </thead>
 
                     <tbody>
-                        @foreach($signedDocs as $doc)
+                        @foreach($myDocuments as $doc)
 
                         @php
 
