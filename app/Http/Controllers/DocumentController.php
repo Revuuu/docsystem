@@ -71,6 +71,7 @@ class DocumentController extends Controller
                 'user_id' => $approver->id,
                 'step_order' => $index + 1,
                 'status' => $index === 0 ? 'pending' : 'waiting',
+                'received_at' => $index === 0 ? now() : null,
             ]);
         }
 

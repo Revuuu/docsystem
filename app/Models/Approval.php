@@ -20,11 +20,23 @@ class Approval extends Model
     'step_order',
     'remarks',
     'rejected_at',
+
+    'received_at',
+    'completed_at',
+    'duration_seconds',
+
     'sig_x',
     'sig_y',
     'sig_w',
     'sig_h',
     'sig_page',
+    ];
+
+    protected $casts = [
+    'signed_at' => 'datetime',
+    'rejected_at' => 'datetime',
+    'received_at' => 'datetime',
+    'completed_at' => 'datetime',
     ];
 
     public function document()

@@ -18,7 +18,7 @@
 <div class="main-container">
 
     {{-- Sidebar --}}
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
 
         <h2>Logged in as</h2>
 
@@ -61,12 +61,12 @@
     {{-- Content --}}
     <div class="content">
 
-        {{-- Signed Documents --}}
-        <div id="section-signed" class="dashboard-section">
+        {{-- My Documents --}}
+        <div id="section-documents" class="dashboard-section">
 
-            <h2 class="section-title">
-                Signed Documents
-            </h2>
+            <h1 class="section-title">
+                My Documents
+            </h1>
 
             @php
                 $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')

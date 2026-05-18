@@ -40,9 +40,15 @@ class ApprovalController extends Controller
     $signedPath = $this->signPdf($approval, $request, $latestPath);
 
         // APPROVE CURRENT STEP
-        $approval->update([
+    $completedAt = now();
+    $approval->update([
     'status'    => 'approved',
-    'signed_at' => now(),
+    'signed_at' => $completedAt,
+
+    'completed_at' => $completedAt,
+    'duration_seconds' => $approval->received_at
+        ? $approval->received_at->diffInSeconds($completedAt)
+        : null,
 
     'sig_x'     => $request->sig_x,
     'sig_y'     => $request->sig_y,
@@ -66,7 +72,10 @@ class ApprovalController extends Controller
         // IF NEXT APPROVER EXISTS
         // In the "next approver exists" branch, also update signed_file_path:
         if ($nextApproval) {
-            $nextApproval->update(['status' => 'pending']);
+            $nextApproval->update([
+                'status' => 'pending',
+                'received_at' => now(),
+            ]);
 
             $approval->document()->update([
                 'status'           => 'in_progress',
@@ -119,10 +128,20 @@ public function reject(Request $request, Approval $approval)
     \DB::transaction(function () use ($approval, $request) {
 
         // CURRENT APPROVAL = REJECTED
+        $completedAt = now();
+
         $approval->update([
-            'status'       => 'rejected',
-            'remarks'      => $request->remarks,
-            'rejected_at'  => now(),
+            'status' => 'rejected',
+
+            'remarks' => $request->remarks,
+
+            'rejected_at' => $completedAt,
+
+            'completed_at' => $completedAt,
+
+            'duration_seconds' => $approval->received_at
+                ? $approval->received_at->diffInSeconds($completedAt)
+                : null,
         ]);
 
         // DOCUMENT = REJECTED

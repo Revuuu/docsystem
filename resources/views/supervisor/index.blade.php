@@ -4,58 +4,12 @@
 
 @section('content')
 
+{{-- Hamburger Menu --}}
+    @include('partials.hamburger')
+    
 <div class="main-container">
 
-    {{-- Sidebar --}}
-    <div class="sidebar">
-
-        <div class="sidebar-logo">
-            DOCSYSTEM
-        </div>
-
-        <div class="sidebar-user">
-
-            <div class="user-avatar">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-            </div>
-
-            <h2>{{ auth()->user()->name }}</h2>
-
-            <span class="user-role-badge">
-                {{ ucfirst(auth()->user()->role) }}
-            </span>
-
-        </div>
-
-        <nav class="sidebar-nav">
-            <button class="nav-btn" onclick="showSection('upload')">
-                Upload Document
-            </button>
-
-            <button class="nav-btn" onclick="showSection('approvals')">
-                Pending Approvals
-            </button>
-
-            <button class="nav-btn" onclick="showSection('signed')">
-                Signed Documents
-            </button>
-
-            <button class="nav-btn" onclick="showSection('signature')">
-                My Signature
-            </button>
-        </nav>
-
-        <div class="logout-wrap">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-
-                <button type="submit" class="btn-logout">
-                    Logout
-                </button>
-            </form>
-        </div>
-
-    </div>
+    @include('partials.sidebar')
 
     {{-- Content --}}
     <div class="content">
@@ -195,13 +149,28 @@
         <span class="status-pending">
             Pending
         </span>
+        
+        
+        <br>
 
+        <small class="status-time">
+
+            Pending for
+            {{ $approval->received_at?->diffForHumans(now(), true) }}
+
+        </small>
     @elseif($approval->status === 'approved')
 
         <span class="status-approved">
             Approved
         </span>
+          <small class="status-time">
 
+            Completed in
+
+            {{ gmdate('H:i:s', $approval->duration_seconds ?? 0) }}
+
+        </small>
     @elseif($approval->status === 'rejected')
 
         <span class="status-rejected">
@@ -268,11 +237,11 @@
 
         </div>
 
-        {{-- Signed Documents --}}
-        <div id="section-signed" class="dashboard-section">
+        {{-- My Documents --}}
+        <div id="section-documents" class="dashboard-section">
 
             <h1 class="section-title">
-                Signed Documents
+                My Documents
             </h1>
 
             @php

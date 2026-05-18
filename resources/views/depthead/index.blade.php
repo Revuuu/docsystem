@@ -4,58 +4,13 @@
 
 @section('content')
 
+{{-- Hamburger Menu --}}
+    @include('partials.hamburger')
+    
 <div class="main-container">
 
     {{-- Sidebar --}}
-    <div class="sidebar">
-
-        <div class="sidebar-logo">
-            DOCSYSTEM
-        </div>
-
-        <div class="sidebar-user">
-
-            <div class="user-avatar">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-            </div>
-
-            <h2>{{ auth()->user()->name }}</h2>
-
-            <span class="user-role-badge">
-                {{ ucfirst(auth()->user()->role) }}
-            </span>
-
-        </div>
-
-        <nav class="sidebar-nav">
-            <button class="nav-btn" onclick="showSection('upload')">
-                Upload Document
-            </button>
-
-            <button class="nav-btn" onclick="showSection('approvals')">
-                Pending Approvals
-            </button>
-
-            <button class="nav-btn" onclick="showSection('signed')">
-                Signed Documents
-            </button>
-
-            <button class="nav-btn" onclick="showSection('signature')">
-                My Signature
-            </button>
-        </nav>
-
-        <div class="logout-wrap">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-
-                <button type="submit" class="btn-logout">
-                    Logout
-                </button>
-            </form>
-        </div>
-
-    </div>
+    @include('partials.sidebar')
 
     {{-- Content --}}
     <div class="content">
@@ -182,7 +137,7 @@
                                     {{ $approval->document->uploader->name ?? 'Missing' }}
                                 </td>
 
-                                <td>
+                               <td>
 
     @if($approval->status === 'waiting')
 
@@ -196,11 +151,39 @@
             Pending
         </span>
 
+        <br>
+
+        <small class="status-time">
+
+            Pending for
+
+            {{
+                $approval->received_at
+                    ? $approval->received_at->diffForHumans(now(), true)
+                    : 'Just now'
+            }}
+
+        </small>
+
     @elseif($approval->status === 'approved')
 
         <span class="status-approved">
             Approved
         </span>
+
+        <br>
+
+        <small class="status-time">
+
+            Completed in
+
+            {{
+                $approval->duration_seconds
+                    ? gmdate('H:i:s', (int) $approval->duration_seconds)
+                    : 'N/A'
+            }}
+
+        </small>
 
     @elseif($approval->status === 'rejected')
 
@@ -269,11 +252,11 @@
 
         </div>
 
-        {{-- Signed Documents --}}
-        <div id="section-signed" class="dashboard-section">
+        {{-- My Documents --}}
+        <div id="section-documents" class="dashboard-section">
 
             <h1 class="section-title">
-                Signed Documents
+                My Documents
             </h1>
 
             @php
@@ -296,34 +279,116 @@
 
                     <tbody>
                         @foreach($signedDocs as $doc)
+
+                        @php
+
+                $firstApproval = $doc->approvals
+                    ->sortBy('step_order')
+                    ->first();
+
+                $lastApproval = $doc->approvals
+                    ->whereNotNull('completed_at')
+                    ->sortByDesc('step_order')
+                    ->first();
+
+                $currentPendingApproval = $doc->approvals
+                    ->where('status', 'pending')
+                    ->first();
+
+            @endphp
+
                             <tr>
                                 <td>{{ $doc->title }}</td>
 
-                                <td>{{ ucfirst($doc->status) }}</td>
-                                <td> 
-                                    @php
-                                        $rejectedApproval = \App\Models\Approval::where('document_id', $doc->id)
-                                            ->where('status', 'rejected')
-                                            ->latest('rejected_at')
-                                            ->first();
-                                    @endphp
-
-                                    {{ $rejectedApproval->remarks ?? '-' }}
-                                </td>
                                 <td>
-    @php
-        $isUploader = $doc->uploaded_by === auth()->id();
 
-        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
-            ? $doc->file_path
-            : ($doc->signed_file_path ?? $doc->file_path);
-    @endphp
+                    {{-- PENDING / IN PROGRESS --}}
+                    @if(
+                        in_array($doc->status, ['pending', 'in_progress']) &&
+                        $currentPendingApproval &&
+                        $currentPendingApproval->received_at
+                    )
 
-       <button type="button" class="view-pdf-btn"
-        onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
-        View PDF
-    </button>
-</td>
+                        <span class="status-pending">
+                            Pending
+                        </span>
+
+                        <br>
+
+                        <small class="status-time">
+
+                            Pending for
+
+                            {{
+                                $currentPendingApproval->received_at
+                                    ->diffForHumans(now(), true)
+                            }}
+
+                        </small>
+
+                    {{-- APPROVED --}}
+                    @elseif(
+                        $doc->status === 'approved' &&
+                        $firstApproval &&
+                        $firstApproval->received_at &&
+                        $lastApproval &&
+                        $lastApproval->completed_at
+                    )
+
+                        <span class="status-approved">
+                            Approved
+                        </span>
+
+                        <br>
+
+                        <small class="status-time">
+
+                            Workflow completed in
+
+                            {{
+                                \Carbon\CarbonInterval::seconds(
+                                    (int) $firstApproval->received_at
+                                        ->diffInSeconds($lastApproval->completed_at)
+                                )->cascade()->forHumans()
+                            }}
+
+                        </small>
+
+                    {{-- REJECTED --}}
+                    @elseif($doc->status === 'rejected')
+
+                        <span class="status-rejected">
+                            Rejected
+                        </span>
+
+                    {{-- DEFAULT --}}
+                    @else
+
+                        <span class="status-upcoming">
+                            {{ ucfirst($doc->status) }}
+                        </span>
+
+                    @endif
+
+                </td>
+                               <td>
+                    {{ $doc->remarks ?? '-' }}
+                </td>
+                            <td>
+
+                    @php
+                        $viewPath = $doc->signed_file_path ?? $doc->file_path;
+                    @endphp
+
+                    <button type="button"
+                            class="view-pdf-btn"
+                            onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+
+                        View PDF
+
+                    </button>
+
+                </td>
                             </tr>
                         @endforeach
                         <!-- PDF Modal -->

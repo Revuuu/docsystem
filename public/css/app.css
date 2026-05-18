@@ -729,6 +729,12 @@ td a {
     color: #721c24;
 }
 
+.status-time {
+    display: block;
+    margin-top: 4px;
+    color: #666;
+    font-size: 12px;
+}
 /* RESPONSIVE */
 
 @media (max-width: 900px) {
