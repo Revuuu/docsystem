@@ -76,61 +76,73 @@
 
     @endphp
 
-    <span class="status-approved">
-        {{ ucfirst($doc->status) }}
+    {{-- REJECTED --}}
+@if($doc->status === 'rejected')
+
+    <span class="status-rejected">
+        Rejected
     </span>
 
-    {{-- IN PROGRESS --}}
-    @if(
+{{-- PENDING --}}
+@elseif(
     in_array($doc->status, ['pending', 'in_progress']) &&
     $currentPendingApproval &&
     $currentPendingApproval->received_at
 )
 
-        <br>
+    <span class="status-pending">
+        Pending
+    </span>
 
-        <small class="status-time">
+    <br>
 
-            Pending for
+    <small class="status-time">
 
-            {{
+        Pending for
 
-                $currentPendingApproval->received_at
-                    ->diffForHumans(now(), true)
+        {{
+            $currentPendingApproval->received_at
+                ->diffForHumans(now(), true)
+        }}
 
-            }}
+    </small>
 
-        </small>
+{{-- APPROVED --}}
+@elseif(
+    $doc->status === 'approved' &&
+    $firstApproval &&
+    $firstApproval->received_at &&
+    $lastApproval &&
+    $lastApproval->completed_at
+)
 
-    {{-- APPROVED --}}
-    @elseif(
-        $doc->status === 'approved' &&
-        $firstApproval &&
-        $firstApproval->received_at &&
-        $lastApproval &&
-        $lastApproval->completed_at
-    )
+    <span class="status-approved">
+        Approved
+    </span>
 
-        <br>
+    <br>
 
-        <small class="status-time">
+    <small class="status-time">
 
-            Workflow completed in
+        Workflow completed in
 
-            {{
+        {{
+            \Carbon\CarbonInterval::seconds(
+                (int) $firstApproval->received_at
+                    ->diffInSeconds($lastApproval->completed_at)
+            )->cascade()->forHumans()
+        }}
 
-                \Carbon\CarbonInterval::seconds(
+    </small>
 
-                    (int) $firstApproval->received_at
-                        ->diffInSeconds($lastApproval->completed_at)
+{{-- DEFAULT --}}
+@else
 
-                )->cascade()->forHumans()
+    <span class="status-upcoming">
+        {{ ucfirst($doc->status) }}
+    </span>
 
-            }}
-
-        </small>
-
-    @endif
+@endif
 
 </td>
 
