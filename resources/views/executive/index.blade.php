@@ -336,6 +336,27 @@
             </button>
 
         </div>
+    </div>
+</div>
+{{-- Reject Modal --}}
+<div class="modal-overlay" id="rejectModal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h3>
+                Reject Document
+            </h3>
+
+            <button onclick="closeRejectModal()"
+                    class="modal-close">
+
+                ×
+
+            </button>
+
+        </div>
 
         <form method="POST"
               id="rejectForm">
@@ -383,6 +404,7 @@
     </div>
 
 </div>
+
 
 <form id="signatureForm" method="POST" action="">
     @csrf
