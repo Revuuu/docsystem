@@ -110,16 +110,33 @@
                                             : ($doc->signed_file_path ?? $doc->file_path);
                                     @endphp
 
-                                    <a href="{{ asset('storage/' . $viewPath) }}"
-                                    target="_blank">
-                                        View PDF
-                                    </a>
+                                       <button type="button" class="view-pdf-btn"
+                                            onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+                                            View PDF
+                                        </button>
                                 </td>
 
                             </tr>
 
                         @endforeach
+                    
+                       
+                        <!-- PDF Modal -->
+<div id="pdfModal" class="pdf-modal">
+    <div class="pdf-modal-content">
 
+        <span class="close-modal" onclick="closePdfModal()">
+            &times;
+        </span>
+
+        <iframe id="pdfFrame"
+            src=""
+            width="100%"
+            height="100%">
+        </iframe>
+
+    </div>
+</div>
                     </tbody>
 
                 </table>

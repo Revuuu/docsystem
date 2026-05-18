@@ -183,8 +183,38 @@
                                 </td>
 
                                 <td>
-                                    {{ ucfirst($approval->status) }}
-                                </td>
+
+    @if($approval->status === 'waiting')
+
+        <span class="status-upcoming">
+            Upcoming
+        </span>
+
+    @elseif($approval->status === 'pending')
+
+        <span class="status-pending">
+            Pending
+        </span>
+
+    @elseif($approval->status === 'approved')
+
+        <span class="status-approved">
+            Approved
+        </span>
+
+    @elseif($approval->status === 'rejected')
+
+        <span class="status-rejected">
+            Rejected
+        </span>
+
+    @else
+
+        {{ ucfirst($approval->status) }}
+
+    @endif
+
+</td>
 
                                 <td>
                                     @if($approval->status === 'pending')
@@ -256,13 +286,29 @@
             : ($doc->signed_file_path ?? $doc->file_path);
     @endphp
 
-    <a href="{{ asset('storage/' . $viewPath) }}"
-       target="_blank">
+     <button type="button" class="view-pdf-btn"
+        onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
         View PDF
-    </a>
+    </button>
 </td>
                             </tr>
                         @endforeach
+                        <!-- PDF Modal -->
+<div id="pdfModal" class="pdf-modal">
+    <div class="pdf-modal-content">
+
+        <span class="close-modal" onclick="closePdfModal()">
+            &times;
+        </span>
+
+        <iframe id="pdfFrame"
+            src=""
+            width="100%"
+            height="100%">
+        </iframe>
+
+    </div>
+</div>
                     </tbody>
                 </table>
 

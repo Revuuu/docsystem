@@ -52,10 +52,13 @@ class DashboardController extends Controller
             ->get();
 
         $approvals = Approval::with('document.uploader')
-            ->where('status', 'pending')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
+        ->where('user_id', $user->id)
+        ->whereIn('status', [
+            'pending',
+            'waiting',
+        ])
+        ->latest()
+        ->get();
 
         $pendingDocuments = $approvals->map(fn ($approval) => $approval->document);
 

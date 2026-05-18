@@ -413,3 +413,23 @@ function closeRejectModal()
 }
 
 
+function openPdfModal(pdfUrl) {
+    document.getElementById('pdfFrame').src = pdfUrl;
+    document.getElementById('pdfModal').style.display = 'block';
+}
+
+function closePdfModal() {
+    document.getElementById('pdfFrame').src = '';
+    document.getElementById('pdfModal').style.display = 'none';
+}
+
+// Optional: close when clicking outside modal
+window.onclick = function(event) {
+    const modal = document.getElementById('pdfModal');
+
+    if (event.target === modal) {
+        closePdfModal();
+    }
+}
+
+

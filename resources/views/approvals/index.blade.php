@@ -65,8 +65,38 @@
                                 </td>
 
                                 <td>
-                                    {{ ucfirst($approval->status) }}
-                                </td>
+
+    @if($approval->status === 'waiting')
+
+        <span class="status-upcoming">
+            Upcoming
+        </span>
+
+    @elseif($approval->status === 'pending')
+
+        <span class="status-pending">
+            Pending
+        </span>
+
+    @elseif($approval->status === 'approved')
+
+        <span class="status-approved">
+            Approved
+        </span>
+
+    @elseif($approval->status === 'rejected')
+
+        <span class="status-rejected">
+            Rejected
+        </span>
+
+    @else
+
+        {{ ucfirst($approval->status) }}
+
+    @endif
+
+</td>
 
                                 <td>
 
