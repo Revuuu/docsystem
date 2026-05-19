@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Approval;
 use App\Models\User;
+use App\Models\AuditLog;
 
 class DashboardController extends Controller
 {
@@ -67,6 +68,10 @@ class DashboardController extends Controller
             $users = User::latest()->get();
             $allDocuments = Document::latest()->get();
 
+            $auditLogs = AuditLog::with('user')
+            ->latest()
+            ->paginate(20);
+
             return view('admin.index', compact(
                 'users',
                 'allDocuments',
@@ -75,6 +80,7 @@ class DashboardController extends Controller
                 'approvals',
                 'pendingDocuments',
                 'approvers',
+                'auditLogs',
                 'section'
             ));
         }

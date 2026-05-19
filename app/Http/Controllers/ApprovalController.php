@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
-use App\Models\AuditLog;
+use App\Services\AuditService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -137,13 +137,26 @@ $newFile = $approval->document
             ]);
         }
 
-        // AUDIT LOG
-        AuditLog::create([
-            'user_id'     => auth()->id(),
-            'document_id' => $approval->document_id,
-            'action'      => 'approved',
-            'ip_address'  => $request->ip(),
-        ]);
+        AuditService::log(
+
+            'approved',
+
+            'approvals',
+
+            $approval->id,
+
+            [
+                'status' => 'pending',
+            ],
+
+            [
+                'document_id' => $approval->document_id,
+                'approved_by' => auth()->id(),
+                'step_order' => $approval->step_order,
+                'status' => 'approved',
+            ]
+
+        );
     });
 
     return redirect()
@@ -203,14 +216,27 @@ public function reject(Request $request, Approval $approval)
                 'status' => 'cancelled'
             ]);
 
-        // AUDIT LOG
-        AuditLog::create([
-            'user_id'     => auth()->id(),
-            'document_id' => $approval->document_id,
-            'action'      => 'rejected',
-            'ip_address'  => $request->ip(),
-        ]);
+        AuditService::log(
 
+            'rejected',
+
+            'approvals',
+
+            $approval->id,
+
+            [
+                'status' => 'pending',
+            ],
+
+            [
+                'document_id' => $approval->document_id,
+                'rejected_by' => auth()->id(),
+                'remarks' => $request->remarks,
+                'step_order' => $approval->step_order,
+                'status' => 'rejected',
+            ]
+
+        );
     });
 
     return redirect()

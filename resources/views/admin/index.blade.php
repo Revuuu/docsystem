@@ -42,6 +42,12 @@
                 👥 Role Assignment
             </button>
 
+            <button type="button"
+                    onclick="showSection('audit')"
+                    class="nav-btn">
+                📜 Audit Trail
+            </button>
+
         </nav>
 
         <a class="nav-btn" href="{{ route('signature.index') }}">
@@ -264,7 +270,168 @@
             </div>
 
         </div>
+{{-- Audit Trail Section --}}
+<div id="section-audit"
+     class="dashboard-section"
+     style="display:none;">
 
+    <h2 class="section-title">
+        Audit Trail
+    </h2>
+
+    @if($auditLogs->count())
+
+        <table>
+
+    <thead>
+        <tr>
+
+            <th>ID</th>
+
+            <th>Table Name</th>
+
+            <th>Table ID</th>
+
+            <th>Old State</th>
+
+            <th>Action</th>
+
+            <th>New State</th>
+
+            <th>IP Address</th>
+
+            <th>Account ID</th>
+
+            <th>Timestamp</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach($auditLogs as $log)
+
+            <tr>
+
+                {{-- ID --}}
+                <td>
+                    {{ $log->id }}
+                </td>
+
+                {{-- Table Name --}}
+                <td>
+                    {{ $log->table_name }}
+                </td>
+
+                {{-- Table ID --}}
+                <td>
+                    {{ $log->table_id }}
+                </td>
+
+                {{-- OLD STATE --}}
+                <td style="max-width:220px;">
+
+                    @if($log->old_values)
+
+                         Status:
+                         {{ $log->old_values['status'] ?? '-' }}
+                    @else
+
+                        -
+
+                    @endif
+
+                </td>
+
+                {{-- ACTION --}}
+                <td>
+
+                    @php
+                        $actionColors = [
+                            'uploaded' => '#2563eb',
+                            'approved' => '#16a34a',
+                            'rejected' => '#dc2626',
+                            'updated' => '#ca8a04',
+                            'deleted' => '#7c2d12',
+                        ];
+
+                        $color = $actionColors[$log->action] ?? '#374151';
+                    @endphp
+
+                    <span style="
+                        background: {{ $color }};
+                        color: white;
+                        padding: 4px 10px;
+                        border-radius: 999px;
+                        font-size: 12px;
+                        font-weight: 600;
+                    ">
+                        {{ strtoupper($log->action) }}
+                    </span>
+
+                </td>
+
+                {{-- NEW STATE --}}
+                <td style="max-width:220px;">
+
+                    @if($log->new_values)
+
+                          status:
+        {{ $log->new_values['status'] ?? '-' }}
+                    @else
+
+                        -
+
+                    @endif
+
+                </td>
+
+                {{-- IP --}}
+                <td>
+                    {{ $log->ip_address ?? '-' }}
+                </td>
+
+                {{-- USER --}}
+                <td>
+
+                    @if($log->user)
+
+                        {{ $log->user_id }}
+
+                    @else
+
+                        System
+
+                    @endif
+
+                </td>
+
+                {{-- TIMESTAMP --}}
+                <td style="min-width:180px;">
+                    {{ $log->created_at->format('M d, Y h:i:s A') }}
+                </td>
+
+            </tr>
+
+        @endforeach
+
+    </tbody>
+
+</table>
+
+        <div style="margin-top:20px;">
+            {{ $auditLogs->links() }}
+        </div>
+
+    @else
+
+        <p class="no-data">
+            No audit logs available.
+        </p>
+
+    @endif
+
+</div>
     </div>
 
 </div>
