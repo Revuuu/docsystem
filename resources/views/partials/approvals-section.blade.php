@@ -105,7 +105,7 @@
                                         onclick="checkSignatureAndOpenModal(
                                             {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                             {{ $approval->id }},
-                                            '{{ asset('storage/' . ($approval->document->signed_file_path ?? $approval->document->file_path)) }}',
+                                            '{{ asset('storage/' . ($approval->document->current_file_path)) }}',
                                             '{{ route('approvals.approve', $approval->id) }}'
                                         )">
 

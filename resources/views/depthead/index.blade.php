@@ -142,7 +142,7 @@
                             <td>
 
                     @php
-                        $viewPath = $doc->signed_file_path ?? $doc->file_path;
+                        $viewPath = $doc->current_file_path;
                     @endphp
 
                     <button type="button"

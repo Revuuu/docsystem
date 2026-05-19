@@ -69,7 +69,7 @@
             </h1>
 
             @php
-                $signedDocs = \App\Models\Document::whereNotNull('signed_file_path')
+                $signedDocs = \App\Models\Document::where('status', 'approved')
                     ->whereNotNull('admin_signed_at')
                     ->latest('admin_signed_at')
                     ->get();
@@ -105,9 +105,7 @@
                                     @php
                                         $isUploader = $doc->uploaded_by === auth()->id();
 
-                                        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
-                                            ? $doc->file_path
-                                            : ($doc->signed_file_path ?? $doc->file_path);
+                                        $viewPath = $doc->current_file_path;
                                     @endphp
 
                                        <button type="button" class="view-pdf-btn"

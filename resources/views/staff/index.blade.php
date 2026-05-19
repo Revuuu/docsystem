@@ -163,11 +163,7 @@
 
                                <td>
     @php
-        $isUploader = $doc->uploaded_by === auth()->id();
-
-        $viewPath = ($isUploader && !in_array($doc->status, ['approved', 'rejected']))
-            ? $doc->file_path
-            : ($doc->signed_file_path ?? $doc->file_path);
+        $viewPath = $doc->current_file_path;
     @endphp
 
     <button type="button" class="view-pdf-btn"
@@ -208,79 +204,6 @@
             @endif
 
         </div>
-
-        {{-- Signed Documents --}}
-        {{-- <div id="section-signed" class="dashboard-section">
-
-            <h1 class="section-title">
-                Signed Documents
-            </h1>
-
-            @php
-                $approvedDocuments = $signedDocuments
-                    ->where('status', 'approved');
-            @endphp
-
-            @if($approvedDocuments->count())
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Title</th>
-                            <th>Signed At</th>
-                            <th>Download</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @foreach($approvedDocuments as $doc)
-
-                            <tr>
-
-                                <td>
-                                    {{ $doc->title }}
-                                </td>
-
-                                <td>
-
-                                    {{ $doc->admin_signed_at
-                                        ? $doc->admin_signed_at->format('M d, Y h:i A')
-                                        : 'N/A' }}
-
-                                </td>
-
-                                <td>
-
-                                    <a href="{{ asset('storage/' . $doc->signed_file_path) }}"
-                                       target="_blank">
-
-                                        Download
-
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-            @else
-
-                <p class="no-data">
-                    No signed documents yet.
-                </p>
-
-            @endif
-
-        </div> --}}
 
         {{-- My Signature --}}
         <div id="section-signature" class="dashboard-section">

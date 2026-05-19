@@ -47,10 +47,10 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $signedDocuments = Document::whereNotNull('signed_file_path')
-            ->where('uploaded_by', $user->id)
-            ->latest('updated_at')
-            ->get();
+        $signedDocuments = Document::where('status', 'approved')
+        ->where('uploaded_by', $user->id)
+        ->latest('updated_at')
+        ->get();
 
         $approvals = Approval::with('document.uploader')
         ->where('user_id', $user->id)

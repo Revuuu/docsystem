@@ -30,14 +30,61 @@ class ApprovalController extends Controller
 
     \DB::transaction(function () use ($request, $approval, &$signedPath) {
 
-        // Generate signed PDF
-        $latestPath = $approval->document->signed_file_path
-    ? storage_path('app/public/' . $approval->document->signed_file_path)
-    : storage_path('app/public/' . $approval->document->file_path);
+    // Generate signed PDF
+    $currentFile = $approval->document->latestVersion();
+
+    $latestPath = storage_path(
+        'app/public/' . $currentFile->file_path
+    );
 
     
     $this->validateSignatureOverlap($approval, $request);
-    $signedPath = $this->signPdf($approval, $request, $latestPath);
+
+$signedPath = $this->signPdf(
+    $approval,
+    $request,
+    $latestPath
+);
+
+/*
+|--------------------------------------------------------------------------
+| Create NEW immutable file version
+|--------------------------------------------------------------------------
+*/
+
+$currentVersion = $approval->document
+    ->latestVersion();
+
+$approval->document
+    ->files()
+    ->where('is_current', true)
+    ->update([
+        'is_current' => false
+    ]);
+
+$newFile = $approval->document
+    ->files()
+    ->create([
+
+        'parent_file_id' => $currentVersion?->id,
+
+        'file_name' => basename($signedPath),
+
+        'file_path' => $signedPath,
+
+        'mime_type' => 'application/pdf',
+
+        'file_size' => null,
+
+        'version' => ($currentVersion?->version ?? 0) + 1,
+
+        'is_signed' => true,
+
+        'is_current' => true,
+
+        'uploaded_by' => auth()->id(),
+
+    ]);
 
         // APPROVE CURRENT STEP
     $completedAt = now();
@@ -70,7 +117,6 @@ class ApprovalController extends Controller
             ->first();
 
         // IF NEXT APPROVER EXISTS
-        // In the "next approver exists" branch, also update signed_file_path:
         if ($nextApproval) {
             $nextApproval->update([
                 'status' => 'pending',
@@ -78,18 +124,16 @@ class ApprovalController extends Controller
             ]);
 
             $approval->document()->update([
-                'status'           => 'in_progress',
-                'approver_id'      => $nextApproval->user_id,
-                'signed_file_path' => $signedPath, // ← ADD THIS
+                'status'      => 'in_progress',
+                'approver_id' => $nextApproval->user_id,
             ]);
 
         } else {
             // Final approval — this part stays the same
             $approval->document()->update([
-                'status'           => 'approved',
-                'signed_file_path' => $signedPath,
-                'admin_signed_at'  => now(),
-                'approver_id'      => null,
+                'status'          => 'approved',
+                'admin_signed_at' => now(),
+                'approver_id'     => null,
             ]);
         }
 
@@ -247,7 +291,7 @@ $pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
         }
 
         // Save as a NEW signed file — never overwrite the original
-        $signedRelativePath = 'documents/signed/signed_step' . $approval->step_order . '_' . basename($approval->document->file_path);
+        $signedRelativePath = 'documents/signed/signed_step' . $approval->step_order . '_' . basename($inputPath);
         $signedAbsolutePath = storage_path('app/public/' . $signedRelativePath);
 
         // Ensure the signed/ directory exists
