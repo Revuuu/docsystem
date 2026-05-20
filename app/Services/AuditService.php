@@ -7,37 +7,41 @@ use App\Models\AuditLog;
 class AuditService
 {
     public static function log(
-
         string $action,
-
         string $tableName,
-
         int $tableId,
-
         ?array $oldValues = null,
-
         ?array $newValues = null
-
     ): void {
 
-        AuditLog::create([
+        try {
 
-            'user_id' => auth()->id(),
+            AuditLog::create([
 
-            'table_name' => $tableName,
+                'user_id' => auth()->id(),
 
-            'table_id' => $tableId,
+                'table_name' => $tableName,
 
-            'action' => $action,
+                'table_id' => $tableId,
 
-            'old_values' => $oldValues,
+                'action' => strtolower($action),
 
-            'new_values' => $newValues,
+                'old_values' => $oldValues,
 
-            'ip_address' => request()->ip(),
+                'new_values' => $newValues,
 
-            'user_agent' => request()->userAgent(),
+                'ip_address' => request()?->ip(),
 
-        ]);
+                'user_agent' => request()?->userAgent(),
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            \Log::error('Audit log failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+        }
     }
 }

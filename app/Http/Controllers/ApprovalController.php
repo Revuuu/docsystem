@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
-use App\Services\AuditService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use setasign\Fpdi\Tcpdf\Fpdi;
 
@@ -55,13 +53,17 @@ $signedPath = $this->signPdf(
 $currentVersion = $approval->document
     ->latestVersion();
 
-$approval->document
+$currentFiles = $approval->document
     ->files()
     ->where('is_current', true)
-    ->update([
+    ->get();
+
+foreach ($currentFiles as $file) {
+    $file->update([
         'is_current' => false
     ]);
-
+}
+    
 $newFile = $approval->document
     ->files()
     ->create([
@@ -123,40 +125,23 @@ $newFile = $approval->document
                 'received_at' => now(),
             ]);
 
-            $approval->document()->update([
+            $document = $approval->document;
+
+            $document->update([
                 'status'      => 'in_progress',
                 'approver_id' => $nextApproval->user_id,
             ]);
 
         } else {
             // Final approval — this part stays the same
-            $approval->document()->update([
+            $document = $approval->document;
+            $document->update([
                 'status'          => 'approved',
                 'admin_signed_at' => now(),
                 'approver_id'     => null,
             ]);
         }
 
-        AuditService::log(
-
-            'approved',
-
-            'approvals',
-
-            $approval->id,
-
-            [
-                'status' => 'pending',
-            ],
-
-            [
-                'document_id' => $approval->document_id,
-                'approved_by' => auth()->id(),
-                'step_order' => $approval->step_order,
-                'status' => 'approved',
-            ]
-
-        );
     });
 
     return redirect()
@@ -216,27 +201,7 @@ public function reject(Request $request, Approval $approval)
                 'status' => 'cancelled'
             ]);
 
-        AuditService::log(
-
-            'rejected',
-
-            'approvals',
-
-            $approval->id,
-
-            [
-                'status' => 'pending',
-            ],
-
-            [
-                'document_id' => $approval->document_id,
-                'rejected_by' => auth()->id(),
-                'remarks' => $request->remarks,
-                'step_order' => $approval->step_order,
-                'status' => 'rejected',
-            ]
-
-        );
+    
     });
 
     return redirect()
@@ -283,11 +248,7 @@ public function reject(Request $request, Approval $approval)
                 $sigImgPath = auth()->user()->signature_path
                     ? storage_path('app/public/' . auth()->user()->signature_path)
                     : null;
-// DEBUG - check in laravel.log
-    \Log::info('Signature image path: ' . $sigImgPath);
-    \Log::info('File exists: ' . (file_exists($sigImgPath) ? 'YES' : 'NO'));
-    \Log::info('sig_x=' . $sigX . ' sig_y=' . $sigY . ' sig_w=' . $sigW . ' sig_h=' . $sigH);
-    \Log::info('Computed x=' . $x . ' y=' . $y . ' page_w=' . $size['width'] . ' page_h=' . $size['height']);
+
                     // Signature image above the line
     $blockW = $sigW * $size['width'];
 

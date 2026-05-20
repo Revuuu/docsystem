@@ -7,7 +7,6 @@ use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Approval;
-use App\Services\AuditService;
 
 class DocumentController extends Controller
 {
@@ -34,7 +33,6 @@ class DocumentController extends Controller
 
         $uploader = Auth::user();
         $uploaderRole = $uploader->roles->first()?->name ?? $uploader->role;
-        $uploaderLevel = $hierarchy[$uploaderRole];
 
         $approvers = User::whereIn('id', $request->approvers)
             ->where('id', '!=', Auth::id())
@@ -87,23 +85,6 @@ class DocumentController extends Controller
 
         ]);
 
-        AuditService::log(
-
-            'uploaded',
-
-            'documents',
-
-            $document->id,
-
-            null,
-
-            [
-                'title' => $document->title,
-                'status' => $document->status,
-                'uploaded_by' => $document->uploaded_by,
-            ]
-
-        );
 
         foreach ($approvers as $index => $approver) {
             Approval::create([
