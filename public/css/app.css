@@ -735,6 +735,10 @@ td a {
     color: #666;
     font-size: 12px;
 }
+
+body.modal-open {
+    overflow: hidden;
+}
 /* RESPONSIVE */
 
 @media (max-width: 900px) {

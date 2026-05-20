@@ -199,9 +199,9 @@
                         class="signature-preview"
                         alt="Signature">
 
-                   <form method="POST"
+                   <form id="removeSignatureForm" method="POST"
       action="{{ route('signature.remove') }}"
-      onsubmit="return openPasswordModal(event, this)">
+         onsubmit="return openPasswordModal(event, this)">
 
     @csrf
     @method('DELETE')
@@ -210,8 +210,10 @@
            name="password"
            class="password-hidden-input">
 
-    <button type="submit"
-            class="btn-remove-signature">
+       <button type="button"
+            class="btn-remove-signature"
+           >
+
 
         Remove Signature
 
@@ -227,11 +229,12 @@
                 <div class="form-card">
                     <h3>Upload Signature Image</h3>
 
-                    <form method="POST"
+                    <form id="uploadSignatureForm" method="POST"
     action="{{ route('signature.upload') }}"
     enctype="multipart/form-data"
     class="user-form"
-    onsubmit="return openPasswordModal(event, this)">
+    onsubmit="return openPasswordModal(event, this)"
+    >
 
                         @csrf
 
@@ -246,9 +249,15 @@
                         <input type="hidden"
        name="password"
        class="password-hidden-input">
-                        <button type="submit" class="btn-submit">
-                            Upload Signature
-                        </button>
+          <button type="button"
+            class="btn-submit"
+        >
+
+
+
+    Upload Signature
+
+</button>
 
                     </form>
                 </div>
@@ -256,13 +265,13 @@
                 <div class="form-card">
                     <h3>Draw Signature</h3>
 
-                    <form method="POST"
+                    <form id="drawSignatureForm" method="POST"
     action="{{ route('signature.draw') }}"
-    onsubmit="
+
+    class="user-form"  onsubmit="
         saveDrawnSignature();
         return openPasswordModal(event, this);
-    "
-    class="user-form">
+    ">
 
                         @csrf
 
@@ -283,7 +292,14 @@
 <input type="hidden"
        name="password"
        class="password-hidden-input">
-                        <button type="submit" class="btn-submit">
+                        <button type="button"
+            class="btn-submit"
+            onclick="
+                saveDrawnSignature();
+                openPasswordModal(
+                    document.getElementById('drawSignatureForm')
+                );
+            ">
                             Save Drawn Signature
                         </button>
 

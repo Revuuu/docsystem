@@ -22,13 +22,7 @@ class SignatureController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Hash::check($request->password, Auth::user()->password)) {
-
-        return back()->withErrors([
-    'password' => 'Incorrect account password.',
-], 'signature');
-
-        }
+       
 
         $user = Auth::user();
 
@@ -54,9 +48,10 @@ class SignatureController extends Controller
 
         if (!Hash::check($request->password, Auth::user()->password)) {
 
-            return back()->withErrors([
-    'password' => 'Incorrect account password.',
-], 'signature');
+            return back()
+    ->withInput()
+    ->with('password_modal_error', 'Incorrect account password.')
+->with('password_modal_form', 'drawSignatureForm');
 
         }
 
@@ -88,9 +83,10 @@ class SignatureController extends Controller
 
         if (!Hash::check($request->password, Auth::user()->password)) {
 
-            return back()->withErrors([
-                'password' => 'Incorrect account password.',
-            ], 'signature');
+            return back()
+    ->withInput()
+    ->with('password_modal_error', 'Incorrect account password.')
+->with('password_modal_form', 'removeSignatureForm');
 
         }
         $user = auth()->user();

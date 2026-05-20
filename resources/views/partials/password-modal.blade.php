@@ -1,5 +1,6 @@
 {{-- PASSWORD CONFIRMATION MODAL --}}
-<div id="passwordModal" class="password-modal" onclick="if(event.target === this) closePasswordModal()">
+<div id="passwordModal"
+     class="password-modal">
     <div class="password-modal-content">
         
         {{-- Header --}}
@@ -33,7 +34,13 @@
                     </svg>
                 </button>
             </div>
-            <div id="modalErrorMessage" class="password-error-message">Password is required.</div>
+           <div id="modalErrorMessage"
+     class="password-error-message"
+     style="{{ session('password_modal_error') ? 'display:block;' : '' }}">
+
+    {{ session('password_modal_error') }}
+
+</div>
         </div>
 
         {{-- Action Buttons --}}
@@ -213,35 +220,40 @@
 </style>
 
 <script>
-let protectedForm = null;
 
-function openPasswordModal(event, form) {
+function openPasswordModal(event, form)
+{
     event.preventDefault();
-    protectedForm = form;
 
-    document.getElementById('passwordModal').style.display = 'flex';
+    const modal =
+        document.getElementById('passwordModal');
+
+    modal.style.display = 'flex';
+
+    modal.dataset.formId = form.id;
+
     document.getElementById('modalPassword').value = '';
-    hideError();
 
-    // Autofocus input smoothly
+
+
     setTimeout(() => {
-        document.getElementById('modalPassword').focus();
+
+        document.getElementById('modalPassword')
+            .focus();
+
     }, 50);
 
     return false;
 }
 
-function closePasswordModal() {
-    document.getElementById('passwordModal').style.display = 'none';
-    protectedForm = null;
+function closePasswordModal()
+{
+    document.getElementById('passwordModal')
+        .style.display = 'none';
+
+    document.body.classList.remove('modal-open');
 }
 
-// Close on pressing Escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' && document.getElementById('passwordModal').style.display === 'flex') {
-        closePasswordModal();
-    }
-});
 
 function togglePasswordVisibility() {
     const input = document.getElementById('modalPassword');
@@ -269,23 +281,93 @@ function hideError() {
     errorDiv.style.display = 'none';
     document.getElementById('modalPassword').style.borderColor = '#d1d5db';
 }
+async function submitProtectedForm()
+{
+    const modal =
+        document.getElementById('passwordModal');
 
-function submitProtectedForm() {
-    const password = document.getElementById('modalPassword').value;
+    const formId =
+        modal.dataset.formId;
+
+    const form =
+        document.getElementById(formId);
+
+    if (!form) {
+
+        showError('Form session expired.');
+
+        return;
+    }
+
+    const password =
+        document.getElementById('modalPassword').value;
 
     if (!password) {
+
         showError('Password is required.');
+
         return;
     }
 
-    const hiddenInput = protectedForm.querySelector('.password-hidden-input');
+    const response = await fetch('/verify-password', {
 
-    if (!hiddenInput) {
-        showError('Form system configuration error.');
-        return;
-    }
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+
+            'X-CSRF-TOKEN':
+                document.querySelector(
+                    'meta[name="csrf-token"]'
+                ).content
+        },
+
+        body: JSON.stringify({
+            password: password
+        })
+    });
+
+   const result = await response.json();
+
+if (!response.ok) {
+
+    showError(
+        result.message || 'Incorrect account password.'
+    );
+
+    return;
+}
+
+    const hiddenInput =
+        form.querySelector('.password-hidden-input');
 
     hiddenInput.value = password;
-    protectedForm.submit();
+
+    form.submit();
 }
+
+
 </script>
+
+@if(session('password_modal_error'))
+<script>
+
+window.addEventListener('load', () => {
+
+    const modal =
+        document.getElementById('passwordModal');
+
+    modal.style.display = 'flex';
+
+    modal.dataset.formId =
+        '{{ session('password_modal_form') }}';
+
+    console.log(
+        'Restored form ID:',
+        modal.dataset.formId
+    );
+
+});
+
+</script>
+@endif

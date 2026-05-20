@@ -60,6 +60,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/signature/remove', [SignatureController::class, 'remove'])
     ->name('signature.remove');
+
+    Route::post('/verify-password', function (\Illuminate\Http\Request $request) {
+
+    if (!\Illuminate\Support\Facades\Hash::check(
+        $request->password,
+        auth()->user()->password
+    )) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Incorrect account password.'
+        ], 422);
+    }
+
+    return response()->json([
+        'success' => true
+    ]);
+});
 });
 
 require __DIR__.'/auth.php';
