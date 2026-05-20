@@ -114,9 +114,10 @@
              <input type="hidden"
        name="password"
        class="password-hidden-input">
-                <button type="button"
+                <button type="submit"
             class="btn-submit"
-            >
+         >
+
 
                         Upload Signature
                     </button>
@@ -153,7 +154,7 @@
 <input type="hidden"
        name="password"
        class="password-hidden-input">
-                 <button type="button"
+                 <button type="submit"
             class="btn-submit"
             onclick="
                 saveDrawnSignature();

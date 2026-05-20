@@ -210,10 +210,9 @@
            name="password"
            class="password-hidden-input">
 
-       <button type="button"
+        <button type="submit"
             class="btn-remove-signature"
            >
-
 
         Remove Signature
 
@@ -249,9 +248,9 @@
                         <input type="hidden"
        name="password"
        class="password-hidden-input">
-          <button type="button"
+                 <button type="submit"
             class="btn-submit"
-        >
+         >
 
 
 
@@ -292,7 +291,7 @@
 <input type="hidden"
        name="password"
        class="password-hidden-input">
-                        <button type="button"
+                        <button type="submit"
             class="btn-submit"
             onclick="
                 saveDrawnSignature();
