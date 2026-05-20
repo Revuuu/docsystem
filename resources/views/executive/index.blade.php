@@ -199,18 +199,25 @@
                         class="signature-preview"
                         alt="Signature">
 
-                    <form method="POST"
-                        action="{{ route('signature.remove') }}"
-                        onsubmit="return confirm('Are you sure you want to remove your signature?')">
+                   <form method="POST"
+      action="{{ route('signature.remove') }}"
+      onsubmit="return openPasswordModal(event, this)">
 
-                        @csrf
-                        @method('DELETE')
+    @csrf
+    @method('DELETE')
 
-                        <button type="submit" class="btn-remove-signature">
-                            Remove Signature
-                        </button>
+    <input type="hidden"
+           name="password"
+           class="password-hidden-input">
 
-                    </form>
+    <button type="submit"
+            class="btn-remove-signature">
+
+        Remove Signature
+
+    </button>
+
+</form>
 
                 </div>
             @endif
@@ -235,7 +242,9 @@
                                 accept="image/*"
                                 required>
                         </div>
-
+                 <input type="hidden"
+       name="password"
+       class="password-hidden-input"> 
                         <button type="submit" class="btn-submit">
                             Upload Signature
                         </button>
@@ -267,7 +276,9 @@
                                 onclick="clearSignatureCanvas()">
                             Clear
                         </button>
-
+<input type="hidden"
+       name="password"
+       class="password-hidden-input">
                         <button type="submit" class="btn-submit">
                             Save Drawn Signature
                         </button>
@@ -416,4 +427,5 @@
     <input type="hidden" name="sig_page" id="formSigPage">
 </form>
 
+@include('partials.password-modal')
 @endsection

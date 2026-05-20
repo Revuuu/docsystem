@@ -50,11 +50,15 @@
 
         <h1 class="section-title">My Signature</h1>
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+        @if($errors->signature->any())
+
+    <div class="alert alert-error">
+
+        {{ $errors->signature->first('password') }}
+
+    </div>
+
+@endif
 
         @if(auth()->user()->signature_path)
             <div class="signature-preview-card">
@@ -67,11 +71,13 @@
 
                 <form method="POST"
                     action="{{ route('signature.remove') }}"
-                    onsubmit="return confirm('Are you sure you want to remove your signature?')">
+                   onsubmit="return openPasswordModal(event, this)">
 
                     @csrf
                     @method('DELETE')
-
+               <input type="hidden"
+       name="password"
+       class="password-hidden-input">
                     <button type="submit" class="btn-remove-signature">
                         Remove Signature
                     </button>
@@ -97,7 +103,9 @@
                         <label>Signature Image</label>
                         <input type="file" name="signature" accept="image/*" required>
                     </div>
-
+             <input type="hidden"
+       name="password"
+       class="password-hidden-input">
                     <button type="submit" class="btn-submit">
                         Upload Signature
                     </button>
@@ -128,7 +136,9 @@
                             onclick="clearSignatureCanvas()">
                         Clear
                     </button>
-
+<input type="hidden"
+       name="password"
+       class="password-hidden-input">
                     <button type="submit" class="btn-submit">
                         Save Drawn Signature
                     </button>
@@ -141,4 +151,5 @@
 
 </div>
 
+@include('partials.password-modal')
 @endsection

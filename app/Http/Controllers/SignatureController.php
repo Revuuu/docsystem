@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Services\AuditService;
+use Illuminate\Support\Facades\Hash;
 
 class SignatureController extends Controller
 {
@@ -18,7 +19,16 @@ class SignatureController extends Controller
     {
         $request->validate([
             'signature' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+            'password' => 'required|string',
         ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+
+        return back()->withErrors([
+    'password' => 'Incorrect account password.',
+], 'signature');
+
+        }
 
         $user = Auth::user();
 
@@ -39,7 +49,16 @@ class SignatureController extends Controller
     {
         $request->validate([
             'signature_data' => 'required|string',
+            'password' => 'required|string',
         ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+
+            return back()->withErrors([
+    'password' => 'Incorrect account password.',
+], 'signature');
+
+        }
 
         $user = Auth::user();
 
@@ -61,8 +80,19 @@ class SignatureController extends Controller
 
         return back()->with('success', 'Signature saved successfully.');
     }
-    public function remove()
+    public function remove(Request $request)
     {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+
+            return back()->withErrors([
+                'password' => 'Incorrect account password.',
+            ], 'signature');
+
+        }
         $user = auth()->user();
 
         if ($user->signature_path)

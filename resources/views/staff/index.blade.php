@@ -212,11 +212,15 @@
                 My Signature
             </h1>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+          @if($errors->signature->any())
+
+    <div class="alert alert-error">
+
+        {{ $errors->signature->first('password') }}
+
+    </div>
+
+@endif
 
             @if(auth()->user()->signature_path)
                 <div class="signature-preview-card">
@@ -227,18 +231,25 @@
                         class="signature-preview"
                         alt="Signature">
 
-                    <form method="POST"
-                        action="{{ route('signature.remove') }}"
-                        onsubmit="return confirm('Are you sure you want to remove your signature?')">
+                 <form method="POST"
+      action="{{ route('signature.remove') }}"
+      onsubmit="return openPasswordModal(event, this)">
 
-                        @csrf
-                        @method('DELETE')
+    @csrf
+    @method('DELETE')
 
-                        <button type="submit" class="btn-remove-signature">
-                            Remove Signature
-                        </button>
+    <input type="hidden"
+           name="password"
+           class="password-hidden-input">
 
-                    </form>
+    <button type="submit"
+            class="btn-remove-signature">
+
+        Remove Signature
+
+    </button>
+
+</form>
 
                 </div>
             @endif
@@ -248,10 +259,11 @@
                 <div class="form-card">
                     <h3>Upload Signature Image</h3>
 
-                    <form method="POST"
-                        action="{{ route('signature.upload') }}"
-                        enctype="multipart/form-data"
-                        class="user-form">
+<form method="POST"
+    action="{{ route('signature.upload') }}"
+    enctype="multipart/form-data"
+    class="user-form"
+    onsubmit="return openPasswordModal(event, this)">
 
                         @csrf
 
@@ -263,7 +275,9 @@
                                 accept="image/*"
                                 required>
                         </div>
-
+             <input type="hidden"
+       name="password"
+       class="password-hidden-input">
                         <button type="submit" class="btn-submit">
                             Upload Signature
                         </button>
@@ -275,9 +289,12 @@
                     <h3>Draw Signature</h3>
 
                     <form method="POST"
-                        action="{{ route('signature.draw') }}"
-                        onsubmit="saveDrawnSignature()"
-                        class="user-form">
+    action="{{ route('signature.draw') }}"
+    onsubmit="
+        saveDrawnSignature();
+        return openPasswordModal(event, this);
+    "
+    class="user-form">
 
                         @csrf
 
@@ -289,13 +306,15 @@
                         <input type="hidden"
                             name="signature_data"
                             id="signatureData">
-
+    <input type="hidden"
+           name="password"
+           class="password-hidden-input">
                         <button type="button"
                                 class="btn-clear-signature"
                                 onclick="clearSignatureCanvas()">
                             Clear
                         </button>
-
+                    
                         <button type="submit" class="btn-submit">
                             Save Drawn Signature
                         </button>
@@ -383,4 +402,5 @@
     <input type="hidden" name="sig_page" id="formSigPage">
 </form>
 
+@include('partials.password-modal')
 @endsection

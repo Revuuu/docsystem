@@ -4,11 +4,7 @@
         Pending Approvals
     </h1>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            {{ $errors->first() }}
-        </div>
-    @endif
+   
 
     @if($approvals->count())
 
