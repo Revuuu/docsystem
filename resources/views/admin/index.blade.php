@@ -280,9 +280,11 @@
     </h2>
 
     @if($auditLogs->count())
-
+  
         <table>
-
+  <div style="margin-top:20px;">
+         {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+        </div>
     <thead>
         <tr>
 
@@ -420,7 +422,7 @@
 </table>
 
         <div style="margin-top:20px;">
-            {{ $auditLogs->links() }}
+         {{ $auditLogs->appends(['section' => 'audit'])->links() }}
         </div>
 
     @else

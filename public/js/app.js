@@ -1,9 +1,12 @@
 function showSection(section) {
+
     const signed = document.getElementById('section-signed');
     const users = document.getElementById('section-users');
+    const audit = document.getElementById('section-audit');
 
     if (signed) signed.style.display = 'none';
     if (users) users.style.display = 'none';
+    if (audit) audit.style.display = 'none';
 
     if (section === 'signed' && signed) {
         signed.style.display = 'block';
@@ -11,6 +14,10 @@ function showSection(section) {
 
     if (section === 'users' && users) {
         users.style.display = 'block';
+    }
+
+    if (section === 'audit' && audit) {
+        audit.style.display = 'block';
     }
 }
 
@@ -22,10 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const hamburger = document.getElementById('hamburger');
     const sidebar   = document.getElementById('sidebar');
     const overlay   = document.getElementById('overlay');
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
 
     if (!hamburger || !sidebar || !overlay) {
         console.log("Sidebar elements not found on this page.");
         return;
+    }
+
+    //Sections
+    if (section) {
+        showSection(section);
+    } else {
+        showSection('signed');
     }
 
     // =========================

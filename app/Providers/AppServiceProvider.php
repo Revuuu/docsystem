@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 use App\Models\Document;
 use App\Models\Approval;
@@ -33,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
 Approval::observe(ApprovalObserver::class);
 User::observe(UserObserver::class);
 DocumentFile::observe(DocumentFileObserver::class);
+Paginator::useBootstrapFive();
     }
 }
