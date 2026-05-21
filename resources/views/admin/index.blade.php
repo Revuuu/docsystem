@@ -47,12 +47,13 @@
                     class="nav-btn">
                 📜 Audit Trail
             </button>
+            <button type="button"
+                    onclick="showSection('signature')"
+                    class="nav-btn">
+                📜 My Signature
+            </button>
 
         </nav>
-
-        <a class="nav-btn" href="{{ route('signature.index') }}">
-            My Signature
-        </a>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -68,7 +69,7 @@
     <div class="content">
 
         {{-- My Documents --}}
-        <div id="section-documents" class="dashboard-section">
+        <div id="section-signed" class="dashboard-section" >
 
             <h1 class="section-title">
                 My Documents
@@ -125,26 +126,11 @@
                         @endforeach
                     
                        
-                        <!-- PDF Modal -->
-<div id="pdfModal" class="pdf-modal">
-    <div class="pdf-modal-content">
-
-        <span class="close-modal" onclick="closePdfModal()">
-            &times;
-        </span>
-
-        <iframe id="pdfFrame"
-            src=""
-            width="100%"
-            height="100%">
-        </iframe>
-
-    </div>
-</div>
+                        
                     </tbody>
 
                 </table>
-
+                        
             @else
 
                 <p class="alert alert-error">
@@ -158,7 +144,7 @@
         {{-- Users Section --}}
         <div id="section-users"
              class="dashboard-section"
-             style="display:none;">
+             >
 
             <h2 class="section-title">
                 Role Assignment
@@ -270,172 +256,180 @@
             </div>
 
         </div>
-{{-- Audit Trail Section --}}
-<div id="section-audit"
-     class="dashboard-section"
-     style="display:none;">
+        {{-- Audit Trail Section --}}
+        <div id="section-audit"
+            class="dashboard-section">
 
-    <h2 class="section-title">
-        Audit Trail
-    </h2>
+            <h2 class="section-title">
+                Audit Trail
+            </h2>
 
-    @if($auditLogs->count())
-  
-        <table>
-  <div style="margin-top:20px;">
-         {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+            @if($auditLogs->count())
+
+                {{-- Pagination Top --}}
+      
+                <div class="audit-pagination">
+
+                    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Table Name</th>
+                                <th>Table ID</th>
+                                <th>Old State</th>
+                                <th>Action</th>
+                                <th>New State</th>
+                                <th>IP Address</th>
+                                <th>Account ID</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach($auditLogs as $log)
+
+                                <tr>
+
+                                    <td>{{ $log->id }}</td>
+
+                                    <td>{{ $log->table_name }}</td>
+
+                                    <td>{{ $log->table_id }}</td>
+
+                                    <td>
+                                        {{ $log->old_values['status'] ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ strtoupper($log->action) }}
+                                    </td>
+
+                                    <td>
+                                        {{ $log->new_values['status'] ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $log->ip_address ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $log->user_id ?? 'System' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $log->created_at->format('M d, Y h:i:s A') }}
+                                    </td>
+
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                    </table>
+                
+                    {{-- Pagination Top --}}
+      
+                <div class="audit-pagination">
+
+                    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
+                </div>
+                </div>
+
+            @else
+
+                <p class="no-data">
+                    No audit logs available.
+                </p>
+
+            @endif
+
         </div>
-    <thead>
-        <tr>
+        {{-- Signature Section --}}
+        <div id="section-signature"
+            class="dashboard-section"
+            >
 
-            <th>ID</th>
+            <h2 class="section-title">
+                My Signature
+            </h2>
 
-            <th>Table Name</th>
+            <div class="form-card">
 
-            <th>Table ID</th>
+                @if(auth()->user()->signature_path)
 
-            <th>Old State</th>
+                    <div style="margin-bottom:20px;">
 
-            <th>Action</th>
+                        <h3>Current Signature</h3>
 
-            <th>New State</th>
+                        <img src="{{ asset('storage/' . auth()->user()->signature_path) }}"
+                            alt="Signature"
+                            class="signature-preview">
 
-            <th>IP Address</th>
+                    </div>
 
-            <th>Account ID</th>
+                @else
 
-            <th>Timestamp</th>
+                    <p class="alert alert-error">
+                        No signature uploaded yet.
+                    </p>
 
-        </tr>
-    </thead>
+                @endif
 
-    <tbody>
+                <form method="POST"
+                    action="{{ route('signature.upload') }}"
+                    enctype="multipart/form-data"
+                    class="user-form">
 
-        @foreach($auditLogs as $log)
+                    @csrf
 
-            <tr>
+                    <div class="form-group">
 
-                {{-- ID --}}
-                <td>
-                    {{ $log->id }}
-                </td>
+                        <label>Upload Signature</label>
 
-                {{-- Table Name --}}
-                <td>
-                    {{ $log->table_name }}
-                </td>
+                        <input type="file"
+                            name="signature"
+                            accept="image/*"
+                            required>
 
-                {{-- Table ID --}}
-                <td>
-                    {{ $log->table_id }}
-                </td>
+                    </div>
 
-                {{-- OLD STATE --}}
-                <td style="max-width:220px;">
+                    <button type="submit"
+                            class="btn-submit">
 
-                    @if($log->old_values)
+                        Upload Signature
 
-                         Status:
-                         {{ $log->old_values['status'] ?? '-' }}
-                    @else
+                    </button>
 
-                        -
-
-                    @endif
-
-                </td>
-
-                {{-- ACTION --}}
-                <td>
-
-                    @php
-                        $actionColors = [
-                            'uploaded' => '#2563eb',
-                            'approved' => '#16a34a',
-                            'rejected' => '#dc2626',
-                            'updated' => '#ca8a04',
-                            'deleted' => '#7c2d12',
-                        ];
-
-                        $color = $actionColors[$log->action] ?? '#374151';
-                    @endphp
-
-                    <span style="
-                        background: {{ $color }};
-                        color: white;
-                        padding: 4px 10px;
-                        border-radius: 999px;
-                        font-size: 12px;
-                        font-weight: 600;
-                    ">
-                        {{ strtoupper($log->action) }}
-                    </span>
-
-                </td>
-
-                {{-- NEW STATE --}}
-                <td style="max-width:220px;">
-
-                    @if($log->new_values)
-
-                          status:
-        {{ $log->new_values['status'] ?? '-' }}
-                    @else
-
-                        -
-
-                    @endif
-
-                </td>
-
-                {{-- IP --}}
-                <td>
-                    {{ $log->ip_address ?? '-' }}
-                </td>
-
-                {{-- USER --}}
-                <td>
-
-                    @if($log->user)
-
-                        {{ $log->user_id }}
-
-                    @else
-
-                        System
-
-                    @endif
-
-                </td>
-
-                {{-- TIMESTAMP --}}
-                <td style="min-width:180px;">
-                    {{ $log->created_at->format('M d, Y h:i:s A') }}
-                </td>
-
-            </tr>
-
-        @endforeach
-
-    </tbody>
-
-</table>
-
-        <div style="margin-top:20px;">
-         {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+                   
+                </form>
+            </div>
         </div>
-
-    @else
-
-        <p class="no-data">
-            No audit logs available.
-        </p>
-
-    @endif
-
-</div>
     </div>
-
 </div>
+ <!-- PDF Modal -->
+                        <div id="pdfModal" class="pdf-modal">
+                            <div class="pdf-modal-content">
 
+                                <span class="close-modal" onclick="closePdfModal()">
+                                    &times;
+                                </span>
+
+                                <iframe id="pdfFrame"
+                                    src=""
+                                    width="100%"
+                                    height="100%">
+                                </iframe>
+
+                            </div>
+                        </div>
 @endsection

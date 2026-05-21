@@ -47,131 +47,132 @@
 
                         @php
 
-                $firstApproval = $doc->approvals
-                    ->sortBy('step_order')
-                    ->first();
+                            $firstApproval = $doc->approvals
+                                ->sortBy('step_order')
+                                ->first();
 
-                $lastApproval = $doc->approvals
-                    ->whereNotNull('completed_at')
-                    ->sortByDesc('step_order')
-                    ->first();
+                            $lastApproval = $doc->approvals
+                                ->whereNotNull('completed_at')
+                                ->sortByDesc('step_order')
+                                ->first();
 
-                $currentPendingApproval = $doc->approvals
-                    ->where('status', 'pending')
-                    ->first();
+                            $currentPendingApproval = $doc->approvals
+                                ->where('status', 'pending')
+                                ->first();
 
-            @endphp
+                        @endphp
 
-                            <tr>
-                                <td>{{ $doc->title }}</td>
+                        <tr>
+                            <td>{{ $doc->title }}</td>
 
-                                <td>
-
-                    {{-- PENDING / IN PROGRESS --}}
-                    @if(
-                        in_array($doc->status, ['pending', 'in_progress']) &&
-                        $currentPendingApproval &&
-                        $currentPendingApproval->received_at
-                    )
-
-                        <span class="status-pending">
-                            Pending
-                        </span>
-
-                        <br>
-
-                        <small class="status-time">
-
-                            Pending for
-
-                            {{
-                                $currentPendingApproval->received_at
-                                    ->diffForHumans(now(), true)
-                            }}
-
-                        </small>
-
-                    {{-- APPROVED --}}
-                    @elseif(
-                        $doc->status === 'approved' &&
-                        $firstApproval &&
-                        $firstApproval->received_at &&
-                        $lastApproval &&
-                        $lastApproval->completed_at
-                    )
-
-                        <span class="status-approved">
-                            Approved
-                        </span>
-
-                        <br>
-
-                        <small class="status-time">
-
-                            Workflow completed in
-
-                            {{
-                                \Carbon\CarbonInterval::seconds(
-                                    (int) $firstApproval->received_at
-                                        ->diffInSeconds($lastApproval->completed_at)
-                                )->cascade()->forHumans()
-                            }}
-
-                        </small>
-
-                    {{-- REJECTED --}}
-                    @elseif($doc->status === 'rejected')
-
-                        <span class="status-rejected">
-                            Rejected
-                        </span>
-
-                    {{-- DEFAULT --}}
-                    @else
-
-                        <span class="status-upcoming">
-                            {{ ucfirst($doc->status) }}
-                        </span>
-
-                    @endif
-
-                </td>
-                               <td>
-                    {{ $doc->remarks ?? '-' }}
-                </td>
                             <td>
 
-                    @php
-                        $viewPath = $doc->current_file_path;
-                    @endphp
+                                {{-- PENDING / IN PROGRESS --}}
+                                @if(
+                                    in_array($doc->status, ['pending', 'in_progress']) &&
+                                    $currentPendingApproval &&
+                                    $currentPendingApproval->received_at
+                                )
 
-                    <button type="button"
-                            class="view-pdf-btn"
-                            onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+                                    <span class="status-pending">
+                                        Pending
+                                    </span>
 
-                        View PDF
+                                    <br>
 
-                    </button>
+                                    <small class="status-time">
 
-                </td>
-                            </tr>
+                                        Pending for
+
+                                        {{
+                                            $currentPendingApproval->received_at
+                                                ->diffForHumans(now(), true)
+                                        }}
+
+                                    </small>
+
+                                {{-- APPROVED --}}
+                                @elseif(
+                                    $doc->status === 'approved' &&
+                                    $firstApproval &&
+                                    $firstApproval->received_at &&
+                                    $lastApproval &&
+                                    $lastApproval->completed_at
+                                )
+
+                                    <span class="status-approved">
+                                        Approved
+                                    </span>
+
+                                    <br>
+
+                                    <small class="status-time">
+
+                                        Workflow completed in
+
+                                        {{
+                                            \Carbon\CarbonInterval::seconds(
+                                                (int) $firstApproval->received_at
+                                                    ->diffInSeconds($lastApproval->completed_at)
+                                            )->cascade()->forHumans()
+                                        }}
+
+                                    </small>
+
+                                {{-- REJECTED --}}
+                                @elseif($doc->status === 'rejected')
+
+                                    <span class="status-rejected">
+                                        Rejected
+                                    </span>
+
+                                {{-- DEFAULT --}}
+                                @else
+
+                                    <span class="status-upcoming">
+                                        {{ ucfirst($doc->status) }}
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+                            <td>
+                                {{ $doc->remarks ?? '-' }}
+                            </td>
+                            
+                            <td>
+                                @php
+                                    $viewPath = $doc->current_file_path;
+                                @endphp
+
+                                <button type="button"
+                                        class="view-pdf-btn"
+                                        onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+
+                                    View PDF
+
+                                </button>
+                            </td>
+                        </tr>
                         @endforeach
+
                         <!-- PDF Modal -->
-<div id="pdfModal" class="pdf-modal">
-    <div class="pdf-modal-content">
+                        <div id="pdfModal" class="pdf-modal">
+                            <div class="pdf-modal-content">
 
-        <span class="close-modal" onclick="closePdfModal()">
-            &times;
-        </span>
+                                <span class="close-modal" onclick="closePdfModal()">
+                                    &times;
+                                </span>
 
-        <iframe id="pdfFrame"
-            src=""
-            width="100%"
-            height="100%">
-        </iframe>
+                                <iframe id="pdfFrame"
+                                    src=""
+                                    width="100%"
+                                    height="100%">
+                                </iframe>
 
-    </div>
-</div>
+                            </div>
+                        </div>
                     </tbody>
                 </table>
 
@@ -192,15 +193,15 @@
                 My Signature
             </h1>
 
-        @if($errors->signature->any())
+            @if($errors->signature->any())
 
-    <div class="alert alert-error">
+                <div class="alert alert-error">
 
-        {{ $errors->signature->first('password') }}
+                    {{ $errors->signature->first('password') }}
 
-    </div>
+                </div>
 
-@endif
+            @endif
 
             @if(auth()->user()->signature_path)
                 <div class="signature-preview-card">
@@ -211,29 +212,25 @@
                         class="signature-preview"
                         alt="Signature">
 
-                 <form id="removeSignatureForm"
-      method="POST"
-      action="{{ route('signature.remove') }}"
-         onsubmit="return openPasswordModal(event, this)">
+                    <form id="removeSignatureForm"
+                        method="POST"
+                        action="{{ route('signature.remove') }}"
+                        onsubmit="return openPasswordModal(event, this)">
 
-    @csrf
-    @method('DELETE')
+                        @csrf
+                        @method('DELETE')
 
-    <input type="hidden"
-           name="password"
-           class="password-hidden-input">
+                        <input type="hidden"
+                                name="password"
+                                class="password-hidden-input">
 
-            <button type="submit"
-              class="btn-remove-signature"
-         >
+                        <button type="submit"
+                                class="btn-remove-signature">
 
+                            Remove Signature
 
-        Remove Signature
-
-    </button>
-
-</form>
-
+                        </button>
+                    </form>
                 </div>
             @endif
 
@@ -242,15 +239,14 @@
                 <div class="form-card">
                     <h3>Upload Signature Image</h3>
 
-                  <form id="uploadSignatureForm"
-      method="POST"
-      action="{{ route('signature.upload') }}"
-      enctype="multipart/form-data"
-      class="user-form"
-      onsubmit="return openPasswordModal(event, this)"
-      >
+                    <form id="uploadSignatureForm"
+                        method="POST"
+                        action="{{ route('signature.upload') }}"
+                        enctype="multipart/form-data"
+                        class="user-form"
+                        onsubmit="return openPasswordModal(event, this)">
 
-    @csrf
+                        @csrf
 
 
                         <div class="form-group">
@@ -263,16 +259,13 @@
                         </div>
                      
                         <input type="hidden"
-       name="password"
-       class="password-hidden-input">
-                       <button type="submit"
-            class="btn-submit"
-           >
-
-
-    Upload Signature
-
-</button>
+                                name="password"
+                                class="password-hidden-input">
+                        
+                        <button type="submit"
+                                class="btn-submit">
+                            Upload Signature
+                        </button>
 
                     </form>
                 </div>
@@ -281,13 +274,11 @@
                     <h3>Draw Signature</h3>
 
                     <form id="drawSignatureForm" method="POST"
-    action="{{ route('signature.draw') }}"
-   
-    class="user-form"
-     onsubmit="
-        saveDrawnSignature();
-        return openPasswordModal(event, this);
-    ">
+                        action="{{ route('signature.draw') }}"
+                        class="user-form"
+                        onsubmit="
+                            saveDrawnSignature();
+                            return openPasswordModal(event, this);">
 
                         @csrf
 
@@ -305,18 +296,19 @@
                                 onclick="clearSignatureCanvas()">
                             Clear
                         </button>
-                   <input type="hidden"
-       name="password"
-       class="password-hidden-input">
+                        <input type="hidden"
+                                name="password"
+                                class="password-hidden-input">
+                    
                         <button type="submit"
-            class="btn-submit"
-            onclick="
-                saveDrawnSignature();
-                openPasswordModal(
-                    document.getElementById('drawSignatureForm')
-                );
-            ">
-                            Save Drawn Signature
+                                class="btn-submit"
+                                onclick="
+                                    saveDrawnSignature();
+                                    openPasswordModal(
+                                        document.getElementById('drawSignatureForm')
+                                    );
+                                ">
+                                Save Drawn Signature
                         </button>
 
                     </form>
