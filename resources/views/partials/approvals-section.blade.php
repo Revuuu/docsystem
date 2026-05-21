@@ -4,7 +4,13 @@
         Pending Approvals
     </h1>
 
-   
+    @if($errors->has('signature'))
+
+        <div class="alert alert-error">
+            {{ $errors->first('signature') }}
+        </div>
+
+    @endif
 
     @if($approvals->count())
 
