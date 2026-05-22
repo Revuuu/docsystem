@@ -7,6 +7,7 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\FileController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -78,6 +79,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'success' => true
     ]);
 });
+
+Route::get(
+    '/files/view/{id}',
+    [FileController::class, 'view']
+)->name('files.view');
+
+Route::get(
+    '/files/download/{id}',
+    [FileController::class, 'download']
+)->name('files.download');
+
+Route::get(
+    '/signatures/view/{id}',
+    [FileController::class, 'signature']
+)->name('signatures.view');
 });
 
 require __DIR__.'/auth.php';

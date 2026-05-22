@@ -162,12 +162,9 @@
                                 </td>
 
                                <td>
-    @php
-        $viewPath = $doc->current_file_path;
-    @endphp
-
+   
     <button type="button" class="view-pdf-btn"
-        onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+        onclick='openPdfModal(@json($doc->current_file_url))'>
         View PDF
     </button>
 </td>
@@ -227,7 +224,10 @@
 
                     <h3>Current Signature</h3>
 
-                    <img src="{{ asset('storage/' . auth()->user()->signature_path) }}"
+                    <img src="{{ route(
+    'signatures.view',
+    encrypt(auth()->id())
+) }}"
                         class="signature-preview"
                         alt="Signature">
 
@@ -263,7 +263,6 @@
 <form id="uploadSignatureForm"
       method="POST"
       action="{{ route('signature.upload') }}"
-      enctype="multipart/form-data"
       class="user-form"
       onsubmit="return openPasswordModal(event, this)"
       >
@@ -274,16 +273,20 @@
                             <label>Signature Image</label>
 
                             <input type="file"
-                                name="signature"
-                                accept="image/*"
-                                required>
+       id="signatureFileInput"
+       accept="image/*"
+       required>
+
+<input type="hidden"
+       name="signature_data"
+       id="signatureBase64">
                         </div>
              <input type="hidden"
        name="password"
        class="password-hidden-input">
-                       <button type="submit"
-            class="btn-submit"
-         >
+             <button type="button"
+        class="btn-submit"
+        onclick="submitBase64Signature()">
 
 
 
@@ -418,6 +421,68 @@
     <input type="hidden" name="sig_h" id="formSigH">
     <input type="hidden" name="sig_page" id="formSigPage">
 </form>
+<script>
 
+document.addEventListener('DOMContentLoaded', function ()
+{
+    const input = document.getElementById(
+        'signatureFileInput'
+    );
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener('change', function(event)
+    {
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e)
+        {
+            const base64 = e.target.result;
+
+            document.getElementById(
+                'signatureBase64'
+            ).value = base64;
+
+            console.log('BASE64 GENERATED');
+
+            console.log(base64);
+        };
+
+        reader.readAsDataURL(file);
+    });
+});
+
+
+
+function submitBase64Signature()
+{
+    const base64 = document.getElementById(
+        'signatureBase64'
+    ).value;
+
+    if (!base64) {
+
+        alert(
+            'Please wait for image conversion to finish.'
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        'uploadSignatureForm'
+    ).submit();
+}
+
+
+</script>
 @include('partials.password-modal')
 @endsection

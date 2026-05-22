@@ -32,7 +32,7 @@ class ApprovalController extends Controller
     $currentFile = $approval->document->latestVersion();
 
     $latestPath = storage_path(
-        'app/public/' . $currentFile->file_path
+        'app/private/' . $currentFile->generated_storage_path
     );
 
     
@@ -246,7 +246,7 @@ public function reject(Request $request, Approval $approval)
                 $y = $sigY * $size['height'];
 
                 $sigImgPath = auth()->user()->signature_path
-                    ? storage_path('app/public/' . auth()->user()->signature_path)
+                    ? storage_path('app/private/' . auth()->user()->signature_path)
                     : null;
 
                     // Signature image above the line
@@ -278,8 +278,25 @@ $pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
         }
 
         // Save as a NEW signed file — never overwrite the original
-        $signedRelativePath = 'documents/signed/signed_step' . $approval->step_order . '_' . basename($inputPath);
-        $signedAbsolutePath = storage_path('app/public/' . $signedRelativePath);
+        $currentVersion = $approval->document
+    ->latestVersion();
+
+$newVersion = ($currentVersion?->version ?? 0) + 1;
+
+$signedFileName =
+    'document_' .
+    $approval->document_id .
+    '_v' .
+    $newVersion .
+    '_signed.pdf';
+
+$signedRelativePath =
+    'document/' .
+    $signedFileName;
+
+$signedAbsolutePath = storage_path(
+    'app/private/' . $signedRelativePath
+);
 
         // Ensure the signed/ directory exists
         $signedDir = dirname($signedAbsolutePath);

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
@@ -54,9 +54,7 @@ class DocumentController extends Controller
             );
         }
 
-        $uploadedFile = $request->file('file');
-
-        $path = $uploadedFile->store('documents', 'public');
+       $uploadedFile = $request->file('file');
 
         $document = Document::create([
             'title' => $request->title,
@@ -65,11 +63,27 @@ class DocumentController extends Controller
             'status' => 'pending',
         ]);
 
+        $storageFileName =
+    'document_' .
+    $document->id .
+    '_v1.pdf';
+
+$storagePath =
+    'document/' .
+    $storageFileName;
+
+Storage::disk('local')->put(
+    $storagePath,
+    file_get_contents(
+        $uploadedFile->getRealPath()
+    )
+);
+
         $document->files()->create([
 
             'file_name' => $uploadedFile->getClientOriginalName(),
 
-            'file_path' => $path,
+            'file_path' => $storagePath,
 
             'mime_type' => $uploadedFile->getMimeType(),
 

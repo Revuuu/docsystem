@@ -41,9 +41,18 @@ public function currentFile()
     return $this->hasOne(DocumentFile::class)
         ->where('is_current', true);
 }
-public function getCurrentFilePathAttribute()
+public function getCurrentFileUrlAttribute()
 {
-    return $this->currentFile?->file_path;
+    $file = $this->currentFile()->first();
+
+    if (!$file) {
+        return null;
+    }
+
+    return route(
+        'files.view',
+        encrypt($file->id)
+    );
 }
 
 public function getCurrentSignedFileAttribute()

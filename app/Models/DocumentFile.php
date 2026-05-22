@@ -20,6 +20,11 @@ class DocumentFile extends Model
         'uploaded_by',
 
     ];
+    
+    protected $appends = [
+        'view_url',
+        'download_url',
+    ];   
 
     /*
     |--------------------------------------------------------------------------
@@ -45,4 +50,40 @@ class DocumentFile extends Model
     {
         return $this->hasMany(DocumentFile::class, 'parent_file_id');
     }
+
+    public function getGeneratedFileNameAttribute()
+{
+    $signed = $this->is_signed
+        ? '_signed'
+        : '';
+
+    return 'document_' .
+        $this->document_id .
+        '_v' .
+        $this->version .
+        $signed .
+        '.pdf';
+}
+
+public function getGeneratedStoragePathAttribute()
+{
+    return 'document/' .
+        $this->generated_file_name;
+}
+
+public function getViewUrlAttribute()
+{
+    return route(
+        'files.view',
+        encrypt($this->id)
+    );
+}
+
+public function getDownloadUrlAttribute()
+{
+    return route(
+        'files.download',
+        encrypt($this->id)
+    );
+}
 }

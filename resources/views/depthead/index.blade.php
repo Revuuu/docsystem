@@ -148,7 +148,7 @@
 
                                 <button type="button"
                                         class="view-pdf-btn"
-                                        onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
+                                        onclick="openPdfModal('{{ $doc->current_file_url }}')">
 
                                     View PDF
 
@@ -208,7 +208,10 @@
 
                     <h3>Current Signature</h3>
 
-                    <img src="{{ asset('storage/' . auth()->user()->signature_path) }}"
+                    <img src="{{ route(
+    'signatures.view',
+    encrypt(auth()->id())
+) }}"
                         class="signature-preview"
                         alt="Signature">
 

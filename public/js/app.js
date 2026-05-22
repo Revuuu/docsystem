@@ -413,6 +413,9 @@ function saveDrawnSignature() {
 
 function openRejectModal(approvalId)
 {
+      console.log(document.getElementById('rejectForm'));
+    console.log(document.getElementById('rejectModal'));
+    
     const modal = document.getElementById('rejectModal');
 
     const form = document.getElementById('rejectForm');
