@@ -19,23 +19,46 @@ class SignatureController extends Controller
     public function upload(Request $request)
     {
         Log::info($request);
+
         $request->validate([
             'signature' => 'required|image|mimes:png,jpg,jpeg|max:2048',
             'password' => 'required|string',
         ]);
 
-       
+        // CHECK PASSWORD
+        if (!Hash::check($request->password, Auth::user()->password)) {
+
+            return back()
+                ->withInput()
+                ->with('password_modal_error', 'Incorrect account password.')
+                ->with('password_modal_form', 'uploadSignatureForm');
+        }
 
         $user = Auth::user();
 
+        // DELETE OLD SIGNATURE
         if ($user->signature_path) {
             Storage::disk('private')->delete($user->signature_path);
         }
 
-        $path = $request->file('signature')->store('signatures', 'private');
+        // GET IMAGE FILE CONTENT
+        $imageFile = $request->file('signature');
 
+        // CONVERT IMAGE TO BASE64
+        $base64 = base64_encode(file_get_contents($imageFile->getRealPath()));
+        Log::info('Uploaded Signature Full Base64:', [
+            'base64' => $base64
+        ]);
+
+        // GENERATE FILE NAME
+        $filename = 'signatures/signature_' . $user->id . '_' . time() . '.png';
+
+        // STORE DECODED BASE64 IMAGE
+        Storage::disk('private')->put($filename, base64_decode($base64));
+
+        // SAVE PATH
         $user->update([
-            'signature_path' => $path,
+            'signature_path' => $filename,
         ]);
 
         return back()->with('success', 'Signature uploaded successfully.');
@@ -52,9 +75,9 @@ class SignatureController extends Controller
         if (!Hash::check($request->password, Auth::user()->password)) {
 
             return back()
-    ->withInput()
-    ->with('password_modal_error', 'Incorrect account password.')
-->with('password_modal_form', 'drawSignatureForm');
+                ->withInput()
+                ->with('password_modal_error', 'Incorrect account password.')
+                ->with('password_modal_form', 'drawSignatureForm');
 
         }
 
@@ -64,9 +87,12 @@ class SignatureController extends Controller
             Storage::disk('private')->delete($user->signature_path);
         }
 
-        $image = $request->signature_data;
-        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = preg_replace('#^data:image/\w+;base64,#i', '', $request->signature_data);
         $image = str_replace(' ', '+', $image);
+
+        Log::info('Uploaded Signature Full Base64:', [
+            'base64' => $image
+        ]);
 
         $filename = 'signatures/signature_' . $user->id . '_' . time() . '.png';
 
@@ -87,16 +113,16 @@ class SignatureController extends Controller
         if (!Hash::check($request->password, Auth::user()->password)) {
 
             return back()
-    ->withInput()
-    ->with('password_modal_error', 'Incorrect account password.')
-->with('password_modal_form', 'removeSignatureForm');
+                ->withInput()
+                ->with('password_modal_error', 'Incorrect account password.')
+                ->with('password_modal_form', 'removeSignatureForm');
 
         }
         $user = auth()->user();
 
         if ($user->signature_path)
         {
-            \Illuminate\Support\Facades\Storage::disk('local')
+            Storage::disk('private')
                 ->delete($user->signature_path);
 
             $user->signature_path = null;

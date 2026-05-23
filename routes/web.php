@@ -62,6 +62,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/signature/remove', [SignatureController::class, 'remove'])
     ->name('signature.remove');
 
+    Route::get('/preview-signature', function () {
+    $user = auth()->user();
+
+    $file = Storage::disk('private')->get($user->signature_path);
+    $base64 = base64_encode($file);
+
+    return '<img src="data:image/png;base64,' . $base64 . '">';
+});
+
     Route::post('/verify-password', function (\Illuminate\Http\Request $request) {
 
     if (!\Illuminate\Support\Facades\Hash::check(
