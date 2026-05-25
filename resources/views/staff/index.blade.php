@@ -263,30 +263,28 @@
 <form id="uploadSignatureForm"
       method="POST"
       action="{{ route('signature.upload') }}"
+      enctype="multipart/form-data"
       class="user-form"
       onsubmit="return openPasswordModal(event, this)"
       >
 
     @csrf
 
-                        <div class="form-group">
+                      <div class="form-group">
                             <label>Signature Image</label>
 
                             <input type="file"
-       id="signatureFileInput"
-       accept="image/*"
-       required>
-
-<input type="hidden"
-       name="signature_data"
-       id="signatureBase64">
+                                name="signature"
+                                accept="image/*"
+                                required>
                         </div>
-             <input type="hidden"
+
+  <input type="hidden"
        name="password"
-       class="password-hidden-input">
-             <button type="button"
-        class="btn-submit"
-        onclick="submitBase64Signature()">
+       class="password-hidden-input"> 
+                   <button type="submit"
+            class="btn-submit"
+         >
 
 
 
@@ -305,7 +303,6 @@
    
     
     class="user-form"  onsubmit="
-        saveDrawnSignature();
         return openPasswordModal(event, this);
     ">
 
@@ -319,23 +316,18 @@
                         <input type="hidden"
                             name="signature_data"
                             id="signatureData">
-    <input type="hidden"
-           name="password"
-           class="password-hidden-input">
+
                         <button type="button"
                                 class="btn-clear-signature"
                                 onclick="clearSignatureCanvas()">
                             Clear
                         </button>
-                    
+                        
+                        <input type="hidden"
+       name="password"
+       class="password-hidden-input">
                         <button type="submit"
-            class="btn-submit"
-            onclick="
-                saveDrawnSignature();
-                openPasswordModal(
-                    document.getElementById('drawSignatureForm')
-                );
-            ">
+            class="btn-submit">
                             Save Drawn Signature
                         </button>
 
@@ -421,68 +413,40 @@
     <input type="hidden" name="sig_h" id="formSigH">
     <input type="hidden" name="sig_page" id="formSigPage">
 </form>
+@if(session('uploaded_signature_base64'))
+
 <script>
 
-document.addEventListener('DOMContentLoaded', function ()
-{
-    const input = document.getElementById(
-        'signatureFileInput'
+    console.log(
+        'UPLOADED SIGNATURE BASE64:'
     );
 
-    if (!input) {
-        return;
-    }
-
-    input.addEventListener('change', function(event)
-    {
-        const file = event.target.files[0];
-
-        if (!file) {
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = function(e)
-        {
-            const base64 = e.target.result;
-
-            document.getElementById(
-                'signatureBase64'
-            ).value = base64;
-
-            console.log('BASE64 GENERATED');
-
-            console.log(base64);
-        };
-
-        reader.readAsDataURL(file);
-    });
-});
-
-
-
-function submitBase64Signature()
-{
-    const base64 = document.getElementById(
-        'signatureBase64'
-    ).value;
-
-    if (!base64) {
-
-        alert(
-            'Please wait for image conversion to finish.'
-        );
-
-        return;
-    }
-
-    document.getElementById(
-        'uploadSignatureForm'
-    ).submit();
-}
-
+    console.log(
+        @json(
+            session('uploaded_signature_base64')
+        )
+    );
 
 </script>
+
+@endif
+
+@if(session('drawn_signature_base64'))
+
+<script>
+
+    console.log(
+        'DRAWN SIGNATURE BASE64:'
+    );
+
+    console.log(
+        @json(
+            session('drawn_signature_base64')
+        )
+    );
+
+</script>
+
+@endif
 @include('partials.password-modal')
 @endsection

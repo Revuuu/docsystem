@@ -287,7 +287,6 @@
                         action="{{ route('signature.draw') }}"
                         
                         class="user-form"  onsubmit="
-        saveDrawnSignature();
         return openPasswordModal(event, this);
     ">
 
@@ -311,13 +310,7 @@
        name="password"
        class="password-hidden-input">
                  <button type="submit"
-            class="btn-submit"
-            onclick="
-                saveDrawnSignature();
-                openPasswordModal(
-                    document.getElementById('drawSignatureForm')
-                );
-            ">
+            class="btn-submit">
                             Save Drawn Signature
                         </button>
 
@@ -470,6 +463,40 @@
     <input type="hidden" name="sig_h" id="formSigH">
     <input type="hidden" name="sig_page" id="formSigPage">
 </form>
+@if(session('uploaded_signature_base64'))
 
+<script>
+
+    console.log(
+        'UPLOADED SIGNATURE BASE64:'
+    );
+
+    console.log(
+        @json(
+            session('uploaded_signature_base64')
+        )
+    );
+
+</script>
+
+@endif
+
+@if(session('drawn_signature_base64'))
+
+<script>
+
+    console.log(
+        'DRAWN SIGNATURE BASE64:'
+    );
+
+    console.log(
+        @json(
+            session('drawn_signature_base64')
+        )
+    );
+
+</script>
+
+@endif
 @include('partials.password-modal')
 @endsection
