@@ -343,6 +343,12 @@ if (!response.ok) {
 
     hiddenInput.value = password;
 
+    if (form.id === 'drawSignatureForm') {
+
+    saveDrawnSignature();
+
+    }
+    
     form.submit();
 }
 

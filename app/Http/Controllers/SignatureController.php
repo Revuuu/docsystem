@@ -17,29 +17,113 @@ class SignatureController extends Controller
     }
 
     public function upload(Request $request)
-    {
-        Log::info($request);
-        $request->validate([
-            'signature' => 'required|image|mimes:png,jpg,jpeg|max:2048',
-            'password' => 'required|string',
-        ]);
+{
+    Log::info($request->all());
 
-       
+    $request->validate([
+        'signature' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+        'password' => 'required|string',
+    ]);
 
-        $user = Auth::user();
+    if (!Hash::check($request->password, Auth::user()->password)) {
 
-        if ($user->signature_path) {
-            Storage::disk('private')->delete($user->signature_path);
-        }
-
-        $path = $request->file('signature')->store('signatures', 'private');
-
-        $user->update([
-            'signature_path' => $path,
-        ]);
-
-        return back()->with('success', 'Signature uploaded successfully.');
+        return back()
+            ->withInput()
+            ->with(
+                'password_modal_error',
+                'Incorrect account password.'
+            )
+            ->with(
+                'password_modal_form',
+                'uploadSignatureForm'
+            );
     }
+
+    $user = Auth::user();
+
+    if ($user->signature_path) {
+        Storage::disk('private')
+            ->delete($user->signature_path);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Convert Uploaded Image To Base64
+    |--------------------------------------------------------------------------
+    */
+
+    $file = $request->file('signature');
+
+    $imageContent = file_get_contents(
+        $file->getRealPath()
+    );
+
+    $mime = $file->getMimeType();
+
+    $base64 =
+        'data:' .
+        $mime .
+        ';base64,' .
+        base64_encode($imageContent);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Browser Console Debug
+    |--------------------------------------------------------------------------
+    */
+
+    Log::info('UPLOAD BASE64:');
+    Log::info($base64);
+
+    session()->flash(
+    'uploaded_signature_base64',
+    $base64
+);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Decode Same As Draw Signature
+    |--------------------------------------------------------------------------
+    */
+
+    $image = preg_replace(
+        '#^data:image/\w+;base64,#i',
+        '',
+        $base64
+    );
+
+    $image = str_replace(' ', '+', $image);
+
+    $filename =
+        'signatures/signature_' .
+        $user->id .
+        '_' .
+        time() .
+        '.png';
+
+    Storage::disk('private')->put(
+        $filename,
+        base64_decode($image)
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Save Path
+    |--------------------------------------------------------------------------
+    */
+
+    $user->signature_path = $filename;
+    $user->save();
+
+    session()->flash(
+    'uploaded_signature_base64',
+     $base64
+);
+    return back()->with(
+        'success',
+        'Signature uploaded successfully.'
+    );
+}
 
     public function draw(Request $request)
     {
@@ -76,6 +160,10 @@ class SignatureController extends Controller
             'signature_path' => $filename,
         ]);
 
+        session()->flash(
+            'drawn_signature_base64',
+            $request->signature_data
+        );
         return back()->with('success', 'Signature saved successfully.');
     }
     public function remove(Request $request)

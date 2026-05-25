@@ -403,12 +403,30 @@ function clearSignatureCanvas() {
 }
 
 function saveDrawnSignature() {
-    const canvas = document.getElementById('signatureCanvas');
-    const input = document.getElementById('signatureData');
 
-    if (!canvas || !input) return;
+    console.log('saveDrawnSignature triggered');
 
-    input.value = canvas.toDataURL('image/png');
+    const canvas =
+        document.getElementById('signatureCanvas');
+
+    const input =
+        document.getElementById('signatureData');
+
+    if (!canvas || !input) {
+
+        console.log('Canvas or input missing');
+
+        return;
+    }
+
+    const base64 =
+        canvas.toDataURL('image/png');
+
+    input.value = base64;
+
+    console.log('DRAWN SIGNATURE BASE64:');
+
+    console.log(base64);
 }
 
 function openRejectModal(approvalId)
