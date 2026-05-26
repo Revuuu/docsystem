@@ -8,237 +8,370 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
 
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+    }
 
-        :root {
-            --ink:       #0d1117;
-            --ink-mid:   #1c2333;
-            --ink-soft:  #2d3a52;
-            --paper:     #f5f0e8;
-            --paper-warm:#ede8dc;
-            --paper-mid: #d4cfc3;
-            --gold:      #c9a84c;
-            --gold-light:#e8c97a;
-            --red-acc:   #b83232;
-            --blue-acc:  #2a4a7f;
-            --text-body: #1c2333;
-            --text-muted:#6b7890;
-            --font-display: 'Playfair Display', Georgia, serif;
-            --font-body:    'Libre Baskerville', Georgia, serif;
-            --font-mono:    'DM Mono', monospace;
-        }
+    body{
+        font-family: Arial, sans-serif;
+        background:#e9ddc8;
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        overflow:hidden;
+    }
 
-        body {
-            background-color: var(--paper);
-            font-family: var(--font-body);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .page-wrapper{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+    }
 
-        .login-container {
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 3rem;
-            max-width: 1200px;
-            width: 100%;
-            padding: 3rem;
-        }
+    .dashboard-title{
+        font-size:32px;
+        font-weight:800;
+        margin-bottom:20px;
+        color:#1A6C35;
+    }
 
-        .hero-left {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+    .page-wrapper{
+        position:relative;
+        width:420px;
+        background:#f7f3ea;
+        border-radius:16px;
+        padding:40px 35px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.15);
+        overflow:hidden;
+    }
 
-        .hero-eyebrow {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .hero-eyebrow-line { width: 40px; height: 2px; background: var(--gold); }
-        .hero-eyebrow-text {
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            color: var(--gold);
-            font-weight: 500;
-        }
+    /* Decorative Shapes */
+    .login-card::before{
+        content:'';
+        position:absolute;
+        top:-40px;
+        right:-40px;
+        width:140px;
+        height:140px;
+        background:#c9a24b;
+        border-radius:50%;
+    }
 
-        .hero-title {
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: 900;
-            color: var(--ink);
-            margin-bottom: 1rem;
-        }
+    .login-card::after{
+        content:'';
+        position:absolute;
+        bottom:-60px;
+        left:-60px;
+        width:180px;
+        height:180px;
+        background:#c9a24b;
+        border-radius:50%;
+    }
 
-        .hero-subtitle {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-        }
+    .logo-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 50px;
+    }
 
-        .login-form {
-            background: var(--paper-warm);
-            padding: 2.5rem;
-            border: 1px solid var(--paper-mid);
-            box-shadow: 0 8px 24px rgba(13,17,23,0.12);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
 
-        .login-form h2 {
-            font-family: var(--font-display);
-            font-size: 1.8rem;
-            color: var(--ink);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
+    .logo-text h1 {
+        font-size: 100px;
+        margin: 0;
+        line-height: 1;
+    }
 
-        .login-form label {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-body);
-            margin-bottom: 0.25rem;
-        }
+    .logo-text h2 {
+        font-size: 19px;
+        margin: 0;
+        line-height: 1;
+    }
 
-        /* Uniform and clickable email/password inputs */
-        .login-form input[type="email"],
-        .login-form input[type="password"] {
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            border: 1.5px solid var(--paper-mid);
-            font-family: var(--font-body);
-            font-size: 1rem;
-            width: 100%;
-            outline: none;
-            transition: all 0.2s ease;
-        }
+    .logo-container img{
+        width:100px;
+    }
 
-        .login-form input[type="email"]:focus,
-        .login-form input[type="password"]:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
-        }
+    .form-group{
+        margin-bottom:18px;
+        position:relative;
+        z-index:2;
+    }
 
-        .login-form input[type="checkbox"] {
-            width: auto;
-            margin-right: 0.5rem;
-        }
+    .form-group label{
+        display:block;
+        margin-bottom:6px;
+        font-size:14px;
+        font-weight:600;
+        color:#222;
+    }
 
-        .login-form .remember-me {
-            display: flex;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-body);
-        }
+    .form-group input{
+        width:100%;
+        padding:12px 14px;
+        border:1px solid #bbb;
+        border-radius:8px;
+        font-size:14px;
+        outline:none;
+        background:#fff;
+    }
 
-        .login-form button {
-            padding: 0.85rem 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--paper);
-            background: var(--gold);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.25s;
-        }
+    .form-group input:focus{
+        border-color:#0c7a3d;
+    }
 
-        .login-form button:hover {
-            background: var(--gold-light);
-        }
+    .login-btn{
+        width:100%;
+        background:#0c7a3d;
+        color:#fff;
+        border:none;
+        padding:12px;
+        border-radius:8px;
+        font-weight:700;
+        cursor:pointer;
+        transition:.2s;
+        position:relative;
+        z-index:2;
+    }
 
-        .login-right {
-            position: relative;
-            height: 420px;
-        }
+    .login-btn:hover{
+        background:#095e2f;
+    }
 
-        .doc-stack { position: absolute; inset: 0, pointer-events:none;}
-        .doc-card {
-            position: absolute;
-            background: var(--paper);
-            border: 1.5px solid var(--paper-mid);
-            padding: 1.5rem;
-            box-shadow: 4px 4px 0 var(--paper-mid), 0 16px 48px rgba(13,17,23,0.12);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            pointer-events: none;
-        }
-        .doc-card:nth-child(1) { width: 300px; top: 60px; left: 40px; transform: rotate(4deg); z-index:1; }
-        .doc-card:nth-child(2) { width: 310px; top: 30px; left: 20px; transform: rotate(-2deg); z-index:2; }
-        .doc-card:nth-child(3) { width: 320px; top: 0; left: 0; transform: rotate(1deg); z-index:3; }
+    .forgot-password{
+        text-align:center;
+        margin-top:15px;
+        position:relative;
+        z-index:2;
+    }
 
-        @media (max-width:900px){
-            .login-container { grid-template-columns: 1fr; gap:2rem; padding:2rem; }
-            .login-right { height: 300px; position:relative; }
-        }
-    </style>
+    .forgot-password a{
+        text-decoration:none;
+        color:#2d6b45;
+        font-size:14px;
+    }
+
+    .password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    }
+
+    /* =========================
+   LARGE DESKTOP
+========================= */
+@media (min-width: 1400px) {
+
+    .login-card{
+        width:500px;
+    }
+
+    .logo-text h1{
+        font-size:110px;
+    }
+
+    .logo-text h2{
+        font-size:22px;
+    }
+}
+
+
+/* =========================
+   LAPTOP
+========================= */
+@media (max-width: 1200px){
+
+    .login-card{
+        width:430px;
+    }
+
+    .logo-text h1{
+        font-size:90px;
+    }
+
+    .logo-text h2{
+        font-size:18px;
+    }
+}
+
+
+/* =========================
+   TABLET
+========================= */
+@media (max-width: 768px){
+
+    body{
+        padding:20px;
+        overflow:auto;
+    }
+
+    .login-card{
+        width:100%;
+        max-width:420px;
+        padding:35px 25px;
+    }
+
+    .logo-container{
+        flex-direction:column;
+        justify-content:center;
+        text-align:center;
+        margin-bottom:35px;
+    }
+
+    .logo-container img{
+        width:80px;
+        margin-bottom:10px;
+    }
+
+    .logo-text h1{
+        font-size:70px;
+    }
+
+    .logo-text h2{
+        font-size:16px;
+    }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 500px){
+
+    .login-card{
+        padding:25px 18px;
+        border-radius:12px;
+    }
+
+    .logo-container img{
+        width:70px;
+    }
+
+    .logo-text h1{
+        font-size:52px;
+    }
+
+    .logo-text h2{
+        font-size:13px;
+    }
+
+    .form-group input{
+        padding:11px 12px;
+        font-size:14px;
+    }
+
+    .login-btn{
+        padding:11px;
+        font-size:14px;
+    }
+}
+
+
+/* =========================
+   SMALL MOBILE
+========================= */
+@media (max-width: 360px){
+
+    .logo-text h1{
+        font-size:42px;
+    }
+
+    .logo-text h2{
+        font-size:11px;
+    }
+
+    .login-card{
+        padding:20px 15px;
+    }
+}
+</style>
+<script>
+    function togglePasswordVisibility() {
+    const input = document.getElementById('loginPassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        // Change eye to "slashed" version
+        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+    } else {
+        input.type = 'password';
+        // Revert back to normal eye
+        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+    }
+}
+</script>
 </head>
 <body>
-    <div class="login-container">
-        <!-- Hero / Login Description -->
-        <div class="hero-left">
-            <div class="hero-eyebrow">
-                <div class="hero-eyebrow-line"></div>
-                <span class="hero-eyebrow-text">Secure Document Platform</span>
+<div class="login-card">
+
+        <div class="logo-container">
+            <img src="{{ asset('images/phmc-logo.png') }}" alt="PHMC Logo">
+           <div class="logo-text">
+                <h1 class="dashboard-title">PHMC</h1>
+                <h2 class="dashboard-title">MEDICAL CENTER - LAS PIÑAS</h2>
+            </div>
+        </div>
+        
+
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <div class="form-group">
+                <label>User ID</label>
+                <input type="text"
+                       name="email"
+                       value="{{ old('email') }}"
+                       placeholder="User ID"
+                       required
+                       autofocus>
             </div>
 
-            <h1 class="hero-title">
-                Sign In<br>to <em>DOCSYSTEM</em>
-            </h1>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password"
+                       id="loginPassword"
+                       name="password"
+                       placeholder="Password"
+                       required>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()" title="Toggle password visibility">
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#6b7280" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
 
-            <p class="hero-subtitle">
-                Enter your credentials below to access your dashboard, upload documents, approve, and digitally sign securely.
-            </p>
-        </div>
+            <button type="submit" class="login-btn">
+                SIGN IN
+            </button>
 
-        <!-- Login Form -->
-        <div class="login-right">
-            <form method="POST" action="{{ route('login') }}" class="login-form">
-                @csrf
-                <h2>Login</h2>
-
-                <div>
-                    <label for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
-                    <x-input-error :messages="$errors->get('email')" class="mt-1" />
-                </div>
-
-                <div>
-                    <label for="password">Password</label>
-                    <input id="password" type="password" name="password" required autocomplete="current-password">
-                    <x-input-error :messages="$errors->get('password')" class="mt-1" />
-                </div>
-
-                <div class="remember-me">
-                    <input id="remember_me" type="checkbox" name="remember">
-                    <label for="remember_me">Remember me</label>
-                </div>
-
+            <div class="forgot-password">
                 @if (Route::has('password.request'))
-                    <a class="text-sm text-blue-acc underline mb-2 block" href="{{ route('password.request') }}">
-                        Forgot your password?
+                    <a href="{{ route('password.request') }}">
+                        Forgot password
                     </a>
                 @endif
+            </div>
 
-                <button type="submit">Log In</button>
-            </form>
-        </div>
+        </form>
 
-        <!-- Document Stack Visual -->
-        <div class="doc-stack">
-            <div class="doc-card"></div>
-            <div class="doc-card"></div>
-            <div class="doc-card"></div>
-        </div>
-    </div>
+
+</div>
+
 </body>
 </html>
