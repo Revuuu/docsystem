@@ -22,20 +22,8 @@
     </div>
 
     <nav class="sidebar-nav">
-        <button class="nav-btn" onclick="showSection('upload')">
-            Upload Document
-        </button>
-
-        <button class="nav-btn" onclick="showSection('approvals')">
-            Pending Approvals
-        </button>
-
         <button class="nav-btn" onclick="showSection('documents')">
             My Documents
-        </button>
-
-        <button class="nav-btn" onclick="showSection('signature')">
-            My Signature
         </button>
     </nav>
 

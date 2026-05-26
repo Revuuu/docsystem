@@ -74,6 +74,7 @@
 
                     <tr>
                         <th>ID</th>
+                        <th>File name</th>
                         <th>Uploaded By</th>
                         <th>file_path</th>
                         <th>Timestamp</th>
@@ -97,7 +98,14 @@
                             </span>
 
                         </td>
+                        <!-- FILE NAME -->
+                        <td>
 
+                            <div class="file-name">
+                                {{ $doc->title }}
+                            </div>
+
+                        </td>
                         <!-- USER -->
                         <td>
 
@@ -127,13 +135,12 @@
                         <td>
 
                             <div class="file-name">
-                                {{ $doc->title }}
+                                {{ $doc->latestVersion()
+                                    ? basename($doc->latestVersion()->generated_storage_path)
+                                    : 'No file'
+                                }}
                             </div>
-
-                            <small>
-                                size 15 MB/checksum
-                            </small>
-
+                            a
                         </td>
 
                         <!-- DATE -->
