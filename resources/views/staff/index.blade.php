@@ -183,9 +183,22 @@
                         <!-- ACTION -->
                         <td>
 
-                            <button class="table-action-btn">
-                                More ⋮
-                            </button>
+                            <div class="more-menu">
+                                <button type="button" class="table-action-btn">
+                                    More ⋮
+                                </button>
+
+                               <div class="more-menu-dropdown">
+                                     <a href="{{ route('files.view', encrypt($doc->latestVersion()->id)) }}"
+                                    target="_blank">
+                                        View PDF
+                                    </a>
+
+                                    <a href="{{ route('files.download', encrypt($doc->latestVersion()->id)) }}">
+                                        Download PDF
+                                    </a>
+                                </div>
+                            </div>
 
                         </td>
 

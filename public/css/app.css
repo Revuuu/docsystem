@@ -1962,3 +1962,38 @@ FULL WIDTH DASHBOARD LAYOUT
 
     box-sizing:border-box;
 }
+
+.more-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.more-menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 140px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    z-index: 50;
+    overflow: hidden;
+}
+
+.more-menu-dropdown a {
+    display: block;
+    padding: 10px 14px;
+    color: #111;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.more-menu-dropdown a:hover {
+    background: #f3f3f3;
+}
+
+.more-menu:hover .more-menu-dropdown {
+    display: block;
+}
