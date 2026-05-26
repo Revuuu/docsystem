@@ -1,7 +1,8 @@
 <div class="sidebar" id="sidebar">
 
     <div class="sidebar-logo">
-        DOCSYSTEM
+        <img src="{{ asset('images/phmc-logo.png') }}" alt="PHMC Logo">
+        PHMC
     </div>
 
     <div class="sidebar-user">
@@ -15,6 +16,8 @@
         <span class="user-role-badge">
             {{ ucfirst(auth()->user()->role) }}
         </span>
+        
+        <div class="user-role-line"></div>
 
     </div>
 
