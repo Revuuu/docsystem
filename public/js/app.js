@@ -469,4 +469,69 @@ window.onclick = function(event) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('documentSearchInput');
 
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', () => {
+        const keyword = searchInput.value.toLowerCase().trim();
+
+        document.querySelectorAll('.document-row').forEach(row => {
+            const title = row.dataset.title || '';
+            const file = row.dataset.file || '';
+
+            const matches =
+                title.includes(keyword) ||
+                file.includes(keyword);
+
+            row.style.display = matches ? '' : 'none';
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('documentSearchInput');
+    const statusFilter = document.getElementById('documentStatusFilter');
+    const noResults = document.getElementById('noResultsMessage');
+
+    if (!searchInput || !statusFilter) return;
+
+    function filterDocuments() {
+        const keyword = searchInput.value.toLowerCase().trim();
+        const selectedStatus = statusFilter.value.toLowerCase();
+
+        let visibleCount = 0;
+
+        document.querySelectorAll('.document-row').forEach(row => {
+            const title = row.dataset.title || '';
+            const file = row.dataset.file || '';
+            const status = row.dataset.status || '';
+
+            const matchesSearch =
+                keyword === '' ||
+                title.includes(keyword) ||
+                file.includes(keyword);
+
+            const matchesStatus =
+                selectedStatus === '' ||
+                status === selectedStatus;
+
+            const show = matchesSearch && matchesStatus;
+
+            row.style.display = show ? '' : 'none';
+
+            if (show) {
+                visibleCount++;
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display =
+                visibleCount === 0 ? 'block' : 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', filterDocuments);
+    statusFilter.addEventListener('change', filterDocuments);
+});

@@ -38,18 +38,16 @@
                 <div class="search-box">
 
                     <input type="text"
-                           placeholder="Search documents, IDs, filenames...">
-
-                    <button>
-                        🔍
-                    </button>
+                            id="documentSearchInput"
+                            placeholder="Search by file name...">
 
                 </div>
 
-                <select class="filter-select">
-                    <option>
-                        Filter by: [F]
-                    </option>
+                <select id="documentStatusFilter" class="documentStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
                 </select>
 
                 <button class="upload-document-btn"
@@ -87,7 +85,10 @@
 
                     @foreach($myDocuments as $index => $doc)
 
-                    <tr>
+                    <tr class="document-row"
+                            data-title="{{ strtolower($doc->title) }}"
+                            data-file="{{ strtolower($doc->latestVersion() ? basename($doc->latestVersion()->generated_storage_path) : '') }}"
+                            data-status="{{ strtolower($doc->status) }}">
 
                         <!-- ID -->
                         <td>
@@ -211,11 +212,14 @@
                     </tr>
 
                     @endforeach
-
+                    
                 </tbody>
 
             </table>
-
+            <div id="noResultsMessage"
+                style="display:none; text-align:center; padding:20px; color:#777;">
+                No results found.
+            </div>
         </div>
 
         <!-- FOOTER -->
