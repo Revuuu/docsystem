@@ -15,9 +15,8 @@
     {{-- Content --}}
     <div class="content">
 
-       
         {{-- Pending Approvals --}}
-        @include('partials.approvals-section')
+        <!-- @include('partials.approvals-section') -->
 
         {{-- My Documents --}}
 
@@ -140,7 +139,7 @@
                                     : 'No file'
                                 }}
                             </div>
-                            a
+                            
                         </td>
 
                         <!-- DATE -->

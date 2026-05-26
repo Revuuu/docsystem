@@ -1997,3 +1997,132 @@ FULL WIDTH DASHBOARD LAYOUT
 .more-menu:hover .more-menu-dropdown {
     display: block;
 }
+
+/* =========================================================
+DOCUMENTS SECTION RESPONSIVE FIX
+========================================================= */
+
+#section-documents {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.documents-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+.documents-card-header {
+    padding: clamp(14px, 3vw, 24px);
+}
+
+.documents-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.search-box {
+    flex: 1 1 280px;
+    min-width: 0;
+}
+
+.filter-select,
+.upload-document-btn {
+    flex: 0 1 auto;
+}
+
+.table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modern-docs-table {
+    width: 100%;
+    min-width: 900px;
+}
+
+.modern-docs-table th,
+.modern-docs-table td {
+    white-space: nowrap;
+}
+
+.file-name {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.documents-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .modern-docs-table {
+        min-width: 820px;
+    }
+
+    .documents-tools {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box,
+    .filter-select,
+    .upload-document-btn {
+        width: 100%;
+    }
+
+    .search-box {
+        flex: none;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .documents-card {
+        border-radius: 0;
+    }
+
+    .documents-card-header {
+        padding: 16px;
+    }
+
+    .modern-docs-table {
+        min-width: 760px;
+    }
+
+    .modern-docs-table th,
+    .modern-docs-table td {
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .table-user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .status-pill {
+        min-width: 110px;
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+
+    .table-action-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .documents-footer {
+        padding: 16px;
+        align-items: flex-start;
+    }
+}
+
