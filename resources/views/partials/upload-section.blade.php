@@ -1,4 +1,15 @@
-<div id="section-upload" class="dashboard-section">
+<div id="uploadModal" class="upload-modal">
+
+    <div class="upload-modal-content">
+
+        <button class="upload-modal-close"
+                onclick="closeUploadModal()">
+
+            ×
+
+        </button>
+
+<div id="section-upload" class="upload-modal-body">
 
     <h1 class="section-title">
         Upload Document
@@ -83,3 +94,9 @@
 
     </form>
 </div>
+    </div>
+</div>
+<style>
+
+
+    </style>

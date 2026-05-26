@@ -15,192 +15,207 @@
     {{-- Content --}}
     <div class="content">
 
-        {{-- Upload Section --}}
-        @include('partials.upload-section')
+       
         {{-- Pending Approvals --}}
         @include('partials.approvals-section')
 
         {{-- My Documents --}}
+
+        @php
+            $myDocuments = $documents;
+        @endphp
+
         <div id="section-documents" class="dashboard-section">
 
-            <h1 class="section-title">
-                My Documents
-            </h1>
+    <!-- DOCUMENT CARD -->
+    <div class="documents-card">
 
-            @php
-                $myDocuments = $documents;
-            @endphp
+        <!-- CARD HEADER -->
+        <div class="documents-card-header">
 
-            @if($myDocuments->count())
+            <div class="documents-tools">
 
-                <table>
+                
+                <div class="search-box">
 
-                    <thead>
+                    <input type="text"
+                           placeholder="Search documents, IDs, filenames...">
 
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Uploaded</th>
-                            <th>Remarks</th>
-                            <th>File</th>
-                        </tr>
+                    <button>
+                        🔍
+                    </button>
 
-                    </thead>
+                </div>
 
-                    <tbody>
+                <select class="filter-select">
+                    <option>
+                        Filter by: [F]
+                    </option>
+                </select>
 
-                        @foreach($myDocuments as $doc)
+                <button class="upload-document-btn"
+        type="button"
+        onclick="openUploadModal()">
 
-                            <tr>
+    ＋ UPLOAD NEW DOCUMENT
 
-                                <td>
-                                    {{ $doc->title }}
-                                </td>
+</button>
 
-                                <td>
-
-    @php
-
-        $firstApproval = $doc->approvals()
-            ->orderBy('step_order')
-            ->first();
-
-        $lastApproval = $doc->approvals()
-            ->whereNotNull('completed_at')
-            ->orderByDesc('step_order')
-            ->first();
-
-        $currentPendingApproval = $doc->approvals()
-            ->where('status', 'pending')
-            ->first();
-
-    @endphp
-
-    {{-- REJECTED --}}
-@if($doc->status === 'rejected')
-
-    <span class="status-rejected">
-        Rejected
-    </span>
-
-{{-- PENDING --}}
-@elseif(
-    in_array($doc->status, ['pending', 'in_progress']) &&
-    $currentPendingApproval &&
-    $currentPendingApproval->received_at
-)
-
-    <span class="status-pending">
-        Pending
-    </span>
-
-    <br>
-
-    <small class="status-time">
-
-        Pending for
-
-        {{
-            $currentPendingApproval->received_at
-                ->diffForHumans(now(), true)
-        }}
-
-    </small>
-
-{{-- APPROVED --}}
-@elseif(
-    $doc->status === 'approved' &&
-    $firstApproval &&
-    $firstApproval->received_at &&
-    $lastApproval &&
-    $lastApproval->completed_at
-)
-
-    <span class="status-approved">
-        Approved
-    </span>
-
-    <br>
-
-    <small class="status-time">
-
-        Workflow completed in
-
-        {{
-            \Carbon\CarbonInterval::seconds(
-                (int) $firstApproval->received_at
-                    ->diffInSeconds($lastApproval->completed_at)
-            )->cascade()->forHumans()
-        }}
-
-    </small>
-
-{{-- DEFAULT --}}
-@else
-
-    <span class="status-upcoming">
-        {{ ucfirst($doc->status) }}
-    </span>
-
-@endif
-
-</td>
-
-                                <td>
-                                    {{ $doc->created_at->format('M d, Y h:i A') }}
-                                </td>
-
-                                <td> 
-                                    @php
-                                        $rejectedApproval = \App\Models\Approval::where('document_id', $doc->id)
-                                            ->where('status', 'rejected')
-                                            ->latest('rejected_at')
-                                            ->first();
-                                    @endphp
-
-                                    {{ $rejectedApproval->remarks ?? '-' }}
-                                </td>
-
-                               <td>
-   
-    <button type="button" class="view-pdf-btn"
-        onclick='openPdfModal(@json($doc->current_file_url))'>
-        View PDF
-    </button>
-</td>
-
-                            </tr>
-
-                        @endforeach
-                     <!-- PDF Modal -->
-                        <div id="pdfModal" class="pdf-modal">
-                            <div class="pdf-modal-content">
-
-                                <span class="close-modal" onclick="closePdfModal()">
-                                    &times;
-                                </span>
-
-                                <iframe id="pdfFrame"
-                                    src=""
-                                    width="100%"
-                                    height="100%">
-                                </iframe>
-
-                            </div>
-                        </div>
-                    </tbody>
-
-                </table>
-
-            @else
-
-                <p class="no-data">
-                    No uploaded documents yet.
-                </p>
-
-            @endif
+            </div>
 
         </div>
+
+        <!-- TABLE -->
+        <div class="table-wrapper">
+
+            <table class="modern-docs-table">
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Uploaded By</th>
+                        <th>file_path</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach($myDocuments as $index => $doc)
+
+                    <tr>
+
+                        <!-- ID -->
+                        <td>
+
+                            <span class="doc-id-pill">
+                                {{ 100 + $index }}
+                            </span>
+
+                        </td>
+
+                        <!-- USER -->
+                        <td>
+
+                            <div class="table-user">
+
+                                <div class="table-user-avatar">
+                                    {{ strtoupper(substr($doc->uploader->name ?? 'U',0,1)) }}
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ $doc->uploader->name ?? 'Unknown' }}
+                                    </strong>
+
+                                    <small>
+                                        {{ ucfirst($doc->uploader->role ?? '-') }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <!-- FILE -->
+                        <td>
+
+                            <div class="file-name">
+                                {{ $doc->title }}
+                            </div>
+
+                            <small>
+                                size 15 MB/checksum
+                            </small>
+
+                        </td>
+
+                        <!-- DATE -->
+                        <td>
+
+                            {{ $doc->created_at->format('M d, Y') }}
+
+                            <br>
+
+                            <small>
+                                {{ $doc->created_at->format('h:i A') }}
+                            </small>
+
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+
+                            @if($doc->status === 'approved')
+
+                                <span class="status-pill success">
+                                    Fully Signed
+                                </span>
+
+                            @elseif($doc->status === 'in_progress')
+
+                                <span class="status-pill ongoing">
+                                    Ongoing
+                                </span>
+
+                            @elseif($doc->status === 'pending')
+
+                                <span class="status-pill waiting">
+                                    Awaiting Signature
+                                </span>
+
+                            @else
+
+                                <span class="status-pill neutral">
+                                    {{ ucfirst($doc->status) }}
+                                </span>
+
+                            @endif
+
+                        </td>
+
+                        <!-- ACTION -->
+                        <td>
+
+                            <button class="table-action-btn">
+                                More ⋮
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="documents-footer">
+
+            <div class="table-pagination">
+                Table foos:
+                <span class="active">1</span>
+                <span>2</span>
+                <span>3</span>
+                ...
+                Next →
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
         {{-- My Signature --}}
         <div id="section-signature" class="dashboard-section">
@@ -403,7 +418,7 @@
     </div>
 
 </div>
-
+@include('partials.upload-section')
 <form id="signatureForm" method="POST" action="">
     @csrf
 
@@ -449,4 +464,35 @@
 
 @endif
 @include('partials.password-modal')
+
+<script>
+
+function openUploadModal()
+{
+    document
+        .getElementById('uploadModal')
+        .classList
+        .add('show');
+}
+
+function closeUploadModal()
+{
+    document
+        .getElementById('uploadModal')
+        .classList
+        .remove('show');
+}
+
+window.onclick = function(event)
+{
+    const modal =
+        document.getElementById('uploadModal');
+
+    if(event.target === modal)
+    {
+        closeUploadModal();
+    }
+}
+
+</script>
 @endsection

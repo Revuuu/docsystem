@@ -168,7 +168,7 @@ CONTENT
 
 .content {
 padding: 2rem;
-overflow-x: auto;
+
 }
 
 .section-title {
@@ -202,48 +202,7 @@ background: #fee2e2;
 color: #991b1b;
 }
 
-/* =========================================================
-TABLE
-========================================================= */
 
-table {
-width: 100%;
-border-collapse: collapse;
-
-background: var(--paper-warm);
-
-border-radius: 10px;
-overflow: hidden;
-
-border: 1px solid var(--paper-mid);
-}
-
-thead {
-background: var(--paper-mid);
-}
-
-th,
-td {
-padding: 1rem;
-text-align: left;
-
-border-bottom: 1px solid var(--paper-mid);
-}
-
-th {
-font-family: var(--font-mono);
-font-size: 0.8rem;
-color: var(--ink);
-}
-
-td {
-font-size: 0.92rem;
-}
-
-td a {
-color: var(--blue-acc);
-text-decoration: underline;
-}
 
 /* =========================================================
 FORM CARD
@@ -564,9 +523,6 @@ color: #6b7280;
 align-self: center;
 }
 
-.dashboard-section {
-display: none;
-}
 
 .dashboard-section.active {
 display: block;
@@ -1057,7 +1013,6 @@ line-height: normal;
 
     gap:2rem;
 
-    padding:2rem;
 
     overflow-x:hidden;
 }
@@ -1172,7 +1127,7 @@ line-height: normal;
 .alert-danger ul { padding-left: 1.25rem; margin-top: 0.25rem; }
 
 /* ── Tables ──────────────────────────────────────────── */
-.section-wrap { max-width: 580px; }
+
 
 .docs-table {
     width: 100%;
@@ -1209,6 +1164,101 @@ line-height: normal;
     border-radius: 8px;
 }
 
+/* =========================================================
+FULL PAGE DOCUMENT LAYOUT
+========================================================= */
+
+.content{
+    width:100%;
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:2rem;
+
+    overflow:hidden;
+}
+
+/* DOCUMENT SECTION */
+
+#section-documents{
+    width:100%;
+
+    display:flex;
+    flex-direction:column;
+
+    flex:1;
+}
+
+/* DOCUMENT CARD */
+
+.documents-card{
+    width:100%;
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:calc(100vh - 120px);
+}
+
+/* HEADER */
+
+.documents-card-header{
+    padding:24px;
+
+    border-bottom:1px solid #ececec;
+
+    background:#fff;
+}
+
+/* TABLE AREA */
+
+.table-wrapper{
+    flex:1;
+
+    overflow-y:auto;
+    overflow-x:auto;
+
+    background:#fff;
+}
+
+/* TABLE */
+
+.modern-docs-table{
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:1100px;
+}
+
+/* FOOTER */
+
+.documents-footer{
+    padding:20px 24px;
+
+    border-top:1px solid #ececec;
+
+    background:#fff;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-top:auto;
+}
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 860px) {
     .hamburger { display: flex; }
@@ -1235,4 +1285,680 @@ line-height: normal;
     .hero-title { font-size: 1.9rem; }
     .docs-table th:nth-child(2),
     .docs-table td:nth-child(2) { display: none; }
+}
+
+/* =========================================================
+MODERN DOCUMENTS UI
+========================================================= */
+
+#section-documents{
+    width:100%;
+}
+
+.documents-card{
+    width:100%;
+    background:#fff;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+
+.documents-card-header{
+    padding:24px;
+    border-bottom:1px solid #ececec;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:20px;
+}
+
+.documents-tools{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    width:100%;
+}
+
+/* SEARCH */
+
+.search-box{
+    display:flex;
+    align-items:center;
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    height:48px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:0 16px;
+
+    font-size:14px;
+
+    background:#fff;
+}
+
+.search-box button{
+    width:48px;
+    height:48px;
+
+    margin-left:8px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#ece3d0;
+
+    cursor:pointer;
+}
+
+/* FILTER */
+
+.filter-select{
+    height:48px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:0 14px;
+
+    background:#fff;
+}
+
+/* UPLOAD BUTTON */
+
+.upload-document-btn{
+    height:48px;
+
+    padding:0 24px;
+
+    border:none;
+    border-radius:14px;
+
+    background:#198754;
+    color:#fff;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+}
+
+/* TABLE */
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.modern-docs-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.modern-docs-table thead{
+    background:#f5f1e7;
+}
+
+.modern-docs-table th{
+    padding:20px;
+    text-align:left;
+
+    font-size:13px;
+    font-weight:700;
+}
+
+.modern-docs-table td{
+    padding:18px 20px;
+    border-top:1px solid #ececec;
+
+    vertical-align:middle;
+}
+
+/* USER */
+
+.table-user{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.table-user-avatar{
+    width:44px;
+    height:44px;
+
+    border-radius:50%;
+
+    background:#dedede;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:700;
+}
+
+/* ID */
+
+.doc-id-pill{
+    background:#0d7a45;
+    color:#fff;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:13px;
+    font-weight:700;
+}
+
+/* STATUS */
+
+.status-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:130px;
+
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    color:#fff;
+
+    font-size:13px;
+    font-weight:700;
+}
+
+.status-pill.success{
+    background:#198754;
+}
+
+.status-pill.waiting{
+    background:#c9a84c;
+}
+
+.status-pill.ongoing{
+    background:#748196;
+}
+
+.status-pill.neutral{
+    background:#999;
+}
+
+/* ACTION */
+
+.table-action-btn{
+    border:1px solid #d8d8d8;
+    border-radius:12px;
+
+    background:#fff;
+
+    padding:10px 18px;
+
+    cursor:pointer;
+}
+
+/* FOOTER */
+
+.documents-footer{
+    padding:22px 24px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border-top:1px solid #ececec;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+    .documents-card-header,
+    .documents-footer{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .documents-tools{
+        flex-wrap:wrap;
+    }
+
+    .search-box{
+        width:100%;
+    }
+}
+
+    /* ======================================================
+UPLOAD MODAL BODY
+====================================================== */
+
+.upload-modal-body{
+    width:100%;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:22px;
+}
+
+/* ======================================================
+FORM
+====================================================== */
+
+.upload-form{
+    display:flex;
+    flex-direction:column;
+
+    gap:22px;
+}
+
+.upload-form .form-group{
+    display:flex;
+    flex-direction:column;
+
+    gap:10px;
+
+    width:100%;
+}
+
+.upload-form label{
+    font-size:14px;
+    font-weight:700;
+
+    color:#333;
+}
+
+.upload-form input,
+.upload-form select{
+    width:100%;
+
+    min-height:52px;
+
+    border:1px solid #ddd;
+
+    border-radius:14px;
+
+    padding:14px 16px;
+
+    background:white;
+
+    font-size:14px;
+
+    box-sizing:border-box;
+}
+
+/* ======================================================
+FILE INPUT
+====================================================== */
+
+.upload-form input[type="file"]{
+    padding:14px;
+
+    background:#faf7f2;
+
+    border:2px dashed #d0c4aa;
+}
+
+/* ======================================================
+APPROVER
+====================================================== */
+
+.approver-row{
+    display:flex;
+    gap:12px;
+
+    width:100%;
+}
+
+.approver-row select{
+    flex:1;
+}
+
+.btn-add-approver{
+    margin-top:10px;
+
+    border:none;
+
+    background:#ece3d0;
+
+    padding:12px 18px;
+
+    border-radius:12px;
+
+    font-weight:700;
+
+    cursor:pointer;
+}
+
+/* ======================================================
+SUBMIT
+====================================================== */
+
+.btn-submit{
+    width:100%;
+
+    min-height:54px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#198754;
+
+    color:white;
+
+    font-size:15px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    margin-top:10px;
+}
+
+/* ======================================================
+TITLE
+====================================================== */
+
+.section-title{
+    font-size:34px;
+    font-weight:800;
+
+    color:#1d1d1d;
+
+    margin-bottom:10px;
+}
+
+/* =========================================================
+UPLOAD MODAL
+========================================================= */
+
+.upload-modal{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100vh;
+
+    background:rgba(0,0,0,0.55);
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    z-index:999999;
+}
+
+.upload-modal.show{
+    display:flex;
+}
+
+.upload-modal-content{
+    width:90%;
+    max-width:750px;
+
+    background:#f5f0e8;
+
+    border-radius:24px;
+
+    padding:32px;
+
+    position:relative;
+
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+
+    max-height:90vh;
+
+    overflow-y:auto;
+}
+
+/* CLOSE BUTTON */
+
+.upload-modal-close{
+    position:absolute;
+
+    top:18px;
+    right:18px;
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#e8dfcf;
+
+    font-size:26px;
+
+    cursor:pointer;
+}
+
+/* BODY */
+
+.upload-modal-body{
+    width:100%;
+}
+
+/* TITLE */
+
+.upload-modal-body .section-title{
+    font-size:42px;
+    font-weight:800;
+
+    margin-bottom:28px;
+
+    color:#111;
+}
+
+/* FORM */
+
+.upload-form{
+    display:flex;
+    flex-direction:column;
+
+    gap:22px;
+}
+
+.upload-form .form-group{
+    display:flex;
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.upload-form label{
+    font-size:13px;
+    font-weight:700;
+
+    letter-spacing:.08em;
+
+    text-transform:uppercase;
+
+    color:#333;
+}
+
+.upload-form input,
+.upload-form select{
+    width:100%;
+
+    height:56px;
+
+    border:1px solid #d9d3c7;
+
+    border-radius:16px;
+
+    padding:0 18px;
+
+    background:#fff;
+
+    font-size:15px;
+}
+
+/* FILE INPUT */
+
+.upload-form input[type="file"]{
+    height:auto;
+
+    padding:16px;
+
+    border:2px dashed #d8c8a7;
+
+    background:#faf7f1;
+}
+
+/* APPROVER */
+
+.approver-row{
+    width:100%;
+}
+
+.btn-add-approver{
+    width:100%;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#ece3d0;
+
+    font-weight:700;
+
+    cursor:pointer;
+}
+
+/* SUBMIT */
+
+.upload-form .btn-submit{
+    width:100%;
+
+    height:58px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#198754;
+
+    color:#fff;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+}
+/* =========================================================
+FULL WIDTH DASHBOARD LAYOUT
+========================================================= */
+
+.main-container{
+    display:flex;
+
+    width:100%;
+    min-height:100vh;
+}
+
+/* CONTENT */
+
+.content{
+    flex:1;
+
+    width:100%;
+
+    padding:0;
+
+    margin:0;
+
+    overflow:hidden;
+
+    background:#f5f0e8;
+}
+
+/* DOCUMENT SECTION */
+
+#section-documents{
+    width:100%;
+
+    padding:0;
+
+    margin:0;
+}
+
+/* CARD */
+
+.documents-card{
+    width:100%;
+
+    min-height:100vh;
+
+    margin:0;
+
+    border-radius:0;
+
+    box-shadow:none;
+
+    background:#ffffff;
+
+    overflow:hidden;
+}
+
+/* HEADER */
+
+.documents-card-header{
+    width:100%;
+
+    padding:24px;
+
+    margin:0;
+
+    border-bottom:1px solid #ececec;
+
+    box-sizing:border-box;
+}
+
+/* TABLE WRAPPER */
+
+.table-wrapper{
+    width:100%;
+
+    margin:0;
+    padding:0;
+
+    overflow-x:auto;
+}
+
+/* TABLE */
+
+.modern-docs-table{
+    width:100%;
+
+    min-width:1000px;
+
+    border-collapse:collapse;
+}
+
+/* FOOTER */
+
+.documents-footer{
+    width:100%;
+
+    padding:24px;
+
+    margin:0;
+
+    box-sizing:border-box;
 }
