@@ -1532,8 +1532,8 @@ MODERN DOCUMENTS UI
     background:#748196;
 }
 
-.status-pill.neutral{
-    background:#999;
+.status-pill.rejected{
+    background:#dc3545;
 }
 
 /* ACTION */

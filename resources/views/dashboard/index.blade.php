@@ -96,7 +96,7 @@
                                 <tr class="document-row"
                                     data-title="{{ strtolower($doc->title) }}"
                                     data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
-                                    data-status="{{ strtolower($doc->status) }}">
+                                    data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
 
                                     <td>
                                         <span class="doc-id-pill">
@@ -136,66 +136,94 @@
                                     </td>
 
                                     <td>
-                                       @php
-                                            $approvedApprovals = $doc->approvals
-                                                ->where('status', 'approved');
-
-                                            $pendingApproval = $doc->approvals
-                                                ->where('status', 'pending')
-                                                ->sortBy('step_order')
-                                                ->first();
-
-                                            $waitingApproval = $doc->approvals
-                                                ->where('status', 'waiting')
-                                                ->sortBy('step_order')
-                                                ->first();
-
-                                            $rejectedApproval = $doc->approvals
-                                                ->where('status', 'rejected')
-                                                ->first();
-                                        @endphp
-
-                                        @if($myApproval?->status === 'approved')
-    <span class="status-pill success">Approved</span>
-
-@elseif($myApproval?->status === 'pending')
-    <span class="status-pill waiting">
-        Pending
-        <span class="pending-approver">
-            Current Signatory: {{ auth()->user()->name }}
-        </span>
-    </span>
-
-@elseif($myApproval?->status === 'waiting')
-    <span class="status-pill ongoing">
-        Upcoming
-
-        <span class="pending-approver">
-            Waiting For:
-            {{
-                $doc->approvals
-                    ->where('status', 'pending')
-                    ->first()?->user?->name
-                ?? 'Unknown approver'
-            }}
-        </span>
-    </span>
-@else
-    {{-- For documents uploaded by me --}}
     @php
-        $currentPendingApproval = $doc->approvals
+        $approvedApprovals = $doc->approvals
+            ->where('status', 'approved');
+
+        $pendingApproval = $doc->approvals
             ->where('status', 'pending')
+            ->sortBy('step_order')
+            ->first();
+
+        $waitingApproval = $doc->approvals
+            ->where('status', 'waiting')
+            ->sortBy('step_order')
+            ->first();
+
+        $rejectedApproval = $doc->approvals
+            ->where('status', 'rejected')
             ->first();
     @endphp
 
-    <span class="status-pill waiting">
-        Pending
-        <span class="pending-approver">
-            Current Signatory: {{ $currentPendingApproval->user?->name ?? 'Unknown approver' }}
+    {{-- If current user already approved --}}
+    @if($myApproval?->status === 'approved')
+        <span class="status-pill success">
+            Approved
         </span>
-    </span>
-@endif
-                                    </td>
+
+    {{-- If current user is the active signer --}}
+    @elseif($myApproval?->status === 'pending')
+        <span class="status-pill waiting">
+            Pending
+
+            <span class="pending-approver">
+                Current Signatory: {{ auth()->user()->name }}
+            </span>
+        </span>
+
+    {{-- If current user is waiting for their turn --}}
+    @elseif($myApproval?->status === 'waiting')
+        <span class="status-pill ongoing">
+            Upcoming
+
+            <span class="pending-approver">
+                Waiting For:
+                {{
+                    $doc->approvals
+                        ->where('status', 'pending')
+                        ->first()?->user?->name
+                    ?? 'Unknown approver'
+                }}
+            </span>
+        </span>
+
+    {{-- Fallback for uploaded documents --}}
+    @else
+
+        {{-- Document fully approved --}}
+        @if($doc->status === 'approved')
+            <span class="status-pill success">
+                Approved
+            </span>
+
+        {{-- Document rejected --}}
+        @elseif($doc->status === 'rejected')
+            <span class="status-pill rejected">
+                Rejected
+            </span>
+
+        {{-- Document still ongoing --}}
+        @else
+
+            @php
+                $currentPendingApproval = $doc->approvals
+                    ->where('status', 'pending')
+                    ->first();
+            @endphp
+
+            <span class="status-pill waiting">
+                Pending
+
+                <span class="pending-approver">
+                    Current Signatory:
+                    {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
+                </span>
+            </span>
+
+        @endif
+
+    @endif
+</td>
 
                                     <td>
                                         <div class="more-menu">
