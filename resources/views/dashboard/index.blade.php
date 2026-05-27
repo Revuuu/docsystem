@@ -1,0 +1,561 @@
+@extends('layouts.app')
+
+@section('title', ucfirst(auth()->user()->roles->first()?->name ?? auth()->user()->role) . ' Dashboard')
+
+@section('content')
+
+{{-- Hamburger Menu --}}
+@include('partials.hamburger')
+
+<div class="main-container">
+
+    {{-- Sidebar --}}
+    @include('partials.sidebar')
+
+    {{-- Content --}}
+    <div class="content">
+
+        {{-- Upload Section / Upload Modal --}}
+        @include('partials.upload-section')
+        @if ($errors->any())
+            <div class="alert alert-danger" style="margin: 20px;">
+                {{ $errors->first() }}
+            </div>
+        @endif
+        @php
+            $assignedDocuments = $approvals
+                ->pluck('document')
+                ->filter();
+
+            $myDocuments = $documents
+                ->merge($assignedDocuments)
+                ->unique('id')
+                ->sortByDesc('created_at')
+                ->values();
+        @endphp
+
+        {{-- Documents --}}
+        <div id="section-documents" class="dashboard-section">
+
+            <div class="documents-card">
+
+                <div class="documents-card-header">
+                    <div class="documents-tools">
+                        <div class="search-box">
+                            <input type="text" id="documentSearchInput" placeholder="Search by file name...">
+                        </div>
+
+                        <select id="documentStatusFilter" class="documentStatusFilter">
+                            <option value="">All Status</option>
+                            <option value="waiting">Upcoming</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+
+                        <button class="upload-document-btn" type="button" onclick="openUploadModal()">
+                            ＋ UPLOAD NEW DOCUMENT
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="modern-docs-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>File name</th>
+                                <th>Uploaded By</th>
+                                <th>file_path</th>
+                                <th>Timestamp</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach($myDocuments as $index => $doc)
+
+                                @php
+                                    $latestVersion = $doc->latestVersion();
+
+                                    $myApproval = $doc->approvals
+                                        ->where('user_id', auth()->id())
+                                        ->sortBy('step_order')
+                                        ->first();
+
+                                    $myPendingApproval = $doc->approvals
+                                        ->where('user_id', auth()->id())
+                                        ->where('status', 'pending')
+                                        ->first();
+
+                                    $signingFileId = $doc->current_signed_file?->id
+                                        ?? $latestVersion?->id;
+                                @endphp
+
+                                <tr class="document-row"
+                                    data-title="{{ strtolower($doc->title) }}"
+                                    data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
+                                    data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
+
+                                    <td>
+                                        <span class="doc-id-pill">
+                                            {{ $doc->id }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="file-name">
+                                            {{ $doc->title }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="table-user">
+                                            <div class="table-user-avatar">
+                                                {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
+                                            </div>
+
+                                            <div>
+                                                <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
+                                                <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="file-name">
+                                            {{ $latestVersion ? basename($latestVersion->generated_storage_path) : 'No file' }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ $doc->created_at->format('M d, Y') }}
+                                        <br>
+                                        <small>{{ $doc->created_at->format('h:i A') }}</small>
+                                    </td>
+
+                                    <td>
+                                       @php
+    $myApproval = $doc->approvals
+        ->where('user_id', auth()->id())
+        ->sortBy('step_order')
+        ->first();
+
+    $currentPendingApproval = $doc->approvals
+        ->where('status', 'pending')
+        ->sortBy('step_order')
+        ->first();
+
+    $rejectedApproval = $doc->approvals
+        ->where('status', 'rejected')
+        ->sortBy('step_order')
+        ->first();
+@endphp
+
+@if($rejectedApproval)
+
+    <span class="status-pill neutral">
+        Rejected
+
+        <span class="pending-approver">
+            Rejected by:
+            {{ $rejectedApproval->user?->name ?? 'Unknown approver' }}
+        </span>
+    </span>
+
+@elseif($myApproval?->status === 'pending')
+
+    <span class="status-pill waiting">
+        Pending
+
+        <span class="pending-approver">
+            Current Signatory:
+            {{ auth()->user()->name }}
+        </span>
+    </span>
+
+@elseif($myApproval?->status === 'waiting')
+
+    <span class="status-pill ongoing">
+        Upcoming
+
+        <span class="pending-approver">
+            Waiting For:
+            {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
+        </span>
+    </span>
+
+@elseif(
+    $doc->approvals->count() > 0 &&
+    $doc->approvals->every(fn($a) => $a->status === 'approved')
+)
+
+    <span class="status-pill success">
+        Approved
+    </span>
+
+@elseif($currentPendingApproval)
+
+    <span class="status-pill waiting">
+        Pending
+
+        <span class="pending-approver">
+            Current Signatory:
+            {{ $currentPendingApproval->user?->name ?? 'Unknown approver' }}
+        </span>
+    </span>
+
+@else
+
+    <span class="status-pill ongoing">
+        {{ ucfirst(str_replace('_', ' ', $doc->status)) }}
+    </span>
+
+@endif
+                                    </td>
+
+                                    <td>
+                                        <div class="more-menu">
+                                            <button type="button"
+                                                    class="table-action-btn"
+                                                    onclick="toggleMoreMenu(event, this)">
+                                                More ⋮
+                                            </button>
+
+                                            <div class="more-menu-dropdown">
+
+                                                @if($myPendingApproval && $signingFileId)
+                                                    <button type="button"
+                                                            class="btn-sign"
+                                                            onclick="checkSignatureAndOpenModal(
+                                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
+                                                                {{ $myPendingApproval->id }},
+                                                                '{{ route('files.view', encrypt($signingFileId)) }}',
+                                                                '{{ route('approvals.approve', $myPendingApproval->id) }}'
+                                                            )">
+                                                        ✔ Approve & Sign
+                                                    </button>
+
+                                                    <button type="button"
+                                                            class="btn-reject"
+                                                            onclick="openRejectModal({{ $myPendingApproval->id }})">
+                                                        Reject
+                                                    </button>
+                                                @endif
+
+                                                @if($latestVersion)
+                                                    <button type="button"
+                                                            onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
+                                                        View PDF
+                                                    </button>
+
+                                                    <a href="{{ route('files.download', encrypt($latestVersion->id)) }}">
+                                                        Download PDF
+                                                    </a>
+                                                @endif
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <div id="noResultsMessage" style="display:none; text-align:center; padding:20px; color:#777;">
+                        No results found.
+                    </div>
+                </div>
+
+                <div class="documents-footer">
+                    <div class="table-pagination">
+                        Table foos:
+                        <span class="active">1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        ...
+                        Next →
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Profile --}}
+        <div id="section-profile" class="dashboard-section">
+            <div class="documents-card">
+                <div class="documents-card-header">
+                    <h2>My Profile</h2>
+                </div>
+
+                <div class="upload-modal-body" style="padding:24px;">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <form method="POST"
+                          action="{{ route('profile.update') }}"
+                          enctype="multipart/form-data"
+                          class="upload-form">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" name="name" value="{{ auth()->user()->name }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="password" placeholder="Leave blank if unchanged">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" name="password_confirmation" placeholder="Confirm new password">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Upload Signature</label>
+                            <input type="file" name="signature" accept="image/png,image/jpeg,image/jpg">
+                        </div>
+                        <div class="form-card">
+                    <h3>Draw Signature</h3>
+
+                    <form id="drawSignatureForm" method="POST"
+                        action="{{ route('signature.draw') }}"
+                        class="user-form"
+                        onsubmit="
+                            return openPasswordModal(event, this);">
+
+                        @csrf
+
+                        <canvas id="signatureCanvas"
+                                width="500"
+                                height="200"
+                                class="signature-canvas"></canvas>
+
+                        <input type="hidden"
+                            name="signature_data"
+                            id="signatureData">
+
+                        <button type="button"
+                                class="btn-clear-signature"
+                                onclick="clearSignatureCanvas()">
+                            Clear
+                        </button>
+                        <input type="hidden"
+                                name="password"
+                                class="password-hidden-input">
+                    
+                        <button type="submit"
+                                class="btn-submit">
+                                Save Drawn Signature
+                        </button>
+
+                    </form>
+                </div>
+
+
+                       @if(auth()->user()->signature_path)
+                        <img src="{{ route('signatures.view', encrypt(auth()->id())) }}"
+                            class="signature-preview"
+                            alt="Signature">
+                        @endif
+                        
+
+                        <button type="submit" class="btn-submit">
+                            Save Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- My Signature --}}
+        <div id="section-signature" class="dashboard-section">
+            <h1 class="section-title">My Signature</h1>
+
+            @if($errors->signature->any())
+                <div class="alert alert-error">
+                    {{ $errors->signature->first('password') }}
+                </div>
+            @endif
+
+            @if(auth()->user()->signature_path)
+                <div class="signature-preview-card">
+                    <h3>Current Signature</h3>
+
+                    <img src="{{ route('signatures.view', encrypt(auth()->id())) }}"
+                         class="signature-preview"
+                         alt="Signature">
+
+                    <form id="removeSignatureForm"
+                          method="POST"
+                          action="{{ route('signature.remove') }}"
+                          onsubmit="return openPasswordModal(event, this)">
+                        @csrf
+                        @method('DELETE')
+
+                        <input type="hidden" name="password" class="password-hidden-input">
+
+                        <button type="submit" class="btn-remove-signature">
+                            Remove Signature
+                        </button>
+                    </form>
+                </div>
+            @endif
+
+            <div class="signature-grid">
+                <div class="form-card">
+                    <h3>Upload Signature Image</h3>
+
+                    <form id="uploadSignatureForm"
+                          method="POST"
+                          action="{{ route('signature.upload') }}"
+                          enctype="multipart/form-data"
+                          class="user-form"
+                          onsubmit="return openPasswordModal(event, this)">
+                        @csrf
+
+                        <div class="form-group">
+                            <label>Signature Image</label>
+                            <input type="file" name="signature" accept="image/*" required>
+                        </div>
+
+                        <input type="hidden" name="password" class="password-hidden-input">
+
+                        <button type="submit" class="btn-submit">
+                            Upload Signature
+                        </button>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h3>Draw Signature</h3>
+
+                    <form id="drawSignatureForm"
+                          method="POST"
+                          action="{{ route('signature.draw') }}"
+                          class="user-form"
+                          onsubmit="return openPasswordModal(event, this);">
+                        @csrf
+
+                        <canvas id="signatureCanvas"
+                                width="500"
+                                height="200"
+                                class="signature-canvas"></canvas>
+
+                        <input type="hidden" name="signature_data" id="signatureData">
+
+                        <button type="button"
+                                class="btn-clear-signature"
+                                onclick="clearSignatureCanvas()">
+                            Clear
+                        </button>
+
+                        <input type="hidden" name="password" class="password-hidden-input">
+
+                        <button type="submit" class="btn-submit">
+                            Save Drawn Signature
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{-- Signature Modal --}}
+<div class="modal-overlay" id="signModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Place Signature</h3>
+            <button onclick="closeSignModal()" class="modal-close">×</button>
+        </div>
+
+        <div class="page-selector">
+            <label for="sigPageInput">Page:</label>
+            <input type="number" id="sigPageInput" value="1" min="1">
+        </div>
+
+        <div class="pdf-wrapper" id="pdfWrapper">
+            <canvas id="pdfCanvas"></canvas>
+            <div class="pdf-click-layer" id="pdfClickLayer"></div>
+            <div class="sig-ghost" id="sigGhost">✍ {{ auth()->user()->name }}</div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeSignModal()">Cancel</button>
+            <span class="hint" id="hintText">Click anywhere on the document to place your signature</span>
+            <button class="btn-confirm" id="btnConfirm" onclick="submitSignature()" disabled>
+                ✔ Approve & Sign
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Reject Modal --}}
+<div class="modal-overlay" id="rejectModal" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Reject Document</h3>
+            <button onclick="closeRejectModal()" class="modal-close">×</button>
+        </div>
+
+        <form method="POST" id="rejectForm">
+            @csrf
+
+            <div class="form-group">
+                <label>Reason for rejection</label>
+                <textarea name="remarks" rows="5" required
+                          style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px;"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeRejectModal()">Cancel</button>
+                <button type="submit" class="btn-reject">Reject</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Signature Coordinate Form --}}
+<form id="signatureForm" method="POST" action="">
+    @csrf
+    <input type="hidden" name="sig_x" id="formSigX">
+    <input type="hidden" name="sig_y" id="formSigY">
+    <input type="hidden" name="sig_w" id="formSigW">
+    <input type="hidden" name="sig_h" id="formSigH">
+    <input type="hidden" name="sig_page" id="formSigPage">
+</form>
+
+{{-- PDF Viewer Modal --}}
+<div id="pdfModal" class="pdf-modal">
+    <div class="pdf-modal-content">
+        <button type="button" class="pdf-close" onclick="closePdfModal()">×</button>
+        <iframe id="pdfFrame" class="pdf-frame-viewer"></iframe>
+    </div>
+</div>
+
+@if(session('uploaded_signature_base64'))
+    <script>
+        console.log('UPLOADED SIGNATURE BASE64:');
+        console.log(@json(session('uploaded_signature_base64')));
+    </script>
+@endif
+
+@if(session('drawn_signature_base64'))
+    <script>
+        console.log('DRAWN SIGNATURE BASE64:');
+        console.log(@json(session('drawn_signature_base64')));
+    </script>
+@endif
+
+@include('partials.password-modal')
+
+@endsection

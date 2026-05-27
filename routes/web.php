@@ -79,7 +79,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'success' => true
     ]);
 });
-
+Route::patch('/profile/update', [ProfileController::class, 'update'])
+    ->name('profile.update')
+    ->middleware('auth');
 Route::get(
     '/files/view/{id}',
     [FileController::class, 'view']

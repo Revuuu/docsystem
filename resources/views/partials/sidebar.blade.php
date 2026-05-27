@@ -25,6 +25,9 @@
         <button class="nav-btn" onclick="showSection('documents')">
             My Documents
         </button>
+        <button class="nav-btn" onclick="showSection('profile')">
+            My Profile
+        </button>
     </nav>
 
     <div class="logout-wrap">

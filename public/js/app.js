@@ -449,25 +449,35 @@ function closeRejectModal()
         .style.display = 'none';
 }
 
-
 function openPdfModal(pdfUrl) {
-    document.getElementById('pdfFrame').src = pdfUrl;
-    document.getElementById('pdfModal').style.display = 'block';
+    const modal = document.getElementById('pdfModal');
+    const frame = document.getElementById('pdfFrame');
+
+    if (!modal || !frame) return;
+
+    frame.src = pdfUrl;
+    modal.classList.add('active');
 }
 
 function closePdfModal() {
-    document.getElementById('pdfFrame').src = '';
-    document.getElementById('pdfModal').style.display = 'none';
+    const modal = document.getElementById('pdfModal');
+    const frame = document.getElementById('pdfFrame');
+
+    if (!modal || !frame) return;
+
+    frame.src = '';
+    modal.classList.remove('active');
 }
 
-// Optional: close when clicking outside modal
-window.onclick = function(event) {
+document.addEventListener('click', function (e) {
     const modal = document.getElementById('pdfModal');
 
-    if (event.target === modal) {
+    if (modal && e.target === modal) {
         closePdfModal();
     }
-}
+});
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('documentSearchInput');
@@ -534,4 +544,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterDocuments);
     statusFilter.addEventListener('change', filterDocuments);
+});
+
+function openUploadModal()
+{
+    document
+        .getElementById('uploadModal')
+        .classList
+        .add('show');
+}
+
+function closeUploadModal()
+{
+    document
+        .getElementById('uploadModal')
+        .classList
+        .remove('show');
+}
+
+window.onclick = function(event)
+{
+    const modal =
+        document.getElementById('uploadModal');
+
+    if(event.target === modal)
+    {
+        closeUploadModal();
+    }
+}
+
+function toggleMoreMenu(event, button) {
+    event.stopPropagation();
+
+    const currentMenu = button.closest('.more-menu');
+
+    document.querySelectorAll('.more-menu.open').forEach(menu => {
+        if (menu !== currentMenu) {
+            menu.classList.remove('open');
+        }
+    });
+
+    currentMenu.classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.more-menu.open').forEach(menu => {
+        menu.classList.remove('open');
+    });
 });

@@ -85,7 +85,7 @@ class DashboardController extends Controller
             ));
         }
 
-        return view($userRole . '.index', compact(
+        return view('dashboard.index', compact(
             'documents',
             'signedDocuments',
             'approvals',
