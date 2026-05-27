@@ -96,7 +96,7 @@
                                 <tr class="document-row"
                                     data-title="{{ strtolower($doc->title) }}"
                                     data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
-                                    data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
+                                    data-status="{{ strtolower($doc->status) }}">
 
                                     <td>
                                         <span class="doc-id-pill">
@@ -137,81 +137,63 @@
 
                                     <td>
                                        @php
-    $myApproval = $doc->approvals
-        ->where('user_id', auth()->id())
-        ->sortBy('step_order')
-        ->first();
+                                            $approvedApprovals = $doc->approvals
+                                                ->where('status', 'approved');
 
-    $currentPendingApproval = $doc->approvals
-        ->where('status', 'pending')
-        ->sortBy('step_order')
-        ->first();
+                                            $pendingApproval = $doc->approvals
+                                                ->where('status', 'pending')
+                                                ->sortBy('step_order')
+                                                ->first();
 
-    $rejectedApproval = $doc->approvals
-        ->where('status', 'rejected')
-        ->sortBy('step_order')
-        ->first();
-@endphp
+                                            $waitingApproval = $doc->approvals
+                                                ->where('status', 'waiting')
+                                                ->sortBy('step_order')
+                                                ->first();
 
-@if($rejectedApproval)
+                                            $rejectedApproval = $doc->approvals
+                                                ->where('status', 'rejected')
+                                                ->first();
+                                        @endphp
 
-    <span class="status-pill neutral">
-        Rejected
-
-        <span class="pending-approver">
-            Rejected by:
-            {{ $rejectedApproval->user?->name ?? 'Unknown approver' }}
-        </span>
-    </span>
+                                        @if($myApproval?->status === 'approved')
+    <span class="status-pill success">Approved</span>
 
 @elseif($myApproval?->status === 'pending')
-
     <span class="status-pill waiting">
         Pending
-
         <span class="pending-approver">
-            Current Signatory:
-            {{ auth()->user()->name }}
+            Current Signatory: {{ auth()->user()->name }}
         </span>
     </span>
 
 @elseif($myApproval?->status === 'waiting')
-
     <span class="status-pill ongoing">
         Upcoming
 
         <span class="pending-approver">
             Waiting For:
-            {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
+            {{
+                $doc->approvals
+                    ->where('status', 'pending')
+                    ->first()?->user?->name
+                ?? 'Unknown approver'
+            }}
         </span>
     </span>
-
-@elseif(
-    $doc->approvals->count() > 0 &&
-    $doc->approvals->every(fn($a) => $a->status === 'approved')
-)
-
-    <span class="status-pill success">
-        Approved
-    </span>
-
-@elseif($currentPendingApproval)
+@else
+    {{-- For documents uploaded by me --}}
+    @php
+        $currentPendingApproval = $doc->approvals
+            ->where('status', 'pending')
+            ->first();
+    @endphp
 
     <span class="status-pill waiting">
         Pending
-
         <span class="pending-approver">
-            Current Signatory:
-            {{ $currentPendingApproval->user?->name ?? 'Unknown approver' }}
+            Current Signatory: {{ $currentPendingApproval->user?->name ?? 'Unknown approver' }}
         </span>
     </span>
-
-@else
-
-    <span class="status-pill ongoing">
-        {{ ucfirst(str_replace('_', ' ', $doc->status)) }}
-    </span>
-
 @endif
                                     </td>
 
@@ -298,169 +280,53 @@
 
                     <form method="POST"
                           action="{{ route('profile.update') }}"
-                          enctype="multipart/form-data"
                           class="upload-form">
                         @csrf
                         @method('PATCH')
 
                         <div class="form-group">
                             <label>Name</label>
-                            <input type="text" name="name" value="{{ auth()->user()->name }}" required>
+                            <input type="text"
+                                   name="name"
+                                   value="{{ auth()->user()->name }}"
+                                   required>
                         </div>
 
                         <div class="form-group">
                             <label>New Password</label>
-                            <input type="password" name="password" placeholder="Leave blank if unchanged">
+                            <input type="password"
+                                   name="password"
+                                   placeholder="Leave blank if unchanged"
+                                   autocomplete="new-password">
                         </div>
 
                         <div class="form-group">
                             <label>Confirm Password</label>
-                            <input type="password" name="password_confirmation" placeholder="Confirm new password">
+                            <input type="password"
+                                   name="password_confirmation"
+                                   placeholder="Confirm new password"
+                                   autocomplete="new-password">
                         </div>
-
-                        <div class="form-group">
-                            <label>Upload Signature</label>
-                            <input type="file" name="signature" accept="image/png,image/jpeg,image/jpg">
-                        </div>
-                        <div class="form-card">
-                    <h3>Draw Signature</h3>
-
-                    <form id="drawSignatureForm" method="POST"
-                        action="{{ route('signature.draw') }}"
-                        class="user-form"
-                        onsubmit="
-                            return openPasswordModal(event, this);">
-
-                        @csrf
-
-                        <canvas id="signatureCanvas"
-                                width="500"
-                                height="200"
-                                class="signature-canvas"></canvas>
-
-                        <input type="hidden"
-                            name="signature_data"
-                            id="signatureData">
 
                         <button type="button"
-                                class="btn-clear-signature"
-                                onclick="clearSignatureCanvas()">
-                            Clear
+                                class="btn-submit"
+                                onclick="openSignatureChoiceModal()">
+                            Signature
                         </button>
-                        <input type="hidden"
-                                name="password"
-                                class="password-hidden-input">
-                    
+
+                        @if(auth()->user()->signature_path)
+                            <div class="signature-preview-card">
+                                <h3>Current Signature</h3>
+
+                                <img src="{{ route('signatures.view', encrypt(auth()->id())) }}"
+                                     class="signature-preview"
+                                     alt="Signature">
+                            </div>
+                        @endif
+
                         <button type="submit"
                                 class="btn-submit">
-                                Save Drawn Signature
-                        </button>
-
-                    </form>
-                </div>
-
-
-                       @if(auth()->user()->signature_path)
-                        <img src="{{ route('signatures.view', encrypt(auth()->id())) }}"
-                            class="signature-preview"
-                            alt="Signature">
-                        @endif
-                        
-
-                        <button type="submit" class="btn-submit">
                             Save Profile
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {{-- My Signature --}}
-        <div id="section-signature" class="dashboard-section">
-            <h1 class="section-title">My Signature</h1>
-
-            @if($errors->signature->any())
-                <div class="alert alert-error">
-                    {{ $errors->signature->first('password') }}
-                </div>
-            @endif
-
-            @if(auth()->user()->signature_path)
-                <div class="signature-preview-card">
-                    <h3>Current Signature</h3>
-
-                    <img src="{{ route('signatures.view', encrypt(auth()->id())) }}"
-                         class="signature-preview"
-                         alt="Signature">
-
-                    <form id="removeSignatureForm"
-                          method="POST"
-                          action="{{ route('signature.remove') }}"
-                          onsubmit="return openPasswordModal(event, this)">
-                        @csrf
-                        @method('DELETE')
-
-                        <input type="hidden" name="password" class="password-hidden-input">
-
-                        <button type="submit" class="btn-remove-signature">
-                            Remove Signature
-                        </button>
-                    </form>
-                </div>
-            @endif
-
-            <div class="signature-grid">
-                <div class="form-card">
-                    <h3>Upload Signature Image</h3>
-
-                    <form id="uploadSignatureForm"
-                          method="POST"
-                          action="{{ route('signature.upload') }}"
-                          enctype="multipart/form-data"
-                          class="user-form"
-                          onsubmit="return openPasswordModal(event, this)">
-                        @csrf
-
-                        <div class="form-group">
-                            <label>Signature Image</label>
-                            <input type="file" name="signature" accept="image/*" required>
-                        </div>
-
-                        <input type="hidden" name="password" class="password-hidden-input">
-
-                        <button type="submit" class="btn-submit">
-                            Upload Signature
-                        </button>
-                    </form>
-                </div>
-
-                <div class="form-card">
-                    <h3>Draw Signature</h3>
-
-                    <form id="drawSignatureForm"
-                          method="POST"
-                          action="{{ route('signature.draw') }}"
-                          class="user-form"
-                          onsubmit="return openPasswordModal(event, this);">
-                        @csrf
-
-                        <canvas id="signatureCanvas"
-                                width="500"
-                                height="200"
-                                class="signature-canvas"></canvas>
-
-                        <input type="hidden" name="signature_data" id="signatureData">
-
-                        <button type="button"
-                                class="btn-clear-signature"
-                                onclick="clearSignatureCanvas()">
-                            Clear
-                        </button>
-
-                        <input type="hidden" name="password" class="password-hidden-input">
-
-                        <button type="submit" class="btn-submit">
-                            Save Drawn Signature
                         </button>
                     </form>
                 </div>
@@ -524,6 +390,143 @@
     </div>
 </div>
 
+
+{{-- Signature Choice Modal --}}
+<div class="modal-overlay" id="signatureChoiceModal" style="display:none;">
+    <div class="modal-box" style="max-width:420px;height:auto;">
+
+        <div class="modal-header">
+            <h3>Choose Signature Method</h3>
+
+            <button type="button"
+                    onclick="closeSignatureChoiceModal()"
+                    class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <div class="modal-footer" style="flex-direction:column;">
+            <button type="button"
+                    class="btn-submit"
+                    onclick="openSignatureUploadModal()">
+                Upload Signature
+            </button>
+
+            <button type="button"
+                    class="btn-submit"
+                    onclick="openSignatureDrawModal()">
+                Draw Signature
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{{-- Upload Signature Modal --}}
+<div class="modal-overlay"
+     id="signatureUploadModal"
+     style="display:none;">
+
+    <div class="modal-box"
+         style="max-width:500px;height:auto;">
+
+        <div class="modal-header">
+            <h3>Upload Signature</h3>
+
+            <button type="button"
+                    onclick="closeSignatureUploadModal()"
+                    class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <form method="POST"
+              action="{{ route('signature.upload') }}"
+              enctype="multipart/form-data"
+              class="user-form"
+              style="padding:24px;"
+              onsubmit="return openPasswordModal(event, this)">
+
+            @csrf
+
+            <div class="form-group">
+                <label>Signature Image</label>
+
+                <input type="file"
+                       name="signature"
+                       accept="image/*"
+                       required>
+            </div>
+
+            <input type="hidden"
+                   name="password"
+                   class="password-hidden-input">
+
+            <button type="submit"
+                    class="btn-submit">
+                Upload Signature
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+{{-- Signature Draw Modal --}}
+<div class="modal-overlay" id="signatureDrawModal" style="display:none;">
+    <div class="modal-box" style="max-width:650px;height:auto;">
+
+        <div class="modal-header">
+            <h3>Draw Signature</h3>
+
+            <button type="button"
+                    onclick="closeSignatureDrawModal()"
+                    class="modal-close">
+                ×
+            </button>
+        </div>
+
+        
+        <form id="drawSignatureForm"
+      method="POST"
+      action="{{ route('signature.draw') }}"
+      class="user-form"
+      onsubmit="return openPasswordModal(event, this);">
+
+    @csrf
+
+    <canvas id="signatureCanvas"
+            width="500"
+            height="200"
+            class="signature-canvas"></canvas>
+
+    <input type="hidden"
+           name="signature_data"
+           id="signatureData">
+    
+           <input type="hidden"
+       name="password"
+       class="password-hidden-input">
+
+    <div class="signature-btn-row">
+
+        <button type="button"
+                class="btn-clear-signature"
+                onclick="clearSignatureCanvas()">
+            Clear
+        </button>
+
+        <button type="submit"
+                class="btn-submit">
+            Save Drawn Signature
+        </button>
+
+    </div>
+</form>
+
+    </div>
+</div>
+
 {{-- Signature Coordinate Form --}}
 <form id="signatureForm" method="POST" action="">
     @csrf
@@ -556,6 +559,34 @@
     </script>
 @endif
 
+
+<script>
+function openSignatureChoiceModal() {
+    document.getElementById('signatureChoiceModal').style.display = 'flex';
+}
+
+function closeSignatureChoiceModal() {
+    document.getElementById('signatureChoiceModal').style.display = 'none';
+}
+
+function openSignatureUploadModal() {
+    closeSignatureChoiceModal();
+    document.getElementById('signatureUploadModal').style.display = 'flex';
+}
+
+function closeSignatureUploadModal() {
+    document.getElementById('signatureUploadModal').style.display = 'none';
+}
+
+function openSignatureDrawModal() {
+    closeSignatureChoiceModal();
+    document.getElementById('signatureDrawModal').style.display = 'flex';
+}
+
+function closeSignatureDrawModal() {
+    document.getElementById('signatureDrawModal').style.display = 'none';
+}
+</script>
 @include('partials.password-modal')
 
 @endsection

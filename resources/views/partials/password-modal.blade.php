@@ -220,160 +220,57 @@
 </style>
 
 <script>
+window.protectedForm = null;
 
-function openPasswordModal(event, form)
-{
+function openPasswordModal(event, form) {
     event.preventDefault();
 
-    const modal =
-        document.getElementById('passwordModal');
+    window.protectedForm = form;
 
-    modal.style.display = 'flex';
-
-    modal.dataset.formId = form.id;
-
+    document.getElementById('passwordModal').style.display = 'flex';
     document.getElementById('modalPassword').value = '';
-
-
-
-    setTimeout(() => {
-
-        document.getElementById('modalPassword')
-            .focus();
-
-    }, 50);
 
     return false;
 }
 
-function closePasswordModal()
-{
-    document.getElementById('passwordModal')
-        .style.display = 'none';
-
-    document.body.classList.remove('modal-open');
+function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+    window.protectedForm = null;
 }
 
-
-function togglePasswordVisibility() {
-    const input = document.getElementById('modalPassword');
-    const eyeIcon = document.getElementById('eyeIcon');
-    if (input.type === 'password') {
-        input.type = 'text';
-        // Change eye to "slashed" version
-        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-    } else {
-        input.type = 'password';
-        // Revert back to normal eye
-        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
-    }
-}
-
-function showError(message) {
-    const errorDiv = document.getElementById('modalErrorMessage');
-    errorDiv.innerText = message;
-    errorDiv.style.display = 'block';
-    document.getElementById('modalPassword').style.borderColor = '#dc2626';
-}
-
-function hideError() {
-    const errorDiv = document.getElementById('modalErrorMessage');
-    errorDiv.style.display = 'none';
-    document.getElementById('modalPassword').style.borderColor = '#d1d5db';
-}
-async function submitProtectedForm()
-{
-    const modal =
-        document.getElementById('passwordModal');
-
-    const formId =
-        modal.dataset.formId;
-
-    const form =
-        document.getElementById(formId);
-
-    if (!form) {
-
-        showError('Form session expired.');
-
+function submitProtectedForm() {
+    if (!window.protectedForm) {
+        alert('No form selected.');
         return;
     }
 
-    const password =
-        document.getElementById('modalPassword').value;
+    const passwordInput = document.getElementById('modalPassword');
+    const password = passwordInput.value.trim();
 
     if (!password) {
-
-        showError('Password is required.');
-
+        alert('Password is required.');
+        passwordInput.focus();
         return;
     }
 
-    const response = await fetch('/verify-password', {
+    const hiddenInput = window.protectedForm.querySelector('.password-hidden-input');
 
-        method: 'POST',
-
-        headers: {
-            'Content-Type': 'application/json',
-
-            'X-CSRF-TOKEN':
-                document.querySelector(
-                    'meta[name="csrf-token"]'
-                ).content
-        },
-
-        body: JSON.stringify({
-            password: password
-        })
-    });
-
-   const result = await response.json();
-
-if (!response.ok) {
-
-    showError(
-        result.message || 'Incorrect account password.'
-    );
-
-    return;
-}
-
-    const hiddenInput =
-        form.querySelector('.password-hidden-input');
+    if (!hiddenInput) {
+        alert('Password hidden input missing.');
+        return;
+    }
 
     hiddenInput.value = password;
 
-    if (form.id === 'drawSignatureForm') {
-
-    saveDrawnSignature();
-
+    if (window.protectedForm.id === 'drawSignatureForm') {
+        saveDrawnSignature();
     }
-    
-    form.submit();
+
+    window.protectedForm.submit();
 }
 
-
+function togglePasswordVisibility() {
+    const input = document.getElementById('modalPassword');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
 </script>
-
-@if(session('password_modal_error'))
-<script>
-
-window.addEventListener('load', () => {
-
-    const modal =
-        document.getElementById('passwordModal');
-
-    modal.style.display = 'flex';
-
-    modal.dataset.formId =
-        '{{ session('password_modal_form') }}';
-
-    console.log(
-        'Restored form ID:',
-        modal.dataset.formId
-    );
-
-});
-
-</script>
-@endif

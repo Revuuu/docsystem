@@ -587,14 +587,18 @@ cursor: crosshair;
 
 .btn-clear-signature, .btn-remove-signature {
 border: none;
-border-radius: 8px;
+border-radius: 14px;
 padding: 0.8rem 1rem;
+min-height: 54px;
 background: var(--red-acc);
 color: white;
 font-family: var(--font-mono);
 cursor: pointer;
 }
 
+.btn-clear-signature {
+    margin-bottom: 20px;
+}
 .btn-reject {
 background: #dc2626;
 color: white;
@@ -1700,7 +1704,7 @@ SUBMIT
 
     cursor:pointer;
 
-    margin-top:10px;
+    margin-bottom:20px;
 }
 
 /* ======================================================
@@ -2169,3 +2173,14 @@ DOCUMENTS SECTION RESPONSIVE FIX
     }
 }
 
+.signature-btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    align-items: center;
+}
+
+.signature-btn-row .btn-clear-signature,
+.signature-btn-row .btn-submit {
+    flex: 1;
+}
