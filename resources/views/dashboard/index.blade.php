@@ -23,15 +23,36 @@
             </div>
         @endif
         @php
+            use Illuminate\Pagination\LengthAwarePaginator;
+
             $assignedDocuments = $approvals
                 ->pluck('document')
                 ->filter();
 
-            $myDocuments = $documents
+            $mergedDocuments = $documents
                 ->merge($assignedDocuments)
                 ->unique('id')
                 ->sortByDesc('created_at')
                 ->values();
+
+            $perPage = 10;
+
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+            $currentItems = $mergedDocuments
+                ->slice(($currentPage - 1) * $perPage, $perPage)
+                ->values();
+
+            $myDocuments = new LengthAwarePaginator(
+                $currentItems,
+                $mergedDocuments->count(),
+                $perPage,
+                $currentPage,
+                [
+                    'path' => request()->url(),
+                    'query' => request()->query(),
+                ]
+            );
         @endphp
 
         {{-- Documents --}}
@@ -279,14 +300,15 @@
                 </div>
 
                 <div class="documents-footer">
+
                     <div class="table-pagination">
-                        Table foos:
-                        <span class="active">1</span>
-                        <span>2</span>
-                        <span>3</span>
-                        ...
-                        Next →
+
+                        {{ $myDocuments->appends([
+                            'section' => 'documents'
+                        ])->links() }}
+
                     </div>
+
                 </div>
 
             </div>
