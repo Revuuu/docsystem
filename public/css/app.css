@@ -2109,6 +2109,29 @@ DOCUMENTS SECTION RESPONSIVE FIX
     gap: 12px;
 }
 
+
+.middle-name-wrapper{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.middle-name-checkbox{
+    width:18px !important;
+    height:18px !important;
+    accent-color:#0f6a36;
+    cursor:pointer;
+}
+
+.checkbox-inline{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+}
+
+
+
 /* Tablet */
 @media (max-width: 900px) {
     .modern-docs-table {

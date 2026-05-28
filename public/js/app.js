@@ -626,3 +626,17 @@ document.addEventListener('click', () => {
         menu.classList.remove('open');
     });
 });
+
+document.addEventListener('DOMContentLoaded', () => { 
+    const middleNameInput = document.getElementById('middle_name'); 
+    const noMiddleNameCheckbox = document.getElementById('no_middle_name'); 
+    noMiddleNameCheckbox.addEventListener('change', () => { 
+        if (noMiddleNameCheckbox.checked) { 
+            middleNameInput.value = ''; 
+            middleNameInput.disabled = true; 
+        } 
+        else { 
+            middleNameInput.disabled = false; 
+        } 
+    }); 
+});

@@ -199,48 +199,92 @@
                 <h3>Add New User</h3>
 
                 <form method="POST"
-                      action="{{ route('users.store') }}"
-                      class="user-form">
+                    action="{{ route('users.store') }}"
+                    class="user-form">
 
                     @csrf
 
+                    {{-- FIRST NAME --}}
                     <div class="form-group">
-                        <label>Name</label>
+
+                        <label>
+                            First Name
+                        </label>
 
                         <input type="text"
-                               name="name"
-                               value="{{ old('name') }}"
-                               required>
+                            name="first_name"
+                            value="{{ old('first_name') }}"
+                            required>
+
                     </div>
 
+                    {{-- MIDDLE NAME --}}
                     <div class="form-group">
-                        <label>Email</label>
 
-                        <input type="email"
-                               name="email"
-                               value="{{ old('email') }}"
-                               required>
+                        <label>
+                            Middle Name
+                        </label>
+
+                        <div class="middle-name-wrapper">
+                             <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}"> 
+                             <label class="checkbox-inline"> <input type="checkbox" id="no_middle_name" class="middle-name-checkbox">
+                                No Middle Name 
+                            </label> 
+                        </div>
+
                     </div>
 
+                    {{-- LAST NAME --}}
                     <div class="form-group">
-                        <label>Password</label>
 
-                        <input type="password"
-                               name="password"
-                               required>
+                        <label>
+                            Last Name
+                        </label>
+
+                        <input type="text"
+                            name="last_name"
+                            value="{{ old('last_name') }}"
+                            required>
+
                     </div>
 
+                    {{-- GENDER --}}
                     <div class="form-group">
-                        <label>Confirm Password</label>
 
-                        <input type="password"
-                               name="password_confirmation"
-                               required>
+                        <label>
+                            Gender
+                        </label>
+
+                        <select name="gender" required>
+
+                            <option value="">
+                                -- Select Gender --
+                            </option>
+
+                            <option value="male"
+                                {{ old('gender') === 'male' ? 'selected' : '' }}>
+
+                                Male
+
+                            </option>
+
+                            <option value="female"
+                                {{ old('gender') === 'female' ? 'selected' : '' }}>
+
+                                Female
+
+                            </option>
+
+                        </select>
+
                     </div>
 
+                    {{-- ROLE --}}
                     <div class="form-group">
 
-                        <label>Assign Role</label>
+                        <label>
+                            Assign Role
+                        </label>
 
                         <select name="role" required>
 
@@ -248,20 +292,86 @@
                                 -- Select Role --
                             </option>
 
-                            <option value="approver"
-                                {{ old('role') === 'approver' ? 'selected' : '' }}>
-                                Approver
+                            <option value="staff"
+                                {{ old('role') === 'staff' ? 'selected' : '' }}>
+
+                                Staff
+
                             </option>
 
-                            <option value="requestor"
-                                {{ old('role') === 'requestor' ? 'selected' : '' }}>
-                                Requestor
+                            <option value="supervisor"
+                                {{ old('role') === 'supervisor' ? 'selected' : '' }}>
+
+                                Supervisor
+
+                            </option>
+
+                            <option value="depthead"
+                                {{ old('role') === 'depthead' ? 'selected' : '' }}>
+
+                                Department Head
+
+                            </option>
+
+                            <option value="division"
+                                {{ old('role') === 'division' ? 'selected' : '' }}>
+
+                                Division Head
+
+                            </option>
+
+                            <option value="executive"
+                                {{ old('role') === 'executive' ? 'selected' : '' }}>
+
+                                Executive
+
                             </option>
 
                         </select>
 
                     </div>
 
+                    {{-- EMAIL --}}
+                    <div class="form-group">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <input type="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            required>
+
+                    </div>
+
+                    {{-- PASSWORD --}}
+                    <div class="form-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <input type="password"
+                            name="password"
+                            required>
+
+                    </div>
+
+                    {{-- CONFIRM PASSWORD --}}
+                    <div class="form-group">
+
+                        <label>
+                            Confirm Password
+                        </label>
+
+                        <input type="password"
+                            name="password_confirmation"
+                            required>
+
+                    </div>
+
+                    {{-- ERRORS --}}
                     @if($errors->any())
 
                         <div class="alert alert-error">
@@ -269,7 +379,11 @@
                             <ul>
 
                                 @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
+
+                                    <li>
+                                        {{ $error }}
+                                    </li>
+
                                 @endforeach
 
                             </ul>
@@ -278,8 +392,12 @@
 
                     @endif
 
-                    <button type="submit" class="btn-submit">
+                    {{-- SUBMIT --}}
+                    <button type="submit"
+                            class="btn-submit">
+
                         Create User
+
                     </button>
 
                 </form>
