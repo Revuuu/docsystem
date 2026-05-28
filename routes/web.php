@@ -9,9 +9,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\FileController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+Route::redirect('/', '/dashboard');
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
