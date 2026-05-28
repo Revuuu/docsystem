@@ -90,6 +90,53 @@
             );
         @endphp
 
+{{-- DASHBOARD SECTION --}}
+<div id="section-dashboard"
+     class="dashboard-section">
+
+    @php
+        $role =
+            auth()->user()->roles->first()?->name
+            ?? auth()->user()->role;
+    @endphp
+
+    @switch($role)
+
+        @case('staff')
+            @include('dashboard.staff')
+            @break
+
+        @case('supervisor')
+            @include('dashboard.supervisor')
+            @break
+
+        @case('depthead')
+            @include('dashboard.depthead')
+            @break
+
+        @case('division')
+            @include('dashboard.division')
+            @break
+
+        @case('executive')
+            @include('dashboard.executive')
+            @break
+
+        @default
+
+            <div class="documents-card">
+
+                <h2>
+                    Dashboard not configured
+                </h2>
+
+            </div>
+
+    @endswitch
+
+</div>
+
+
         {{-- Documents --}}
         <div id="section-documents" class="dashboard-section">
 
@@ -693,5 +740,45 @@ function closeSignatureDrawModal() {
 }
 </script>
 @include('partials.password-modal')
+
+
+<script>
+
+function showSection(section)
+{
+    document.querySelectorAll('.dashboard-section')
+        .forEach((el) => {
+            el.style.display = 'none';
+        });
+
+    const target =
+        document.getElementById('section-' + section);
+
+    if (target) {
+        target.style.display = 'block';
+    }
+
+    document.querySelectorAll('.nav-btn')
+        .forEach((btn) => {
+            btn.classList.remove('active');
+        });
+
+    const activeBtn = document.querySelector(
+        `.nav-btn[onclick="showSection('${section}')"]`
+    );
+
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    showSection('dashboard');
+
+});
+
+</script>
+
 
 @endsection

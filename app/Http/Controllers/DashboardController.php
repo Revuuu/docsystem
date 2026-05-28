@@ -43,7 +43,7 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get();
 
-        $documents = Document::with('approvals')
+        $documents = Document::with('approvals.user')
             ->where('uploaded_by', $user->id)
             ->latest()
             ->get();

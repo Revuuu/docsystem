@@ -22,6 +22,9 @@
     </div>
 
     <nav class="sidebar-nav">
+        <button class="nav-btn" onclick="showSection('dashboard')"> 
+            Dashboard 
+        </button>
         <button class="nav-btn" onclick="showSection('documents')">
             My Documents
         </button>
