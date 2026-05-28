@@ -5,13 +5,14 @@
 
         <div>
 
-            <h1>
-                Staff Dashboard
-            </h1>
+<h1>
+    {{ $dashboardTitle }}
+</h1>
 
-            <p>
-                Document workflow overview and approvals
-            </p>
+<p>
+    {{ $dashboardSubtitle }}
+</p>
+
 
         </div>
 
@@ -28,7 +29,7 @@
                 </strong>
 
                 <small>
-                    Staff User
+                {{ ucfirst($role) }}
                 </small>
 
             </div>

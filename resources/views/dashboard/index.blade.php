@@ -95,46 +95,54 @@
      class="dashboard-section">
 
     @php
+
         $role =
             auth()->user()->roles->first()?->name
             ?? auth()->user()->role;
+
+        $dashboardTitle = match($role) {
+
+            'staff' => 'Staff Dashboard',
+
+            'supervisor' => 'Supervisor Dashboard',
+
+            'depthead' => 'Department Head Dashboard',
+
+            'division' => 'Division Head Dashboard',
+
+            'executive' => 'Executive Dashboard',
+
+            default => 'Dashboard',
+        };
+
+        $dashboardSubtitle = match($role) {
+
+            'staff' =>
+                'Document workflow overview and approvals',
+
+            'supervisor' =>
+                'Department workflow monitoring and approvals',
+
+            'depthead' =>
+                'Department oversight and document validation',
+
+            'division' =>
+                'Division-wide approval management',
+
+            'executive' =>
+                'Executive approval and compliance overview',
+
+            default =>
+                'Workflow dashboard',
+        };
+
     @endphp
 
-    @switch($role)
-
-        @case('staff')
-            @include('dashboard.staff')
-            @break
-
-        @case('supervisor')
-            @include('dashboard.supervisor')
-            @break
-
-        @case('depthead')
-            @include('dashboard.depthead')
-            @break
-
-        @case('division')
-            @include('dashboard.division')
-            @break
-
-        @case('executive')
-            @include('dashboard.executive')
-            @break
-
-        @default
-
-            <div class="documents-card">
-
-                <h2>
-                    Dashboard not configured
-                </h2>
-
-            </div>
-
-    @endswitch
+    @include('dashboard.staff')
 
 </div>
+
+
 
 
         {{-- Documents --}}
