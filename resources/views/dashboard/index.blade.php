@@ -25,6 +25,9 @@
         @php
             use Illuminate\Pagination\LengthAwarePaginator;
 
+            $search = strtolower(request('search', ''));
+            $status = strtolower(request('status', ''));
+
             $assignedDocuments = $approvals
                 ->pluck('document')
                 ->filter();
@@ -32,6 +35,38 @@
             $mergedDocuments = $documents
                 ->merge($assignedDocuments)
                 ->unique('id')
+                ->filter(function ($doc) use ($search, $status) {
+
+                    $latestVersion = $doc->latestVersion();
+
+                    $title = strtolower($doc->title ?? '');
+
+                    $file = strtolower(
+                        $latestVersion
+                            ? basename($latestVersion->generated_storage_path)
+                            : ''
+                    );
+
+                    $myApproval = $doc->approvals
+                        ->where('user_id', auth()->id())
+                        ->sortBy('step_order')
+                        ->first();
+
+                    $docStatus = strtolower(
+                        $myApproval?->status ?? $doc->status
+                    );
+
+                    $matchesSearch =
+                        empty($search) ||
+                        str_contains($title, $search) ||
+                        str_contains($file, $search);
+
+                    $matchesStatus =
+                        empty($status) ||
+                        $docStatus === $status;
+
+                    return $matchesSearch && $matchesStatus;
+                })
                 ->sortByDesc('created_at')
                 ->values();
 
@@ -63,15 +98,34 @@
                 <div class="documents-card-header">
                     <div class="documents-tools">
                         <div class="search-box">
-                            <input type="text" id="documentSearchInput" placeholder="Search by file name...">
+                            <input type="text"
+                                id="documentSearchInput"
+                                value="{{ request('search') }}"
+                                placeholder="Search by file name...">
                         </div>
 
                         <select id="documentStatusFilter" class="documentStatusFilter">
-                            <option value="">All Status</option>
-                            <option value="waiting">Upcoming</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
+
+                            <option value="" {{ request('status') == '' ? 'selected' : '' }}>
+                                All Status
+                            </option>
+
+                            <option value="waiting" {{ request('status') == 'waiting' ? 'selected' : '' }}>
+                                Upcoming
+                            </option>
+
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                                Pending
+                            </option>
+
+                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>
+                                Approved
+                            </option>
+
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                                Rejected
+                            </option>
+
                         </select>
 
                         <button class="upload-document-btn" type="button" onclick="openUploadModal()">
@@ -80,237 +134,238 @@
                     </div>
                 </div>
 
-                <div class="table-wrapper">
-                    <table class="modern-docs-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>File name</th>
-                                <th>Uploaded By</th>
-                                <th>file_path</th>
-                                <th>Timestamp</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach($myDocuments as $index => $doc)
-
-                                @php
-                                    $latestVersion = $doc->latestVersion();
-
-                                    $myApproval = $doc->approvals
-                                        ->where('user_id', auth()->id())
-                                        ->sortBy('step_order')
-                                        ->first();
-
-                                    $myPendingApproval = $doc->approvals
-                                        ->where('user_id', auth()->id())
-                                        ->where('status', 'pending')
-                                        ->first();
-
-                                    $signingFileId = $doc->current_signed_file?->id
-                                        ?? $latestVersion?->id;
-                                @endphp
-
-                                <tr class="document-row"
-                                    data-title="{{ strtolower($doc->title) }}"
-                                    data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
-                                    data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
-
-                                    <td>
-                                        <span class="doc-id-pill">
-                                            {{ $doc->id }}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <div class="file-name">
-                                            {{ $doc->title }}
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <div class="table-user">
-                                            <div class="table-user-avatar">
-                                                {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
-                                            </div>
-
-                                            <div>
-                                                <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
-                                                <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <div class="file-name">
-                                            {{ $latestVersion ? basename($latestVersion->generated_storage_path) : 'No file' }}
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        {{ $doc->created_at->format('M d, Y') }}
-                                        <br>
-                                        <small>{{ $doc->created_at->format('h:i A') }}</small>
-                                    </td>
-
-                                    <td>
-    @php
-        $approvedApprovals = $doc->approvals
-            ->where('status', 'approved');
-
-        $pendingApproval = $doc->approvals
-            ->where('status', 'pending')
-            ->sortBy('step_order')
-            ->first();
-
-        $waitingApproval = $doc->approvals
-            ->where('status', 'waiting')
-            ->sortBy('step_order')
-            ->first();
-
-        $rejectedApproval = $doc->approvals
-            ->where('status', 'rejected')
-            ->first();
-    @endphp
-
-    {{-- If current user already approved --}}
-    @if($myApproval?->status === 'approved')
-        <span class="status-pill success">
-            Approved
-        </span>
-
-    {{-- If current user is the active signer --}}
-    @elseif($myApproval?->status === 'pending')
-        <span class="status-pill waiting">
-            Pending
-
-            <span class="pending-approver">
-                Current Signatory: {{ auth()->user()->name }}
-            </span>
-        </span>
-
-    {{-- If current user is waiting for their turn --}}
-    @elseif($myApproval?->status === 'waiting')
-        <span class="status-pill ongoing">
-            Upcoming
-
-            <span class="pending-approver">
-                Waiting For:
-                {{
-                    $doc->approvals
-                        ->where('status', 'pending')
-                        ->first()?->user?->name
-                    ?? 'Unknown approver'
-                }}
-            </span>
-        </span>
-
-    {{-- Fallback for uploaded documents --}}
-    @else
-
-        {{-- Document fully approved --}}
-        @if($doc->status === 'approved')
-            <span class="status-pill success">
-                Approved
-            </span>
-
-        {{-- Document rejected --}}
-        @elseif($doc->status === 'rejected')
-            <span class="status-pill rejected">
-                Rejected
-            </span>
-
-        {{-- Document still ongoing --}}
-        @else
-
-            @php
-                $currentPendingApproval = $doc->approvals
-                    ->where('status', 'pending')
-                    ->first();
-            @endphp
-
-            <span class="status-pill waiting">
-                Pending
-
-                <span class="pending-approver">
-                    Current Signatory:
-                    {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
-                </span>
-            </span>
-
-        @endif
-
-    @endif
-</td>
-
-                                    <td>
-                                        <div class="more-menu">
-                                            <button type="button"
-                                                    class="table-action-btn"
-                                                    onclick="toggleMoreMenu(event, this)">
-                                                More ⋮
-                                            </button>
-
-                                            <div class="more-menu-dropdown">
-
-                                                @if($myPendingApproval && $signingFileId)
-                                                    <button type="button"
-                                                            class="btn-sign"
-                                                            onclick="checkSignatureAndOpenModal(
-                                                                {{ auth()->user()->signature_path ? 'true' : 'false' }},
-                                                                {{ $myPendingApproval->id }},
-                                                                '{{ route('files.view', encrypt($signingFileId)) }}',
-                                                                '{{ route('approvals.approve', $myPendingApproval->id) }}'
-                                                            )">
-                                                        ✔ Approve & Sign
-                                                    </button>
-
-                                                    <button type="button"
-                                                            class="btn-reject"
-                                                            onclick="openRejectModal({{ $myPendingApproval->id }})">
-                                                        Reject
-                                                    </button>
-                                                @endif
-
-                                                @if($latestVersion)
-                                                    <button type="button"
-                                                            onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
-                                                        View PDF
-                                                    </button>
-
-                                                    <a href="{{ route('files.download', encrypt($latestVersion->id)) }}">
-                                                        Download PDF
-                                                    </a>
-                                                @endif
-
-                                            </div>
-                                        </div>
-                                    </td>
+                <div id="documentsTableContainer">
+                    <div class="table-wrapper">
+                        <table class="modern-docs-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>File name</th>
+                                    <th>Uploaded By</th>
+                                    <th>file_path</th>
+                                    <th>Timestamp</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
 
-                    <div id="noResultsMessage" style="display:none; text-align:center; padding:20px; color:#777;">
-                        No results found.
+                            <tbody id="documentsTableBody">
+                                @foreach($myDocuments as $index => $doc)
+
+                                    @php
+                                        $latestVersion = $doc->latestVersion();
+
+                                        $myApproval = $doc->approvals
+                                            ->where('user_id', auth()->id())
+                                            ->sortBy('step_order')
+                                            ->first();
+
+                                        $myPendingApproval = $doc->approvals
+                                            ->where('user_id', auth()->id())
+                                            ->where('status', 'pending')
+                                            ->first();
+
+                                        $signingFileId = $doc->current_signed_file?->id
+                                            ?? $latestVersion?->id;
+                                    @endphp
+
+                                    <tr class="document-row"
+                                        data-title="{{ strtolower($doc->title) }}"
+                                        data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
+                                        data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
+
+                                        <td>
+                                            <span class="doc-id-pill">
+                                                {{ $doc->id }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="file-name">
+                                                {{ $doc->title }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="table-user">
+                                                <div class="table-user-avatar">
+                                                    {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
+                                                </div>
+
+                                                <div>
+                                                    <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
+                                                    <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="file-name">
+                                                {{ $latestVersion ? basename($latestVersion->generated_storage_path) : 'No file' }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {{ $doc->created_at->format('M d, Y') }}
+                                            <br>
+                                            <small>{{ $doc->created_at->format('h:i A') }}</small>
+                                        </td>
+
+                                        <td>
+                                            @php
+                                                $approvedApprovals = $doc->approvals
+                                                    ->where('status', 'approved');
+
+                                                $pendingApproval = $doc->approvals
+                                                    ->where('status', 'pending')
+                                                    ->sortBy('step_order')
+                                                    ->first();
+
+                                                $waitingApproval = $doc->approvals
+                                                    ->where('status', 'waiting')
+                                                    ->sortBy('step_order')
+                                                    ->first();
+
+                                                $rejectedApproval = $doc->approvals
+                                                    ->where('status', 'rejected')
+                                                    ->first();
+                                            @endphp
+
+                                            {{-- If current user already approved --}}
+                                            @if($myApproval?->status === 'approved')
+                                                <span class="status-pill success">
+                                                    Approved
+                                                </span>
+
+                                            {{-- If current user is the active signer --}}
+                                            @elseif($myApproval?->status === 'pending')
+                                                <span class="status-pill waiting">
+                                                    Pending
+
+                                                    <span class="pending-approver">
+                                                        Current Signatory: {{ auth()->user()->name }}
+                                                    </span>
+                                                </span>
+
+                                            {{-- If current user is waiting for their turn --}}
+                                            @elseif($myApproval?->status === 'waiting')
+                                                <span class="status-pill ongoing">
+                                                    Upcoming
+
+                                                    <span class="pending-approver">
+                                                        Waiting For:
+                                                        {{
+                                                            $doc->approvals
+                                                                ->where('status', 'pending')
+                                                                ->first()?->user?->name
+                                                            ?? 'Unknown approver'
+                                                        }}
+                                                    </span>
+                                                </span>
+
+                                            {{-- Fallback for uploaded documents --}}
+                                            @else
+
+                                                {{-- Document fully approved --}}
+                                                @if($doc->status === 'approved')
+                                                    <span class="status-pill success">
+                                                        Approved
+                                                    </span>
+
+                                                {{-- Document rejected --}}
+                                                @elseif($doc->status === 'rejected')
+                                                    <span class="status-pill rejected">
+                                                        Rejected
+                                                    </span>
+
+                                                {{-- Document still ongoing --}}
+                                                @else
+
+                                                    @php
+                                                        $currentPendingApproval = $doc->approvals
+                                                            ->where('status', 'pending')
+                                                            ->first();
+                                                    @endphp
+
+                                                    <span class="status-pill waiting">
+                                                        Pending
+
+                                                        <span class="pending-approver">
+                                                            Current Signatory:
+                                                            {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
+                                                        </span>
+                                                    </span>
+
+                                                @endif
+
+                                            @endif
+                                        </td>
+
+                                        <td>
+                                            <div class="more-menu">
+                                                <button type="button"
+                                                        class="table-action-btn"
+                                                        onclick="toggleMoreMenu(event, this)">
+                                                    More ⋮
+                                                </button>
+
+                                                <div class="more-menu-dropdown">
+
+                                                    @if($myPendingApproval && $signingFileId)
+                                                        <button type="button"
+                                                                class="btn-sign"
+                                                                onclick="checkSignatureAndOpenModal(
+                                                                    {{ auth()->user()->signature_path ? 'true' : 'false' }},
+                                                                    {{ $myPendingApproval->id }},
+                                                                    '{{ route('files.view', encrypt($signingFileId)) }}',
+                                                                    '{{ route('approvals.approve', $myPendingApproval->id) }}'
+                                                                )">
+                                                            ✔ Approve & Sign
+                                                        </button>
+
+                                                        <button type="button"
+                                                                class="btn-reject"
+                                                                onclick="openRejectModal({{ $myPendingApproval->id }})">
+                                                            Reject
+                                                        </button>
+                                                    @endif
+
+                                                    @if($latestVersion)
+                                                        <button type="button"
+                                                                onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
+                                                            View PDF
+                                                        </button>
+
+                                                        <a href="{{ route('files.download', encrypt($latestVersion->id)) }}">
+                                                            Download PDF
+                                                        </a>
+                                                    @endif
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <div id="noResultsMessage" style="display:none; text-align:center; padding:20px; color:#777;">
+                            No results found.
+                        </div>
+                    </div>
+                
+                    <div class="documents-footer">
+
+                        <div class="table-pagination">
+
+                            {{ $myDocuments->appends([
+                                'section' => 'documents'
+                            ])->links() }}
+
+                        </div>
+
                     </div>
                 </div>
-
-                <div class="documents-footer">
-
-                    <div class="table-pagination">
-
-                        {{ $myDocuments->appends([
-                            'section' => 'documents'
-                        ])->links() }}
-
-                    </div>
-
-                </div>
-
             </div>
         </div>
 

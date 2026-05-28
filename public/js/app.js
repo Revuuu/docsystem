@@ -477,73 +477,107 @@ document.addEventListener('click', function (e) {
     }
 });
 
-
-
 document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('documentSearchInput');
 
-    if (!searchInput) return;
+    const searchInput =
+        document.getElementById('documentSearchInput');
 
-    searchInput.addEventListener('input', () => {
-        const keyword = searchInput.value.toLowerCase().trim();
+    const statusFilter =
+        document.getElementById('documentStatusFilter');
 
-        document.querySelectorAll('.document-row').forEach(row => {
-            const title = row.dataset.title || '';
-            const file = row.dataset.file || '';
+    const container =
+        document.getElementById('documentsTableContainer');
 
-            const matches =
-                title.includes(keyword) ||
-                file.includes(keyword);
+    if (!searchInput || !statusFilter || !container) return;
 
-            row.style.display = matches ? '' : 'none';
-        });
-    });
-});
+    let debounceTimer;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('documentSearchInput');
-    const statusFilter = document.getElementById('documentStatusFilter');
-    const noResults = document.getElementById('noResultsMessage');
+    async function fetchDocuments(page = 1) {
 
-    if (!searchInput || !statusFilter) return;
+        const search = searchInput.value.trim();
+        const status = statusFilter.value;
 
-    function filterDocuments() {
-        const keyword = searchInput.value.toLowerCase().trim();
-        const selectedStatus = statusFilter.value.toLowerCase();
+        const params = new URLSearchParams();
 
-        let visibleCount = 0;
+        params.set('page', page);
+        params.set('section', 'documents');
 
-        document.querySelectorAll('.document-row').forEach(row => {
-            const title = row.dataset.title || '';
-            const file = row.dataset.file || '';
-            const status = row.dataset.status || '';
+        if (search) {
+            params.set('search', search);
+        }
 
-            const matchesSearch =
-                keyword === '' ||
-                title.includes(keyword) ||
-                file.includes(keyword);
+        if (status) {
+            params.set('status', status);
+        }
 
-            const matchesStatus =
-                selectedStatus === '' ||
-                status === selectedStatus;
+        try {
 
-            const show = matchesSearch && matchesStatus;
+            const response = await fetch(
+                window.location.pathname + '?' + params.toString(),
+                {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
 
-            row.style.display = show ? '' : 'none';
+            const html = await response.text();
 
-            if (show) {
-                visibleCount++;
+            const parser = new DOMParser();
+
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newContainer =
+                doc.getElementById('documentsTableContainer');
+
+            if (newContainer) {
+                container.innerHTML = newContainer.innerHTML;
+                bindPaginationLinks();
             }
-        });
 
-        if (noResults) {
-            noResults.style.display =
-                visibleCount === 0 ? 'block' : 'none';
+        } catch (error) {
+
+            console.error('Search failed:', error);
+
         }
     }
 
-    searchInput.addEventListener('input', filterDocuments);
-    statusFilter.addEventListener('change', filterDocuments);
+    function bindPaginationLinks() {
+
+        container.querySelectorAll('.pagination a').forEach(link => {
+
+            link.addEventListener('click', function (e) {
+
+                e.preventDefault();
+
+                const url = new URL(this.href);
+
+                const page = url.searchParams.get('page') || 1;
+
+                fetchDocuments(page);
+
+            });
+
+        });
+
+    }
+
+    searchInput.addEventListener('input', () => {
+
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(() => {
+            fetchDocuments();
+        }, 400);
+
+    });
+
+    statusFilter.addEventListener('change', () => {
+        fetchDocuments();
+    });
+
+    bindPaginationLinks();
+
 });
 
 function openUploadModal()
