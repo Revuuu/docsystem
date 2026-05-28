@@ -69,28 +69,37 @@
     <div class="content">
 
         {{-- My Documents --}}
-        <div id="section-signed" class="dashboard-section" >
+    
+<div id="section-signed" class="dashboard-section">
+
+    <div class="documents-card">
+
+        <div class="documents-card-header">
 
             <h1 class="section-title">
-                My Documents
+                Signed Documents
             </h1>
 
-            @php
-                $signedDocs = \App\Models\Document::where('status', 'approved')
-                    ->whereNotNull('admin_signed_at')
-                    ->latest('admin_signed_at')
-                    ->get();
-            @endphp
+        </div>
 
-            @if($signedDocs->count() > 0)
+        @php
+            $signedDocs = \App\Models\Document::where('status', 'approved')
+                ->whereNotNull('admin_signed_at')
+                ->latest('admin_signed_at')
+                ->get();
+        @endphp
 
-                <table>
+        @if($signedDocs->count() > 0)
+
+            <div class="table-wrapper">
+
+                <table class="modern-docs-table">
 
                     <thead>
                         <tr>
                             <th>Title</th>
                             <th>Signed At</th>
-                            <th>Download</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
 
@@ -109,37 +118,48 @@
                                 </td>
 
                                 <td>
-                                    @php
-                                        $isUploader = $doc->uploaded_by === auth()->id();
 
+                                    @php
                                         $viewPath = $doc->current_file_path;
                                     @endphp
 
-                                       <button type="button" class="view-pdf-btn"
+                                    <button type="button"
+                                            class="view-pdf-btn"
                                             onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
-                                            View PDF
-                                        </button>
+
+                                        View PDF
+
+                                    </button>
+
                                 </td>
 
                             </tr>
 
                         @endforeach
-                    
-                       
-                        
+
                     </tbody>
 
                 </table>
-                        
-            @else
+
+            </div>
+
+        @else
+
+            <div style="padding:24px;">
 
                 <p class="alert alert-error">
                     No signed documents yet.
                 </p>
 
-            @endif
+            </div>
 
-        </div>
+        @endif
+
+    </div>
+
+</div>
+
+
 
         {{-- Users Section --}}
         <div id="section-users"
@@ -256,104 +276,120 @@
             </div>
 
         </div>
-        {{-- Audit Trail Section --}}
-        <div id="section-audit"
-            class="dashboard-section">
+  
+{{-- Audit Trail Section --}}
+<div id="section-audit"
+     class="dashboard-section">
+
+    <div class="documents-card">
+
+        <div class="documents-card-header">
 
             <h2 class="section-title">
                 Audit Trail
             </h2>
 
-            @if($auditLogs->count())
+        </div>
 
-                {{-- Pagination Top --}}
-      
-                <div class="audit-pagination">
+        @if($auditLogs->count())
 
-                    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+            <div style="padding: 0 24px 24px;">
 
-                </div>
+                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
 
-                <div class="table-wrapper">
+            </div>
 
-                    <table>
+            <div class="table-wrapper">
 
-                        <thead>
+                <table class="modern-docs-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Table</th>
+                            <th>Record ID</th>
+                            <th>Old State</th>
+                            <th>Action</th>
+                            <th>New State</th>
+                            <th>IP Address</th>
+                            <th>Account ID</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach($auditLogs as $log)
+
                             <tr>
-                                <th>ID</th>
-                                <th>Table Name</th>
-                                <th>Table ID</th>
-                                <th>Old State</th>
-                                <th>Action</th>
-                                <th>New State</th>
-                                <th>IP Address</th>
-                                <th>Account ID</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
 
-                        <tbody>
+                                <td>{{ $log->id }}</td>
 
-                            @foreach($auditLogs as $log)
+                                <td>{{ $log->table_name }}</td>
 
-                                <tr>
+                                <td>{{ $log->table_id }}</td>
 
-                                    <td>{{ $log->id }}</td>
+                                <td>
+                                    {{ $log->old_values['status'] ?? '-' }}
+                                </td>
 
-                                    <td>{{ $log->table_name }}</td>
+                                <td>
 
-                                    <td>{{ $log->table_id }}</td>
-
-                                    <td>
-                                        {{ $log->old_values['status'] ?? '-' }}
-                                    </td>
-
-                                    <td>
+                                    <span class="status-pill ongoing">
                                         {{ strtoupper($log->action) }}
-                                    </td>
+                                    </span>
 
-                                    <td>
-                                        {{ $log->new_values['status'] ?? '-' }}
-                                    </td>
+                                </td>
 
-                                    <td>
-                                        {{ $log->ip_address ?? '-' }}
-                                    </td>
+                                <td>
+                                    {{ $log->new_values['status'] ?? '-' }}
+                                </td>
 
-                                    <td>
-                                        {{ $log->user_id ?? 'System' }}
-                                    </td>
+                                <td>
+                                    {{ $log->ip_address ?? '-' }}
+                                </td>
 
-                                    <td>
-                                        {{ $log->created_at->format('M d, Y h:i:s A') }}
-                                    </td>
+                                <td>
+                                    {{ $log->user_id ?? 'System' }}
+                                </td>
 
-                                </tr>
+                                <td>
+                                    {{ $log->created_at->format('M d, Y h:i:s A') }}
+                                </td>
 
-                            @endforeach
+                            </tr>
 
-                        </tbody>
+                        @endforeach
 
-                    </table>
-                
-                    {{-- Pagination Top --}}
-      
-                <div class="audit-pagination">
+                    </tbody>
 
-                    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+                </table>
 
-                </div>
-                </div>
+            </div>
 
-            @else
+            <div class="documents-footer">
+
+                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
+            </div>
+
+        @else
+
+            <div style="padding:24px;">
 
                 <p class="no-data">
                     No audit logs available.
                 </p>
 
-            @endif
+            </div>
 
-        </div>
+        @endif
+
+    </div>
+
+</div>
+
+
         {{-- Signature Section --}}
         <div id="section-signature"
             class="dashboard-section"
