@@ -19,14 +19,25 @@
 
     {{-- Sidebar --}}
     <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+        <img src="{{ asset('images/phmc-logo.png') }}" alt="PHMC Logo">
+        PHMC
+    </div>
+    <div class="sidebar-user">
 
-        <h2>Logged in as</h2>
+        <div class="user-avatar">
+            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+        </div>
 
-        <p>{{ auth()->user()->name }}</p>
+        <h2>{{ auth()->user()->name }}</h2>
 
-        <p class="font-semibold text-sm">
+        <span class="user-role-badge">
             {{ ucfirst(auth()->user()->role) }}
-        </p>
+        </span>
+        
+        <div class="user-role-line"></div>
+
+    </div>
 
         <nav style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">
 
