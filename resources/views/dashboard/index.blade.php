@@ -138,7 +138,7 @@
 
     @endphp
 
-    @include('dashboard.staff')
+    @include('dashboard.user')
 
 </div>
 
@@ -746,74 +746,6 @@
     </script>
 @endif
 
-
-<script>
-function openSignatureChoiceModal() {
-    document.getElementById('signatureChoiceModal').style.display = 'flex';
-}
-
-function closeSignatureChoiceModal() {
-    document.getElementById('signatureChoiceModal').style.display = 'none';
-}
-
-function openSignatureUploadModal() {
-    closeSignatureChoiceModal();
-    document.getElementById('signatureUploadModal').style.display = 'flex';
-}
-
-function closeSignatureUploadModal() {
-    document.getElementById('signatureUploadModal').style.display = 'none';
-}
-
-function openSignatureDrawModal() {
-    closeSignatureChoiceModal();
-    document.getElementById('signatureDrawModal').style.display = 'flex';
-}
-
-function closeSignatureDrawModal() {
-    document.getElementById('signatureDrawModal').style.display = 'none';
-}
-</script>
 @include('partials.password-modal')
-
-
-<script>
-
-function showSection(section)
-{
-    document.querySelectorAll('.dashboard-section')
-        .forEach((el) => {
-            el.style.display = 'none';
-        });
-
-    const target =
-        document.getElementById('section-' + section);
-
-    if (target) {
-        target.style.display = 'block';
-    }
-
-    document.querySelectorAll('.nav-btn')
-        .forEach((btn) => {
-            btn.classList.remove('active');
-        });
-
-    const activeBtn = document.querySelector(
-        `.nav-btn[onclick="showSection('${section}')"]`
-    );
-
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    showSection('dashboard');
-
-});
-
-</script>
-
 
 @endsection

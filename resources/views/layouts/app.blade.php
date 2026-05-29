@@ -8,37 +8,29 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- Fonts --}}
+    {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
-          rel="stylesheet" />
+          rel="stylesheet">
 
-    {{-- Icons --}}
+    {{-- Tabler Icons --}}
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 
-    {{-- Shared CSS --}}
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    {{-- Vite Assets --}}
+    @vite([
+        'resources/css/app.css',
+        'resources/js/app.js'
+    ])
 
     @stack('styles')
 </head>
 
 <body>
-
     @yield('content')
 
-    {{-- Shared JS --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    </script>
-
-    <script src="{{ asset('js/app.js') }}"></script>
-
     @stack('scripts')
-
 </body>
 </html>
