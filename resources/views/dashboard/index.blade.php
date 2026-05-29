@@ -294,9 +294,25 @@
 
                                             {{-- If current user is the active signer --}}
                                             @elseif($myApproval?->status === 'pending')
+                                                
+                                                    @php
+                                                        $currentPendingApproval = $doc->approvals
+                                                            ->where('status', 'pending')
+                                                            ->first();
+                                                    @endphp
                                                 <span class="status-pill waiting">
-                                                    Pending
+                                                    
+                                                    <small class="status-time">
 
+                                                            Pending for
+
+                                                            {{
+                                                                $currentPendingApproval->received_at
+                                                                    ? $currentPendingApproval->received_at->diffForHumans(now(), true)
+                                                                    : 'Just now'
+                                                            }}
+
+                                                        </small>
                                                     <span class="pending-approver">
                                                         Current Signatory: {{ auth()->user()->name }}
                                                     </span>
@@ -343,8 +359,19 @@
                                                     @endphp
 
                                                     <span class="status-pill waiting">
-                                                        Pending
+                                                  
+                                                        
+                                                        <small class="status-time">
 
+                                                            Pending for
+
+                                                            {{
+                                                                $currentPendingApproval->received_at
+                                                                    ? $currentPendingApproval->received_at->diffForHumans(now(), true)
+                                                                    : 'Just now'
+                                                            }}
+
+                                                        </small>
                                                         <span class="pending-approver">
                                                             Current Signatory:
                                                             {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
