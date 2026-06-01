@@ -2131,7 +2131,23 @@ DOCUMENTS SECTION RESPONSIVE FIX
 }
 
 
+.audit-table th,
+.audit-table td {
+    vertical-align: top;
+}
 
+.audit-json {
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 160px;
+    overflow: auto;
+    margin: 0;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.04);
+    font-size: 12px;
+    line-height: 1.4;
+}
 /* Tablet */
 @media (max-width: 900px) {
     .modern-docs-table {

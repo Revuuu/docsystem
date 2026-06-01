@@ -406,117 +406,120 @@
 
         </div>
   
-{{-- Audit Trail Section --}}
-<div id="section-audit"
-     class="dashboard-section">
+        {{-- Audit Trail Section --}}
+        <div id="section-audit"
+            class="dashboard-section">
 
-    <div class="documents-card">
+            <div class="documents-card">
 
-        <div class="documents-card-header">
+                <div class="documents-card-header">
 
-            <h2 class="section-title">
-                Audit Trail
-            </h2>
+                    <h2 class="section-title">
+                        Audit Trail
+                    </h2>
+
+                </div>
+
+                @if($auditLogs->count())
+
+                    <div style="padding: 0 24px 24px;">
+
+                        {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table class="modern-docs-table audit-table">
+
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Description</th>
+                                    <th>Event</th>
+                                    <th>Action</th>
+                                    <th>Table</th>
+                                    <th>Record ID</th>
+                                    <th>IP Address</th>
+                                    <th>User</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach($auditLogs as $log)
+
+                                    <tr>
+
+                                        <td>{{ $log->id }}</td>
+
+                                        <td style="min-width: 320px;">
+                                            {{ $log->description ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            {{ $log->event ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            <span class="status-pill ongoing">
+                                                {{ strtoupper($log->action) }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {{ $log->table_name ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            {{ $log->table_id ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            {{ $log->ip_address ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            {{ $log->user?->name ?? 'System' }}
+                                        </td>
+
+                                        <td style="white-space: nowrap;">
+                                            {{ $log->created_at?->format('M d, Y h:i:s A') ?? '-' }}
+                                        </td>
+
+                                    </tr>
+
+                                @endforeach
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="documents-footer">
+
+                        {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
+                    </div>
+
+                @else
+
+                    <div style="padding:24px;">
+
+                        <p class="no-data">
+                            No audit logs available.
+                        </p>
+
+                    </div>
+
+                @endif
+
+            </div>
 
         </div>
 
-        @if($auditLogs->count())
-
-            <div style="padding: 0 24px 24px;">
-
-                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-
-            </div>
-
-            <div class="table-wrapper">
-
-                <table class="modern-docs-table">
-
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Table</th>
-                            <th>Record ID</th>
-                            <th>Old State</th>
-                            <th>Action</th>
-                            <th>New State</th>
-                            <th>IP Address</th>
-                            <th>Account ID</th>
-                            <th>Timestamp</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @foreach($auditLogs as $log)
-
-                            <tr>
-
-                                <td>{{ $log->id }}</td>
-
-                                <td>{{ $log->table_name }}</td>
-
-                                <td>{{ $log->table_id }}</td>
-
-                                <td>
-                                    {{ $log->old_values['status'] ?? '-' }}
-                                </td>
-
-                                <td>
-
-                                    <span class="status-pill ongoing">
-                                        {{ strtoupper($log->action) }}
-                                    </span>
-
-                                </td>
-
-                                <td>
-                                    {{ $log->new_values['status'] ?? '-' }}
-                                </td>
-
-                                <td>
-                                    {{ $log->ip_address ?? '-' }}
-                                </td>
-
-                                <td>
-                                    {{ $log->user_id ?? 'System' }}
-                                </td>
-
-                                <td>
-                                    {{ $log->created_at->format('M d, Y h:i:s A') }}
-                                </td>
-
-                            </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <div class="documents-footer">
-
-                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-
-            </div>
-
-        @else
-
-            <div style="padding:24px;">
-
-                <p class="no-data">
-                    No audit logs available.
-                </p>
-
-            </div>
-
-        @endif
-
-    </div>
-
-</div>
 
 
         {{-- Signature Section --}}

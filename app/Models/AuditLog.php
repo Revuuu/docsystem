@@ -7,33 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 class AuditLog extends Model
 {
     protected $fillable = [
+    'user_id',
+    'event',
+    'table_name',
+    'table_id',
+    'action',
+    'description',
+    'old_values',
+    'new_values',
+    'metadata',
+    'ip_address',
+    'user_agent',
+];
 
-        'user_id',
-
-        'table_name',
-
-        'table_id',
-
-        'action',
-
-        'old_values',
-
-        'new_values',
-
-        'ip_address',
-
-        'user_agent',
-
-    ];
-
-    protected $casts = [
-
-        'old_values' => 'array',
-
-        'new_values' => 'array',
-
-    ];
-
+protected $casts = [
+    'old_values' => 'array',
+    'new_values' => 'array',
+    'metadata' => 'array',
+];
     /*
     |--------------------------------------------------------------------------
     | Relationships
