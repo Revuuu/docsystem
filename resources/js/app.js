@@ -16,6 +16,7 @@ import RejectModal from './modules/reject-modal';
 import UserProfile from './modules/user-profile';
 
 import MoreMenu from './modules/more-menu';
+import { initRoleAssignmentForm } from './modules/role-assignment';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -41,4 +42,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     MoreMenu.init();
 
+    initRoleAssignmentForm();
 });

@@ -173,238 +173,266 @@
 
 
         {{-- Users Section --}}
-        <div id="section-users"
-             class="dashboard-section"
-             >
+<div id="section-users" class="dashboard-section role-section">
 
+    <div class="role-page-header">
+        <div>
             <h2 class="section-title">
                 Role Assignment
             </h2>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <p class="role-page-subtitle">
+                Create user accounts and assign document workflow roles.
+            </p>
+        </div>
+    </div>
 
-            @if(session('error'))
-                <div class="alert alert-error">
-                    {{ session('error') }}
-                </div>
-            @endif
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-            {{-- User Form --}}
-            <div class="form-card">
+    @if(session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
 
+    @if($errors->any())
+        <div class="alert alert-error">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>
+                        {{ $error }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="role-layout">
+
+        <div class="role-form-card">
+
+            <div class="role-card-header">
                 <h3>Add New User</h3>
+                <p>
+                    Fill out the user details and assign their workflow role.
+                </p>
+            </div>
 
-                <form method="POST"
-                    action="{{ route('users.store') }}"
-                    class="user-form">
+            <form method="POST"
+                  action="{{ route('users.store') }}"
+                  class="user-form role-user-form">
 
-                    @csrf
+                @csrf
 
-                    {{-- FIRST NAME --}}
+                <div class="role-form-row">
+
                     <div class="form-group">
-
-                        <label>
-                            First Name
-                        </label>
+                        <label>First Name</label>
 
                         <input type="text"
-                            name="first_name"
-                            value="{{ old('first_name') }}"
-                            required>
-
+                               name="first_name"
+                               value="{{ old('first_name') }}"
+                               required>
                     </div>
 
-                    {{-- MIDDLE NAME --}}
                     <div class="form-group">
+                        <label>Last Name</label>
 
-                        <label>
-                            Middle Name
-                        </label>
+                        <input type="text"
+                               name="last_name"
+                               value="{{ old('last_name') }}"
+                               required>
+                    </div>
 
-                        <div class="middle-name-wrapper">
-                             <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}"> 
-                             <label class="checkbox-inline"> <input type="checkbox" id="no_middle_name" class="middle-name-checkbox">
-                                No Middle Name 
-                            </label> 
+                </div>
+
+                <div class="form-group">
+                    <label>Middle Name</label>
+
+                    <div class="middle-name-wrapper">
+                        <input type="text"
+                               id="middle_name"
+                               name="middle_name"
+                               value="{{ old('middle_name') }}">
+
+                        <div class="checkbox-inline">
+                            <input type="checkbox"
+                                id="no_middle_name"
+                                class="middle-name-checkbox">
+
+                            <span>No Middle Name</span>
                         </div>
-
                     </div>
+                </div>
 
-                    {{-- LAST NAME --}}
+                <div class="role-form-row">
+
                     <div class="form-group">
-
-                        <label>
-                            Last Name
-                        </label>
-
-                        <input type="text"
-                            name="last_name"
-                            value="{{ old('last_name') }}"
-                            required>
-
-                    </div>
-
-                    {{-- GENDER --}}
-                    <div class="form-group">
-
-                        <label>
-                            Gender
-                        </label>
+                        <label>Gender</label>
 
                         <select name="gender" required>
-
                             <option value="">
                                 -- Select Gender --
                             </option>
 
                             <option value="male"
                                 {{ old('gender') === 'male' ? 'selected' : '' }}>
-
                                 Male
-
                             </option>
 
                             <option value="female"
                                 {{ old('gender') === 'female' ? 'selected' : '' }}>
-
                                 Female
-
                             </option>
-
                         </select>
-
                     </div>
 
-                    {{-- ROLE --}}
                     <div class="form-group">
-
-                        <label>
-                            Assign Role
-                        </label>
+                        <label>Assign Role</label>
 
                         <select name="role" required>
-
                             <option value="">
                                 -- Select Role --
                             </option>
 
                             <option value="staff"
                                 {{ old('role') === 'staff' ? 'selected' : '' }}>
-
                                 Staff
-
                             </option>
 
                             <option value="supervisor"
                                 {{ old('role') === 'supervisor' ? 'selected' : '' }}>
-
                                 Supervisor
-
                             </option>
 
                             <option value="depthead"
                                 {{ old('role') === 'depthead' ? 'selected' : '' }}>
-
                                 Department Head
-
                             </option>
 
                             <option value="division"
                                 {{ old('role') === 'division' ? 'selected' : '' }}>
-
                                 Division Head
-
                             </option>
 
                             <option value="executive"
                                 {{ old('role') === 'executive' ? 'selected' : '' }}>
-
                                 Executive
-
                             </option>
-
                         </select>
-
                     </div>
 
-                    {{-- EMAIL --}}
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+
+                    <input type="email"
+                           name="email"
+                           value="{{ old('email') }}"
+                           required>
+                </div>
+
+                <div class="role-form-row">
+
                     <div class="form-group">
-
-                        <label>
-                            Email
-                        </label>
-
-                        <input type="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            required>
-
-                    </div>
-
-                    {{-- PASSWORD --}}
-                    <div class="form-group">
-
-                        <label>
-                            Password
-                        </label>
+                        <label>Password</label>
 
                         <input type="password"
-                            name="password"
-                            required>
-
+                               name="password"
+                               required>
                     </div>
 
-                    {{-- CONFIRM PASSWORD --}}
                     <div class="form-group">
-
-                        <label>
-                            Confirm Password
-                        </label>
+                        <label>Confirm Password</label>
 
                         <input type="password"
-                            name="password_confirmation"
-                            required>
-
+                               name="password_confirmation"
+                               required>
                     </div>
 
-                    {{-- ERRORS --}}
-                    @if($errors->any())
+                </div>
 
-                        <div class="alert alert-error">
+                <button type="submit"
+                        class="btn-submit role-create-btn">
+                    Create User
+                </button>
 
-                            <ul>
-
-                                @foreach($errors->all() as $error)
-
-                                    <li>
-                                        {{ $error }}
-                                    </li>
-
-                                @endforeach
-
-                            </ul>
-
-                        </div>
-
-                    @endif
-
-                    {{-- SUBMIT --}}
-                    <button type="submit"
-                            class="btn-submit">
-
-                        Create User
-
-                    </button>
-
-                </form>
-
-            </div>
+            </form>
 
         </div>
+
+        <aside class="role-side-panel">
+
+            <div class="role-guide-card">
+                <h3>Role Guide</h3>
+
+                <p>
+                    Use these roles to control each user's access in the document workflow.
+                </p>
+
+                <div class="role-guide-list">
+
+                    <div class="role-guide-item">
+                        <span class="role-dot staff"></span>
+                        <div>
+                            <strong>Staff</strong>
+                            <small>Uploads documents and tracks requests.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-guide-item">
+                        <span class="role-dot supervisor"></span>
+                        <div>
+                            <strong>Supervisor</strong>
+                            <small>Handles the first approval stage.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-guide-item">
+                        <span class="role-dot depthead"></span>
+                        <div>
+                            <strong>Department Head</strong>
+                            <small>Reviews department-level documents.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-guide-item">
+                        <span class="role-dot division"></span>
+                        <div>
+                            <strong>Division Head</strong>
+                            <small>Reviews before final approval.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-guide-item">
+                        <span class="role-dot executive"></span>
+                        <div>
+                            <strong>Executive</strong>
+                            <small>Handles final approval stage.</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="role-guide-card security-card">
+                <h3>Security Note</h3>
+
+                <p>
+                    Passwords are securely hashed. User creation and account updates are recorded in the audit trail.
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+
+</div>
   
         {{-- Audit Trail Section --}}
 <div id="section-audit" class="dashboard-section">
