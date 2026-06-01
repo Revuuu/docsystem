@@ -407,118 +407,141 @@
         </div>
   
         {{-- Audit Trail Section --}}
-        <div id="section-audit"
-            class="dashboard-section">
+<div id="section-audit" class="dashboard-section">
 
-            <div class="documents-card">
+    <div class="documents-card audit-card">
 
-                <div class="documents-card-header">
+        <div class="audit-header">
 
-                    <h2 class="section-title">
-                        Audit Trail
-                    </h2>
+            <div>
+                <h2 class="section-title">
+                    Audit Trail
+                </h2>
 
-                </div>
+                <p class="audit-subtitle">
+                    Track user activity, document actions, approvals, signatures, and account changes.
+                </p>
+            </div>
 
-                @if($auditLogs->count())
-
-                    <div style="padding: 0 24px 24px;">
-
-                        {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-
-                    </div>
-
-                    <div class="table-wrapper">
-
-                        <table class="modern-docs-table audit-table">
-
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Description</th>
-                                    <th>Event</th>
-                                    <th>Action</th>
-                                    <th>Table</th>
-                                    <th>Record ID</th>
-                                    <th>IP Address</th>
-                                    <th>User</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                @foreach($auditLogs as $log)
-
-                                    <tr>
-
-                                        <td>{{ $log->id }}</td>
-
-                                        <td style="min-width: 320px;">
-                                            {{ $log->description ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $log->event ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            <span class="status-pill ongoing">
-                                                {{ strtoupper($log->action) }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            {{ $log->table_name ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $log->table_id ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $log->ip_address ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $log->user?->name ?? 'System' }}
-                                        </td>
-
-                                        <td style="white-space: nowrap;">
-                                            {{ $log->created_at?->format('M d, Y h:i:s A') ?? '-' }}
-                                        </td>
-
-                                    </tr>
-
-                                @endforeach
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                    <div class="documents-footer">
-
-                        {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-
-                    </div>
-
-                @else
-
-                    <div style="padding:24px;">
-
-                        <p class="no-data">
-                            No audit logs available.
-                        </p>
-
-                    </div>
-
-                @endif
-
+            <div class="audit-count-card">
+                <span>{{ $auditLogs->total() }}</span>
+                <small>Total Activities</small>
             </div>
 
         </div>
+
+        @if($auditLogs->count())
+
+            <div class="audit-pagination">
+    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+</div>
+
+            <div class="audit-feed">
+
+                @foreach($auditLogs as $log)
+
+                    @php
+                        $event = $log->event ?? '';
+                        $action = strtolower($log->action ?? 'activity');
+
+                        if (str_contains($event, 'password')) {
+                            $icon = '🔐';
+                            $typeClass = 'security';
+                        } elseif (str_contains($event, 'document_file')) {
+                            $icon = '📎';
+                            $typeClass = 'file';
+                        } elseif (str_contains($event, 'document')) {
+                            $icon = '📄';
+                            $typeClass = 'document';
+                        } elseif (str_contains($event, 'approval')) {
+                            $icon = '✅';
+                            $typeClass = 'approval';
+                        } elseif (str_contains($event, 'signature')) {
+                            $icon = '✍️';
+                            $typeClass = 'signature';
+                        } elseif (str_contains($event, 'user')) {
+                            $icon = '👤';
+                            $typeClass = 'user';
+                        } else {
+                            $icon = '📝';
+                            $typeClass = 'system';
+                        }
+                    @endphp
+
+                    <article class="audit-item">
+
+                        <div class="audit-icon audit-icon-{{ $typeClass }}">
+                            {{ $icon }}
+                        </div>
+
+                        <div class="audit-content">
+
+                            <div class="audit-content-header">
+
+                                <div>
+                                    <h3 class="audit-description">
+                                        {{ $log->description ?? 'No description available.' }}
+                                    </h3>
+
+                                    <div class="audit-meta">
+                                        <span>{{ $log->event ?? 'system.event' }}</span>
+                                        <span>•</span>
+                                        <span>{{ $log->table_name ?? '-' }} #{{ $log->table_id ?? '-' }}</span>
+                                        <span>•</span>
+                                        <span>{{ $log->ip_address ?? '-' }}</span>
+                                    </div>
+                                </div>
+
+                                <span class="audit-action audit-action-{{ $action }}">
+                                    {{ strtoupper($log->action) }}
+                                </span>
+
+                            </div>
+
+                            <div class="audit-footer">
+
+                                <div class="audit-user">
+                                    <span class="audit-user-avatar">
+                                        {{ strtoupper(substr($log->user?->name ?? 'S', 0, 2)) }}
+                                    </span>
+
+                                    <span>
+                                        {{ $log->user?->name ?? 'System' }}
+                                    </span>
+                                </div>
+
+                                <time class="audit-time">
+                                    {{ $log->created_at?->format('M d, Y') ?? '-' }}
+                                    <span>{{ $log->created_at?->format('h:i:s A') ?? '' }}</span>
+                                </time>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                @endforeach
+
+            </div>
+
+            <div class="documents-footer audit-footer-pagination">
+                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+            </div>
+
+        @else
+
+            <div class="audit-empty">
+                <div class="audit-empty-icon">📜</div>
+                <h3>No audit logs available.</h3>
+                <p>System activities will appear here once users start making changes.</p>
+            </div>
+
+        @endif
+
+    </div>
+
+</div>
 
 
 
