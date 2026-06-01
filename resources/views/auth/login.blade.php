@@ -172,6 +172,28 @@
     padding: 0;
     }
 
+    .login-error-box {
+    position: relative;
+    z-index: 2;
+    margin: -6px 0 12px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    }
+
+    .login-error-box p {
+        margin: 0;
+        color: #dc2626 !important;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.35;
+    }
+
+    .login-error-box p + p {
+        margin-top: 3px;
+    }
+
     /* =========================
    LARGE DESKTOP
 ========================= */
@@ -355,7 +377,13 @@
                     </svg>
                 </button>
             </div>
-
+            @if ($errors->any())
+                <div class="login-error-box">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
             <button type="submit" class="login-btn">
                 SIGN IN
             </button>
@@ -369,8 +397,7 @@
             </div>
 
         </form>
-
-
+        
 </div>
 
 </body>

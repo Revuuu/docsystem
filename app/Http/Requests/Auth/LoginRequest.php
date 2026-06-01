@@ -11,6 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
+    private const MAX_ATTEMPTS = 3;
+    private const LOCK_SECONDS = 30;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -33,6 +36,18 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Custom validation messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'User ID is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'password.required' => 'Password is required.',
+        ];
+    }
+
+    /**
      * Attempt to authenticate the request's credentials.
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -42,10 +57,33 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+
+            RateLimiter::hit(
+                $this->throttleKey(),
+                self::LOCK_SECONDS
+            );
+
+            $remainingAttempts = RateLimiter::remaining(
+                $this->throttleKey(),
+                self::MAX_ATTEMPTS
+            );
+
+            if ($remainingAttempts <= 0) {
+                event(new Lockout($this));
+
+                throw ValidationException::withMessages([
+                    'email' => 'Too many incorrect login attempts. Please try again in ' .
+                        RateLimiter::availableIn($this->throttleKey()) .
+                        ' seconds.',
+                ]);
+            }
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Incorrect email or password. You have ' .
+                    $remainingAttempts .
+                    ' attempt' .
+                    ($remainingAttempts === 1 ? '' : 's') .
+                    ' remaining.',
             ]);
         }
 
@@ -59,7 +97,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), self::MAX_ATTEMPTS)) {
             return;
         }
 
@@ -68,10 +106,9 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => 'Your account is temporarily locked. Please try again in ' .
+                $seconds .
+                ' seconds.',
         ]);
     }
 
@@ -80,6 +117,8 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(
+            Str::lower($this->input('email')) . '|' . $this->ip()
+        );
     }
 }
