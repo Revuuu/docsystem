@@ -34,14 +34,12 @@
                     </svg>
                 </button>
             </div>
-           <div id="modalErrorMessage"
-     class="password-error-message"
-     style="{{ session('password_modal_error') ? 'display:block;' : '' }}">
-
-    {{ session('password_modal_error') }}
-
-</div>
-        </div>
+            <div id="modalErrorMessage"
+                class="password-error-message"
+                style="display:none;">
+            </div>
+            </div>
+        
 
         {{-- Action Buttons --}}
         <div class="password-modal-actions">
@@ -52,7 +50,7 @@
                 Confirm Action
             </button>
         </div>
-
+    </div>
     </div>
 </div>
 
@@ -227,46 +225,118 @@ function openPasswordModal(event, form) {
 
     window.protectedForm = form;
 
-    document.getElementById('passwordModal').style.display = 'flex';
-    document.getElementById('modalPassword').value = '';
+    const modal = document.getElementById('passwordModal');
+    const passwordInput = document.getElementById('modalPassword');
+    const errorMessage = document.getElementById('modalErrorMessage');
+
+    if (passwordInput) {
+        passwordInput.value = '';
+    }
+
+    if (errorMessage) {
+        errorMessage.textContent = '';
+        errorMessage.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        passwordInput?.focus();
+    }, 50);
 
     return false;
 }
 
 function closePasswordModal() {
-    document.getElementById('passwordModal').style.display = 'none';
+    const modal = document.getElementById('passwordModal');
+    const passwordInput = document.getElementById('modalPassword');
+    const errorMessage = document.getElementById('modalErrorMessage');
+
+    modal.style.display = 'none';
     window.protectedForm = null;
+
+    if (passwordInput) {
+        passwordInput.value = '';
+    }
+
+    if (errorMessage) {
+        errorMessage.textContent = '';
+        errorMessage.style.display = 'none';
+    }
 }
 
-function submitProtectedForm() {
+async function submitProtectedForm() {
     if (!window.protectedForm) {
         alert('No form selected.');
         return;
     }
 
     const passwordInput = document.getElementById('modalPassword');
+    const errorMessage = document.getElementById('modalErrorMessage');
+    const confirmButton = document.querySelector('.password-btn-confirm');
+
     const password = passwordInput.value.trim();
 
     if (!password) {
-        alert('Password is required.');
+        errorMessage.textContent = 'Password is required.';
+        errorMessage.style.display = 'block';
         passwordInput.focus();
         return;
     }
 
-    const hiddenInput = window.protectedForm.querySelector('.password-hidden-input');
+    try {
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Verifying...';
 
-    if (!hiddenInput) {
-        alert('Password hidden input missing.');
-        return;
+        const response = await fetch('/verify-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content'),
+            },
+            body: JSON.stringify({
+                password: password,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            errorMessage.textContent = data.message || 'Incorrect account password.';
+            errorMessage.style.display = 'block';
+
+            passwordInput.value = '';
+            passwordInput.focus();
+
+            return;
+        }
+
+        const hiddenInput = window.protectedForm.querySelector('.password-hidden-input');
+
+        if (!hiddenInput) {
+            errorMessage.textContent = 'Password hidden input missing.';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        hiddenInput.value = password;
+
+        if (window.protectedForm.id === 'drawSignatureForm') {
+            saveDrawnSignature();
+        }
+
+        window.protectedForm.submit();
+
+    } catch (error) {
+        errorMessage.textContent = 'Unable to verify password. Please try again.';
+        errorMessage.style.display = 'block';
+    } finally {
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Confirm Action';
     }
-
-    hiddenInput.value = password;
-
-    if (window.protectedForm.id === 'drawSignatureForm') {
-        saveDrawnSignature();
-    }
-
-    window.protectedForm.submit();
 }
 
 function togglePasswordVisibility() {

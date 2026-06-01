@@ -129,20 +129,22 @@
                                 </td>
 
                                 <td>
+    @php
+        $latestVersion = $doc->latestVersion();
+    @endphp
 
-                                    @php
-                                        $viewPath = $doc->current_file_path;
-                                    @endphp
-
-                                    <button type="button"
-                                            class="view-pdf-btn"
-                                            onclick="openPdfModal('{{ asset('storage/' . $viewPath) }}')">
-
-                                        View PDF
-
-                                    </button>
-
-                                </td>
+    @if($latestVersion)
+        <button type="button"
+                class="view-pdf-btn"
+                onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
+            View PDF
+        </button>
+    @else
+        <span class="no-data">
+            No file available
+        </span>
+    @endif
+</td>
 
                             </tr>
 

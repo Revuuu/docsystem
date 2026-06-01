@@ -27,8 +27,8 @@ class SignatureController extends Controller
 
     if (!Hash::check($request->password, Auth::user()->password)) {
 
-        return back()
-            ->withInput()
+        return redirect()
+            ->route('dashboard', ['section' => 'profile'])
             ->with(
                 'password_modal_error',
                 'Incorrect account password.'
@@ -136,10 +136,9 @@ class SignatureController extends Controller
         if (!Hash::check($request->password, Auth::user()->password)) {
 
             return back()
-    ->withInput()
-    ->with('password_modal_error', 'Incorrect account password.')
-->with('password_modal_form', 'drawSignatureForm');
-
+                ->route('dashboard', ['section' => 'profile'])
+                ->with('password_modal_error', 'Incorrect account password.')
+                ->with('password_modal_form', 'drawSignatureForm');
         }
 
         $user = Auth::user();
@@ -175,16 +174,15 @@ class SignatureController extends Controller
         if (!Hash::check($request->password, Auth::user()->password)) {
 
             return back()
-    ->withInput()
-    ->with('password_modal_error', 'Incorrect account password.')
-->with('password_modal_form', 'removeSignatureForm');
-
+                ->route('dashboard', ['section' => 'profile'])
+                ->with('password_modal_error', 'Incorrect account password.')
+                ->with('password_modal_form', 'removeSignatureForm');
         }
         $user = auth()->user();
 
         if ($user->signature_path)
         {
-            \Illuminate\Support\Facades\Storage::disk('local')
+            \Illuminate\Support\Facades\Storage::disk('private')
                 ->delete($user->signature_path);
 
             $user->signature_path = null;
