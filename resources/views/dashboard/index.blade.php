@@ -85,50 +85,6 @@
     <div id="section-dashboard"
         class="dashboard-section">
 
-        @php
-
-            $role =
-                auth()->user()->roles->first()?->name
-                ?? auth()->user()->role;
-
-            $dashboardTitle = match($role) {
-
-                'staff' => 'Staff Dashboard',
-
-                'supervisor' => 'Supervisor Dashboard',
-
-                'depthead' => 'Department Head Dashboard',
-
-                'division' => 'Division Head Dashboard',
-
-                'executive' => 'Executive Dashboard',
-
-                default => 'Dashboard',
-            };
-
-            $dashboardSubtitle = match($role) {
-
-                'staff' =>
-                    'Document workflow overview and approvals',
-
-                'supervisor' =>
-                    'Department workflow monitoring and approvals',
-
-                'depthead' =>
-                    'Department oversight and document validation',
-
-                'division' =>
-                    'Division-wide approval management',
-
-                'executive' =>
-                    'Executive approval and compliance overview',
-
-                default =>
-                    'Workflow dashboard',
-            };
-
-        @endphp
-
         @include('dashboard.user')
 
     </div>
@@ -441,9 +397,6 @@
         {{-- Profile --}}
         <div id="section-profile" class="dashboard-section">
             <div class="documents-card">
-                <div class="documents-card-header">
-                    <h2>My Profile</h2>
-                </div>
 
                 <div class="upload-modal-body" style="padding:24px;">
                     @if(session('success'))
