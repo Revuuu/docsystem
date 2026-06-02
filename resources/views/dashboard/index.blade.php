@@ -137,11 +137,9 @@
                         <table class="modern-docs-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
                                     <th>File name</th>
                                     <th>Uploaded By</th>
-                                    <th>file_path</th>
-                                    <th>Timestamp</th>
+                                    <th>Uploaded At</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -172,11 +170,6 @@
                                         data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
                                         data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
 
-                                        <td>
-                                            <span class="doc-id-pill">
-                                                {{ $doc->id }}
-                                            </span>
-                                        </td>
 
                                         <td>
                                             <div class="file-name">
@@ -194,12 +187,6 @@
                                                     <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
                                                     <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
                                                 </div>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <div class="file-name">
-                                                {{ $latestVersion ? basename($latestVersion->generated_storage_path) : 'No file' }}
                                             </div>
                                         </td>
 
