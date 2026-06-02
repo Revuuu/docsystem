@@ -1,9 +1,5 @@
 <div class="staff-dashboard-wrapper">
 
-    {{-- TOP HEADER --}}
-    
-    {{-- @include('partials.header-section') --}}
-
     {{-- STATISTICS --}}
     <div class="staff-stats-grid">
 

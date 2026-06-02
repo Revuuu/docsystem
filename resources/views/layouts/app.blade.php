@@ -39,6 +39,38 @@
             <div class="dashboard-main">
 
                 @include('partials.header-section')
+
+                @php
+
+    $role =
+        auth()->user()->roles->first()?->name
+        ?? auth()->user()->role;
+
+    $dashboardTitle = match($role) {
+        'staff' => 'Staff Dashboard',
+        'supervisor' => 'Supervisor Dashboard',
+        'depthead' => 'Department Head Dashboard',
+        'division' => 'Division Head Dashboard',
+        'executive' => 'Executive Dashboard',
+        default => 'Dashboard',
+    };
+
+    $dashboardSubtitle = match($role) {
+        'staff' => 'Document workflow overview and approvals',
+        'supervisor' => 'Department workflow monitoring and approvals',
+        'depthead' => 'Department oversight and document validation',
+        'division' => 'Division-wide approval management',
+        'executive' => 'Executive approval and compliance overview',
+        default => 'Workflow dashboard',
+    };
+
+@endphp
+
+<div class="dashboard-banner">
+    <h1>{{ $dashboardTitle }}</h1>
+    <p>{{ $dashboardSubtitle }}</p>
+</div>
+
                 <div class="content">
                     @yield('content')
                 </div>

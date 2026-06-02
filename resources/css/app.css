@@ -1309,13 +1309,53 @@ FULL PAGE DOCUMENT LAYOUT
     flex: 1;
     min-width: 0;
     background: var(--paper);
+    position:relative;
 }
+
+.dashboard-banner {
+    width: calc(100% - 48px);
+    max-width: none;
+
+    position: relative;
+    z-index: 20;
+
+    margin: -20px 24px 0;
+
+    padding: 18px 28px;
+
+    background: var(--paper);
+    border-radius: 16px;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+.dashboard-banner h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dashboard-banner p {
+    margin: 4px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 
 .dashboard-header {
     display: flex;
     align-items: center;
     gap: 18px;
-    padding: 18px 24px 0;
+
+    padding: 18px 24px;
+
+    background: var(--paper-warm);
+
+    position: relative;
+    top: 0;
+    z-index: 10;
+
+    box-shadow: 0 4px 20px rgba(0,0,0,.12);
 }
 
 .hamburger {
@@ -1557,6 +1597,9 @@ MODERN DOCUMENTS UI
     vertical-align:middle;
 }
 
+.modern-docs-table thead tr {
+    background: var(--paper-warm); /* Green */
+}
 /* USER */
 
 .table-user{
@@ -1652,7 +1695,7 @@ MODERN DOCUMENTS UI
     display:flex;
     justify-content:space-between;
     align-items:center;
-
+    background-color: var(--paper);
     border-top:1px solid #ececec;
 }
 
@@ -1911,8 +1954,11 @@ UPLOAD MODAL
 .upload-form .form-group{
     display:flex;
     flex-direction:column;
-
     gap:10px;
+}
+
+.documentsTable {
+   background-color:var(--paper-warm);
 }
 
 .upload-form label{
@@ -2047,7 +2093,7 @@ FULL WIDTH DASHBOARD LAYOUT
 
     box-shadow:none;
 
-    background:#ffffff;
+    background-color: var(--paper);
 
     overflow:hidden;
 }
@@ -2060,7 +2106,7 @@ FULL WIDTH DASHBOARD LAYOUT
     padding:24px;
 
     margin:0;
-
+    background-color: var(--paper);
     border-bottom:1px solid #ececec;
 
     box-sizing:border-box;

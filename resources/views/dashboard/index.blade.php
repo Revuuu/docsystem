@@ -81,61 +81,57 @@
     );
 @endphp
 
-{{-- DASHBOARD SECTION --}}
-<div id="section-dashboard"
-     class="dashboard-section">
+    {{-- DASHBOARD SECTION --}}
+    <div id="section-dashboard"
+        class="dashboard-section">
 
-    @php
+        @php
 
-        $role =
-            auth()->user()->roles->first()?->name
-            ?? auth()->user()->role;
+            $role =
+                auth()->user()->roles->first()?->name
+                ?? auth()->user()->role;
 
-        $dashboardTitle = match($role) {
+            $dashboardTitle = match($role) {
 
-            'staff' => 'Staff Dashboard',
+                'staff' => 'Staff Dashboard',
 
-            'supervisor' => 'Supervisor Dashboard',
+                'supervisor' => 'Supervisor Dashboard',
 
-            'depthead' => 'Department Head Dashboard',
+                'depthead' => 'Department Head Dashboard',
 
-            'division' => 'Division Head Dashboard',
+                'division' => 'Division Head Dashboard',
 
-            'executive' => 'Executive Dashboard',
+                'executive' => 'Executive Dashboard',
 
-            default => 'Dashboard',
-        };
+                default => 'Dashboard',
+            };
 
-        $dashboardSubtitle = match($role) {
+            $dashboardSubtitle = match($role) {
 
-            'staff' =>
-                'Document workflow overview and approvals',
+                'staff' =>
+                    'Document workflow overview and approvals',
 
-            'supervisor' =>
-                'Department workflow monitoring and approvals',
+                'supervisor' =>
+                    'Department workflow monitoring and approvals',
 
-            'depthead' =>
-                'Department oversight and document validation',
+                'depthead' =>
+                    'Department oversight and document validation',
 
-            'division' =>
-                'Division-wide approval management',
+                'division' =>
+                    'Division-wide approval management',
 
-            'executive' =>
-                'Executive approval and compliance overview',
+                'executive' =>
+                    'Executive approval and compliance overview',
 
-            default =>
-                'Workflow dashboard',
-        };
+                default =>
+                    'Workflow dashboard',
+            };
 
-    @endphp
+        @endphp
 
-    @include('dashboard.user')
+        @include('dashboard.user')
 
-</div>
-
-
-
-
+    </div>
         {{-- Documents --}}
         <div id="section-documents" class="dashboard-section">
 

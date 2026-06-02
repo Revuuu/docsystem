@@ -5,17 +5,4 @@
         <span></span>
         <span></span>
     </button>
-
-    <div>
-
-        <h1>
-            {{ $dashboardTitle }}
-        </h1>
-
-        <p>
-            {{ $dashboardSubtitle }}
-        </p>
-
-    </div>
-
 </div>
