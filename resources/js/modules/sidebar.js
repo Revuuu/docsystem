@@ -1,7 +1,6 @@
 const Sidebar = {
 
     init() {
-
         this.hamburger = document.getElementById('hamburger');
         this.sidebar = document.getElementById('sidebar');
         this.overlay = document.getElementById('overlay');
@@ -9,47 +8,41 @@ const Sidebar = {
         if (!this.hamburger || !this.sidebar) return;
 
         this.bindEvents();
+        this.syncMode();
     },
 
     bindEvents() {
-
         this.hamburger.addEventListener('click', () => {
-
-            // Mobile
             if (window.innerWidth <= 860) {
-
+                this.sidebar.classList.remove('is-hidden');
                 this.sidebar.classList.toggle('mobile-open');
                 this.overlay?.classList.toggle('show');
-
-            }
-            // Desktop
-            else {
-
+            } else {
+                this.sidebar.classList.remove('mobile-open');
+                this.overlay?.classList.remove('show');
                 this.sidebar.classList.toggle('is-hidden');
-
             }
-
         });
 
         this.overlay?.addEventListener('click', () => {
-
             this.sidebar.classList.remove('mobile-open');
             this.overlay.classList.remove('show');
-
         });
 
         window.addEventListener('resize', () => {
-
-            // Cleanup when switching between desktop/mobile
-            if (window.innerWidth > 860) {
-
-                this.sidebar.classList.remove('mobile-open');
-                this.overlay?.classList.remove('show');
-
-            }
-
+            this.syncMode();
         });
+    },
 
+    syncMode() {
+        if (window.innerWidth <= 860) {
+            this.sidebar.classList.remove('is-hidden');
+            this.sidebar.classList.remove('mobile-open');
+            this.overlay?.classList.remove('show');
+        } else {
+            this.sidebar.classList.remove('mobile-open');
+            this.overlay?.classList.remove('show');
+        }
     }
 };
 
