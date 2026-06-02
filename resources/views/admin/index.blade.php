@@ -4,83 +4,8 @@
 
 @section('content')
 
+{{-- My Documents --}}
 
-{{-- Hamburger --}}
-<button class="hamburger" id="hamburger">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-{{-- Overlay --}}
-<div class="overlay" id="overlay"></div>
-
-<div class="main-container">
-
-    {{-- Sidebar --}}
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-        <img src="{{ asset('images/phmc-logo.png') }}" alt="PHMC Logo">
-        PHMC
-    </div>
-    <div class="sidebar-user">
-
-        <div class="user-avatar">
-            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-        </div>
-
-        <h2>{{ auth()->user()->name }}</h2>
-
-        <span class="user-role-badge">
-            {{ ucfirst(auth()->user()->role) }}
-        </span>
-        
-        <div class="user-role-line"></div>
-
-    </div>
-
-        <nav style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">
-
-            <button type="button"
-                    onclick="showSection('signed')"
-                    class="nav-btn">
-                ✅ Signed Documents
-            </button>
-
-            <button type="button"
-                    onclick="showSection('users')"
-                    class="nav-btn">
-                👥 Role Assignment
-            </button>
-
-            <button type="button"
-                    onclick="showSection('audit')"
-                    class="nav-btn">
-                📜 Audit Trail
-            </button>
-            <button type="button"
-                    onclick="showSection('signature')"
-                    class="nav-btn">
-                📜 My Signature
-            </button>
-
-        </nav>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button type="submit" class="btn-logout">
-                Logout
-            </button>
-        </form>
-
-    </div>
-
-    {{-- Content --}}
-    <div class="content">
-
-        {{-- My Documents --}}
-    
 <div id="section-signed" class="dashboard-section">
 
     <div class="documents-card">
@@ -129,52 +54,40 @@
                                 </td>
 
                                 <td>
-    @php
-        $latestVersion = $doc->latestVersion();
-    @endphp
+                                    @php
+                                        $latestVersion = $doc->latestVersion();
+                                    @endphp
 
-    @if($latestVersion)
-        <button type="button"
-                class="view-pdf-btn"
-                onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
-            View PDF
-        </button>
-    @else
-        <span class="no-data">
-            No file available
-        </span>
-    @endif
-</td>
-
+                                    @if($latestVersion)
+                                        <button type="button"
+                                                class="view-pdf-btn"
+                                                onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
+                                            View PDF
+                                        </button>
+                                    @else
+                                        <span class="no-data">
+                                            No file available
+                                        </span>
+                                    @endif
+                                </td>
                             </tr>
-
                         @endforeach
-
                     </tbody>
-
                 </table>
-
             </div>
 
         @else
 
             <div style="padding:24px;">
-
                 <p class="alert alert-error">
                     No signed documents yet.
                 </p>
-
             </div>
-
         @endif
-
     </div>
-
 </div>
 
-
-
-        {{-- Users Section --}}
+{{-- Users Section --}}
 <div id="section-users" class="dashboard-section role-section">
 
     <div class="role-page-header">
@@ -225,8 +138,8 @@
             </div>
 
             <form method="POST"
-                  action="{{ route('users.store') }}"
-                  class="user-form role-user-form">
+                action="{{ route('users.store') }}"
+                class="user-form role-user-form">
 
                 @csrf
 
@@ -236,18 +149,18 @@
                         <label>First Name</label>
 
                         <input type="text"
-                               name="first_name"
-                               value="{{ old('first_name') }}"
-                               required>
+                            name="first_name"
+                            value="{{ old('first_name') }}"
+                            required>
                     </div>
 
                     <div class="form-group">
                         <label>Last Name</label>
 
                         <input type="text"
-                               name="last_name"
-                               value="{{ old('last_name') }}"
-                               required>
+                            name="last_name"
+                            value="{{ old('last_name') }}"
+                            required>
                     </div>
 
                 </div>
@@ -257,9 +170,9 @@
 
                     <div class="middle-name-wrapper">
                         <input type="text"
-                               id="middle_name"
-                               name="middle_name"
-                               value="{{ old('middle_name') }}">
+                            id="middle_name"
+                            name="middle_name"
+                            value="{{ old('middle_name') }}">
 
                         <div class="checkbox-inline">
                             <input type="checkbox"
@@ -334,9 +247,9 @@
                     <label>Email</label>
 
                     <input type="email"
-                           name="email"
-                           value="{{ old('email') }}"
-                           required>
+                        name="email"
+                        value="{{ old('email') }}"
+                        required>
                 </div>
 
                 <div class="role-form-row">
@@ -345,16 +258,16 @@
                         <label>Password</label>
 
                         <input type="password"
-                               name="password"
-                               required>
+                            name="password"
+                            required>
                     </div>
 
                     <div class="form-group">
                         <label>Confirm Password</label>
 
                         <input type="password"
-                               name="password_confirmation"
-                               required>
+                            name="password_confirmation"
+                            required>
                     </div>
 
                 </div>
@@ -435,136 +348,113 @@
     </div>
 
 </div>
-  
-        {{-- Audit Trail Section --}}
-<div id="section-audit" class="dashboard-section">
 
-    <div class="documents-card audit-card">
+{{-- Audit Trail Section --}}
+<div id="section-audit"
+    class="dashboard-section">
 
-        <div class="audit-header">
+    <div class="documents-card">
 
-            <div>
-                <h2 class="section-title">
-                    Audit Trail
-                </h2>
+        <div class="documents-card-header">
 
-                <p class="audit-subtitle">
-                    Track user activity, document actions, approvals, signatures, and account changes.
-                </p>
-            </div>
-
-            <div class="audit-count-card">
-                <span>{{ $auditLogs->total() }}</span>
-                <small>Total Activities</small>
-            </div>
+            <h2 class="section-title">
+                Audit Trail
+            </h2>
 
         </div>
 
         @if($auditLogs->count())
 
-            <div class="audit-pagination">
-    {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-</div>
+            <div style="padding: 0 24px 24px;">
 
-            <div class="audit-feed">
-
-                @foreach($auditLogs as $log)
-
-                    @php
-                        $event = $log->event ?? '';
-                        $action = strtolower($log->action ?? 'activity');
-
-                        if (str_contains($event, 'password')) {
-                            $icon = '🔐';
-                            $typeClass = 'security';
-                        } elseif (str_contains($event, 'document_file')) {
-                            $icon = '📎';
-                            $typeClass = 'file';
-                        } elseif (str_contains($event, 'document')) {
-                            $icon = '📄';
-                            $typeClass = 'document';
-                        } elseif (str_contains($event, 'approval')) {
-                            $icon = '✅';
-                            $typeClass = 'approval';
-                        } elseif (str_contains($event, 'signature')) {
-                            $icon = '✍️';
-                            $typeClass = 'signature';
-                        } elseif (str_contains($event, 'user')) {
-                            $icon = '👤';
-                            $typeClass = 'user';
-                        } else {
-                            $icon = '📝';
-                            $typeClass = 'system';
-                        }
-                    @endphp
-
-                    <article class="audit-item">
-
-                        <div class="audit-icon audit-icon-{{ $typeClass }}">
-                            {{ $icon }}
-                        </div>
-
-                        <div class="audit-content">
-
-                            <div class="audit-content-header">
-
-                                <div>
-                                    <h3 class="audit-description">
-                                        {{ $log->description ?? 'No description available.' }}
-                                    </h3>
-
-                                    <div class="audit-meta">
-                                        <span>{{ $log->event ?? 'system.event' }}</span>
-                                        <span>•</span>
-                                        <span>{{ $log->table_name ?? '-' }} #{{ $log->table_id ?? '-' }}</span>
-                                        <span>•</span>
-                                        <span>{{ $log->ip_address ?? '-' }}</span>
-                                    </div>
-                                </div>
-
-                                <span class="audit-action audit-action-{{ $action }}">
-                                    {{ strtoupper($log->action) }}
-                                </span>
-
-                            </div>
-
-                            <div class="audit-footer">
-
-                                <div class="audit-user">
-                                    <span class="audit-user-avatar">
-                                        {{ strtoupper(substr($log->user?->name ?? 'S', 0, 2)) }}
-                                    </span>
-
-                                    <span>
-                                        {{ $log->user?->name ?? 'System' }}
-                                    </span>
-                                </div>
-
-                                <time class="audit-time">
-                                    {{ $log->created_at?->format('M d, Y') ?? '-' }}
-                                    <span>{{ $log->created_at?->format('h:i:s A') ?? '' }}</span>
-                                </time>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                @endforeach
+                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
 
             </div>
 
-            <div class="documents-footer audit-footer-pagination">
+            <div class="table-wrapper">
+
+                <table class="modern-docs-table audit-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Event</th>
+                            <th>Action</th>
+                            <th>Table</th>
+                            <th>Record ID</th>
+                            <th>IP Address</th>
+                            <th>User</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach($auditLogs as $log)
+
+                            <tr>
+
+                                <td>{{ $log->id }}</td>
+
+                                <td style="min-width: 320px;">
+                                    {{ $log->description ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $log->event ?? '-' }}
+                                </td>
+
+                                <td>
+                                    <span class="status-pill ongoing">
+                                        {{ strtoupper($log->action) }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ $log->table_name ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $log->table_id ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $log->ip_address ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $log->user?->name ?? 'System' }}
+                                </td>
+
+                                <td style="white-space: nowrap;">
+                                    {{ $log->created_at?->format('M d, Y h:i:s A') ?? '-' }}
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="documents-footer">
+
                 {{ $auditLogs->appends(['section' => 'audit'])->links() }}
+
             </div>
 
         @else
 
-            <div class="audit-empty">
-                <div class="audit-empty-icon">📜</div>
-                <h3>No audit logs available.</h3>
-                <p>System activities will appear here once users start making changes.</p>
+            <div style="padding:24px;">
+
+                <p class="no-data">
+                    No audit logs available.
+                </p>
+
             </div>
 
         @endif
@@ -573,87 +463,83 @@
 
 </div>
 
+{{-- Signature Section --}}
+<div id="section-signature"
+    class="dashboard-section"
+    >
 
+    <h2 class="section-title">
+        My Signature
+    </h2>
 
-        {{-- Signature Section --}}
-        <div id="section-signature"
-            class="dashboard-section"
-            >
+    <div class="form-card">
 
-            <h2 class="section-title">
-                My Signature
-            </h2>
+        @if(auth()->user()->signature_path)
 
-            <div class="form-card">
+            <div style="margin-bottom:20px;">
 
-                @if(auth()->user()->signature_path)
+                <h3>Current Signature</h3>
 
-                    <div style="margin-bottom:20px;">
+                <img src="{{ route(
+                        'signatures.view',
+                        encrypt(auth()->id())
+                    ) }}"
+                    alt="Signature"
+                    class="signature-preview">
 
-                        <h3>Current Signature</h3>
-
-                        <img src="{{ route(
-                                'signatures.view',
-                                encrypt(auth()->id())
-                            ) }}"
-                            alt="Signature"
-                            class="signature-preview">
-
-                    </div>
-
-                @else
-
-                    <p class="alert alert-error">
-                        No signature uploaded yet.
-                    </p>
-
-                @endif
-
-                <form method="POST"
-                    action="{{ route('signature.upload') }}"
-                    enctype="multipart/form-data"
-                    class="user-form">
-
-                    @csrf
-
-                    <div class="form-group">
-
-                        <label>Upload Signature</label>
-
-                        <input type="file"
-                            name="signature"
-                            accept="image/*"
-                            required>
-
-                    </div>
-
-                    <button type="submit"
-                            class="btn-submit">
-
-                        Upload Signature
-
-                    </button>
-
-                   
-                </form>
             </div>
-        </div>
+
+        @else
+
+            <p class="alert alert-error">
+                No signature uploaded yet.
+            </p>
+
+        @endif
+
+        <form method="POST"
+            action="{{ route('signature.upload') }}"
+            enctype="multipart/form-data"
+            class="user-form">
+
+            @csrf
+
+            <div class="form-group">
+
+                <label>Upload Signature</label>
+
+                <input type="file"
+                    name="signature"
+                    accept="image/*"
+                    required>
+
+            </div>
+
+            <button type="submit"
+                    class="btn-submit">
+
+                Upload Signature
+
+            </button>
+
+            
+        </form>
     </div>
 </div>
- <!-- PDF Modal -->
-                        <div id="pdfModal" class="pdf-modal">
-                            <div class="pdf-modal-content">
 
-                                <span class="close-modal" onclick="closePdfModal()">
-                                    &times;
-                                </span>
+<!-- PDF Modal -->
+<div id="pdfModal" class="pdf-modal">
+    <div class="pdf-modal-content">
 
-                                <iframe id="pdfFrame"
-                                    src=""
-                                    width="100%"
-                                    height="100%">
-                                </iframe>
+        <span class="close-modal" onclick="closePdfModal()">
+            &times;
+        </span>
 
-                            </div>
-                        </div>
+        <iframe id="pdfFrame"
+            src=""
+            width="100%"
+            height="100%">
+        </iframe>
+    </div>
+</div>
 @endsection

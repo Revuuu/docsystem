@@ -4,91 +4,82 @@
 
 @section('content')
 
-{{-- Hamburger Menu --}}
-@include('partials.hamburger')
+{{-- Upload Section / Upload Modal --}}
+@include('partials.upload-section')
 
-<div class="main-container">
+@if ($errors->any())
+    <div class="alert alert-danger" style="margin: 20px;">
+        {{ $errors->first() }}
+    </div>
+@endif
 
-    {{-- Sidebar --}}
-    @include('partials.sidebar')
+@php
+    use Illuminate\Pagination\LengthAwarePaginator;
 
-    {{-- Content --}}
-    <div class="content">
+    $search = strtolower(request('search', ''));
+    $status = strtolower(request('status', ''));
 
-        {{-- Upload Section / Upload Modal --}}
-        @include('partials.upload-section')
-        @if ($errors->any())
-            <div class="alert alert-danger" style="margin: 20px;">
-                {{ $errors->first() }}
-            </div>
-        @endif
-        @php
-            use Illuminate\Pagination\LengthAwarePaginator;
+    $assignedDocuments = $approvals
+        ->pluck('document')
+        ->filter();
 
-            $search = strtolower(request('search', ''));
-            $status = strtolower(request('status', ''));
+    $mergedDocuments = $documents
+        ->merge($assignedDocuments)
+        ->unique('id')
+        ->filter(function ($doc) use ($search, $status) {
 
-            $assignedDocuments = $approvals
-                ->pluck('document')
-                ->filter();
+            $latestVersion = $doc->latestVersion();
 
-            $mergedDocuments = $documents
-                ->merge($assignedDocuments)
-                ->unique('id')
-                ->filter(function ($doc) use ($search, $status) {
+            $title = strtolower($doc->title ?? '');
 
-                    $latestVersion = $doc->latestVersion();
-
-                    $title = strtolower($doc->title ?? '');
-
-                    $file = strtolower(
-                        $latestVersion
-                            ? basename($latestVersion->generated_storage_path)
-                            : ''
-                    );
-
-                    $myApproval = $doc->approvals
-                        ->where('user_id', auth()->id())
-                        ->sortBy('step_order')
-                        ->first();
-
-                    $docStatus = strtolower(
-                        $myApproval?->status ?? $doc->status
-                    );
-
-                    $matchesSearch =
-                        empty($search) ||
-                        str_contains($title, $search) ||
-                        str_contains($file, $search);
-
-                    $matchesStatus =
-                        empty($status) ||
-                        $docStatus === $status;
-
-                    return $matchesSearch && $matchesStatus;
-                })
-                ->sortByDesc('created_at')
-                ->values();
-
-            $perPage = 10;
-
-            $currentPage = LengthAwarePaginator::resolveCurrentPage();
-
-            $currentItems = $mergedDocuments
-                ->slice(($currentPage - 1) * $perPage, $perPage)
-                ->values();
-
-            $myDocuments = new LengthAwarePaginator(
-                $currentItems,
-                $mergedDocuments->count(),
-                $perPage,
-                $currentPage,
-                [
-                    'path' => request()->url(),
-                    'query' => request()->query(),
-                ]
+            $file = strtolower(
+                $latestVersion
+                    ? basename($latestVersion->generated_storage_path)
+                    : ''
             );
-        @endphp
+
+            $myApproval = $doc->approvals
+                ->where('user_id', auth()->id())
+                ->sortBy('step_order')
+                ->first();
+
+            $docStatus = strtolower(
+                $myApproval?->status ?? $doc->status
+            );
+
+            $matchesSearch =
+                empty($search) ||
+                str_contains($title, $search) ||
+                str_contains($file, $search);
+
+            $matchesStatus =
+                empty($status) ||
+                $docStatus === $status;
+
+            return $matchesSearch && $matchesStatus;
+        })
+        ->sortByDesc('created_at')
+        ->values();
+
+    $perPage = 10;
+
+    $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+    $currentItems = $mergedDocuments
+        ->slice(($currentPage - 1) * $perPage, $perPage)
+        ->values();
+
+    $myDocuments = new LengthAwarePaginator(
+        $currentItems,
+        $mergedDocuments->count(),
+        $perPage,
+        $currentPage,
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+    );
+@endphp
 
 {{-- DASHBOARD SECTION --}}
 <div id="section-dashboard"

@@ -1,53 +1,55 @@
 const Sidebar = {
 
-    init()
-    {
-        this.hamburger =
-            document.getElementById('hamburger');
+    init() {
 
-        this.sidebar =
-            document.getElementById('sidebar');
+        this.hamburger = document.getElementById('hamburger');
+        this.sidebar = document.getElementById('sidebar');
+        this.overlay = document.getElementById('overlay');
 
-        this.overlay =
-            document.getElementById('overlay');
-
-        if (!this.hamburger) return;
+        if (!this.hamburger || !this.sidebar) return;
 
         this.bindEvents();
     },
 
-    bindEvents()
-    {
-        this.hamburger
-            ?.addEventListener(
-                'click',
-                () => this.toggle()
-            );
+    bindEvents() {
 
-        this.overlay
-            ?.addEventListener(
-                'click',
-                () => this.close()
-            );
-    },
+        this.hamburger.addEventListener('click', () => {
 
-    open()
-    {
-        this.sidebar?.classList.add('open');
-        this.overlay?.classList.add('show');
-    },
+            // Mobile
+            if (window.innerWidth <= 860) {
 
-    close()
-    {
-        this.sidebar?.classList.remove('open');
-        this.overlay?.classList.remove('show');
-    },
+                this.sidebar.classList.toggle('mobile-open');
+                this.overlay?.classList.toggle('show');
 
-    toggle()
-    {
-        this.sidebar?.classList.contains('open')
-            ? this.close()
-            : this.open();
+            }
+            // Desktop
+            else {
+
+                this.sidebar.classList.toggle('is-hidden');
+
+            }
+
+        });
+
+        this.overlay?.addEventListener('click', () => {
+
+            this.sidebar.classList.remove('mobile-open');
+            this.overlay.classList.remove('show');
+
+        });
+
+        window.addEventListener('resize', () => {
+
+            // Cleanup when switching between desktop/mobile
+            if (window.innerWidth > 860) {
+
+                this.sidebar.classList.remove('mobile-open');
+                this.overlay?.classList.remove('show');
+
+            }
+
+        });
+
     }
 };
 

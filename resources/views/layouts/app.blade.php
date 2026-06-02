@@ -29,8 +29,31 @@
 </head>
 
 <body>
-    @yield('content')
+
+    @auth
+        <div class="overlay" id="overlay"></div>
+        <div class="dashboard-shell">
+
+            @include('partials.sidebar')
+
+            <div class="dashboard-main">
+
+                @include('partials.header-section')
+                <div class="content">
+                    @yield('content')
+                </div>
+
+            </div>
+
+        </div>
+
+    @else
+
+        @yield('content')
+
+    @endauth
 
     @stack('scripts')
+
 </body>
 </html>

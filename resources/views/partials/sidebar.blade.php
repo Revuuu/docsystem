@@ -1,3 +1,9 @@
+@php
+    use App\Services\SidebarService;
+
+    $menuItems = SidebarService::getMenu(auth()->user()->role);
+@endphp
+
 <div class="sidebar" id="sidebar">
 
     <div class="sidebar-logo">
@@ -22,16 +28,24 @@
     </div>
 
     <nav class="sidebar-nav">
-        <button class="nav-btn" onclick="showSection('dashboard')"> 
-            Dashboard 
+
+    @foreach($menuItems as $item)
+
+        <button
+            class="nav-btn"
+            onclick="showSection('{{ $item['section'] }}')">
+
+            @if(isset($item['icon']))
+                {{ $item['icon'] }}
+            @endif
+
+            {{ $item['label'] }}
+
         </button>
-        <button class="nav-btn" onclick="showSection('documents')">
-            My Documents
-        </button>
-        <button class="nav-btn" onclick="showSection('profile')">
-            My Profile
-        </button>
-    </nav>
+
+    @endforeach
+
+</nav>
 
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">

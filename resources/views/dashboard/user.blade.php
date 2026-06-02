@@ -1,42 +1,8 @@
 <div class="staff-dashboard-wrapper">
 
     {{-- TOP HEADER --}}
-    <div class="staff-dashboard-header">
-
-        <div>
-
-<h1>
-    {{ $dashboardTitle }}
-</h1>
-
-<p>
-    {{ $dashboardSubtitle }}
-</p>
-
-
-        </div>
-
-        <div class="staff-dashboard-user">
-
-            <div class="staff-avatar">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-            </div>
-
-            <div>
-
-                <strong>
-                    {{ auth()->user()->name }}
-                </strong>
-
-                <small>
-                {{ ucfirst($role) }}
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
+    
+    {{-- @include('partials.header-section') --}}
 
     {{-- STATISTICS --}}
     <div class="staff-stats-grid">
