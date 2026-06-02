@@ -266,11 +266,7 @@
 
                                         <td>
                                             <div class="table-user">
-                                                <div class="table-user-avatar">
-                                                    {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
-                                                </div>
-
-                                                <div>
+                                                 <div class="table-user-info">
                                                     <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
                                                     <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
                                                 </div>
