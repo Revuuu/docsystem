@@ -141,6 +141,8 @@
                                     <th>Uploaded By</th>
                                     <th>Uploaded At</th>
                                     <th>Status</th>
+                                    <th>Elapsed Time</th>
+                                    <th>Current Signatory</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -163,13 +165,98 @@
 
                                         $signingFileId = $doc->current_signed_file?->id
                                             ?? $latestVersion?->id;
+
+                                        $currentPendingApproval = $doc->approvals
+                                            ->where('status', 'pending')
+                                            ->sortBy('step_order')
+                                            ->first();
+
+                                        $rejectedApproval = $doc->approvals
+                                            ->where('status', 'rejected')
+                                            ->sortByDesc('updated_at')
+                                            ->first();
+
+                                        $lastApprovedApproval = $doc->approvals
+                                            ->where('status', 'approved')
+                                            ->sortByDesc('signed_at')
+                                            ->first();
+
+                                        /*
+                                            Display rules:
+                                            - Status column only shows: Pending, Approved, Rejected, Upcoming
+                                            - Elapsed Time column only shows time
+                                            - Current Signatory column only shows the active signer
+                                        */
+                                        if ($myApproval?->status === 'approved') {
+                                            $displayStatus = 'Approved';
+                                            $statusClass = 'success';
+
+                                            $elapsedTime = ($myApproval->received_at && $myApproval->signed_at)
+                                                ? $myApproval->received_at->diffForHumans($myApproval->signed_at, true)
+                                                : ($myApproval->signed_at
+                                                    ? $doc->created_at->diffForHumans($myApproval->signed_at, true)
+                                                    : '-');
+
+                                            $currentSignatory = 'Completed';
+
+                                        } elseif ($myApproval?->status === 'pending') {
+                                            $displayStatus = 'Pending';
+                                            $statusClass = 'waiting';
+
+                                            $elapsedTime = $myApproval->received_at
+                                                ? $myApproval->received_at->diffForHumans(now(), true)
+                                                : $doc->created_at->diffForHumans(now(), true);
+
+                                            $currentSignatory = auth()->user()->name;
+
+                                        } elseif ($myApproval?->status === 'waiting') {
+                                            $displayStatus = 'Upcoming';
+                                            $statusClass = 'ongoing';
+
+                                            $elapsedTime = '-';
+
+                                            $currentSignatory = $currentPendingApproval?->user?->name
+                                                ?? 'Unknown approver';
+
+                                        } else {
+                                            if ($doc->status === 'approved') {
+                                                $displayStatus = 'Approved';
+                                                $statusClass = 'success';
+
+                                                $elapsedTime = $lastApprovedApproval?->signed_at
+                                                    ? $doc->created_at->diffForHumans($lastApprovedApproval->signed_at, true)
+                                                    : '-';
+
+                                                $currentSignatory = 'Completed';
+
+                                            } elseif ($doc->status === 'rejected') {
+                                                $displayStatus = 'Rejected';
+                                                $statusClass = 'rejected';
+
+                                                $elapsedTime = $rejectedApproval?->updated_at
+                                                    ? $doc->created_at->diffForHumans($rejectedApproval->updated_at, true)
+                                                    : '-';
+
+                                                $currentSignatory = 'None';
+
+                                            } else {
+                                                $displayStatus = 'Pending';
+                                                $statusClass = 'waiting';
+
+                                                $elapsedTime = $currentPendingApproval?->received_at
+                                                    ? $currentPendingApproval->received_at->diffForHumans(now(), true)
+                                                    : $doc->created_at->diffForHumans(now(), true);
+
+                                                $currentSignatory = $currentPendingApproval?->user?->name
+                                                    ?? 'Unknown approver';
+                                            }
+                                        }
                                     @endphp
 
                                     <tr class="document-row"
                                         data-title="{{ strtolower($doc->title) }}"
                                         data-file="{{ strtolower($latestVersion ? basename($latestVersion->generated_storage_path) : '') }}"
                                         data-status="{{ strtolower($myApproval?->status ?? $doc->status) }}">
-
 
                                         <td>
                                             <div class="file-name">
@@ -197,120 +284,17 @@
                                         </td>
 
                                         <td>
-                                            @php
-                                                $approvedApprovals = $doc->approvals
-                                                    ->where('status', 'approved');
+                                            <span class="status-pill {{ $statusClass }}">
+                                                {{ $displayStatus }}
+                                            </span>
+                                        </td>
 
-                                                $pendingApproval = $doc->approvals
-                                                    ->where('status', 'pending')
-                                                    ->sortBy('step_order')
-                                                    ->first();
+                                        <td>
+                                            {{ $elapsedTime }}
+                                        </td>
 
-                                                $waitingApproval = $doc->approvals
-                                                    ->where('status', 'waiting')
-                                                    ->sortBy('step_order')
-                                                    ->first();
-
-                                                $rejectedApproval = $doc->approvals
-                                                    ->where('status', 'rejected')
-                                                    ->first();
-                                            @endphp
-
-                                            {{-- If current user already approved --}}
-                                            @if($myApproval?->status === 'approved')
-                                                <span class="status-pill success">
-                                                    Approved
-                                                </span>
-
-                                            {{-- If current user is the active signer --}}
-                                            @elseif($myApproval?->status === 'pending')
-                                                
-                                                    @php
-                                                        $currentPendingApproval = $doc->approvals
-                                                            ->where('status', 'pending')
-                                                            ->first();
-                                                    @endphp
-                                                <span class="status-pill waiting">
-                                                    
-                                                    <small class="status-time">
-
-                                                            Pending for
-
-                                                            {{
-                                                                $currentPendingApproval->received_at
-                                                                    ? $currentPendingApproval->received_at->diffForHumans(now(), true)
-                                                                    : 'Just now'
-                                                            }}
-
-                                                        </small>
-                                                    <span class="pending-approver">
-                                                        Current Signatory: {{ auth()->user()->name }}
-                                                    </span>
-                                                </span>
-
-                                            {{-- If current user is waiting for their turn --}}
-                                            @elseif($myApproval?->status === 'waiting')
-                                                <span class="status-pill ongoing">
-                                                    Upcoming
-
-                                                    <span class="pending-approver">
-                                                        Waiting For:
-                                                        {{
-                                                            $doc->approvals
-                                                                ->where('status', 'pending')
-                                                                ->first()?->user?->name
-                                                            ?? 'Unknown approver'
-                                                        }}
-                                                    </span>
-                                                </span>
-
-                                            {{-- Fallback for uploaded documents --}}
-                                            @else
-
-                                                {{-- Document fully approved --}}
-                                                @if($doc->status === 'approved')
-                                                    <span class="status-pill success">
-                                                        Approved
-                                                    </span>
-
-                                                {{-- Document rejected --}}
-                                                @elseif($doc->status === 'rejected')
-                                                    <span class="status-pill rejected">
-                                                        Rejected
-                                                    </span>
-
-                                                {{-- Document still ongoing --}}
-                                                @else
-
-                                                    @php
-                                                        $currentPendingApproval = $doc->approvals
-                                                            ->where('status', 'pending')
-                                                            ->first();
-                                                    @endphp
-
-                                                    <span class="status-pill waiting">
-                                                  
-                                                        
-                                                        <small class="status-time">
-
-                                                            Pending for
-
-                                                            {{
-                                                                $currentPendingApproval->received_at
-                                                                    ? $currentPendingApproval->received_at->diffForHumans(now(), true)
-                                                                    : 'Just now'
-                                                            }}
-
-                                                        </small>
-                                                        <span class="pending-approver">
-                                                            Current Signatory:
-                                                            {{ $currentPendingApproval?->user?->name ?? 'Unknown approver' }}
-                                                        </span>
-                                                    </span>
-
-                                                @endif
-
-                                            @endif
+                                        <td>
+                                            {{ $currentSignatory }}
                                         </td>
 
                                         <td>
