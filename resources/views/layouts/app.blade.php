@@ -69,7 +69,7 @@
             <section class="dashboard-page">
 
                 <div class="dashboard-page-heading">
-                    <h1 id="bannerTitle">Dashboard</h1>
+                    <h1 id="bannerTitle"></h1>
                     <p>Welcome to your document management dashboard</p>
                 </div>
 

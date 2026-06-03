@@ -10,14 +10,6 @@
 
     <div class="documents-card">
 
-        <div class="documents-card-header">
-
-            <h1 class="section-title">
-                Signed Documents
-            </h1>
-
-        </div>
-
         @php
             $signedDocs = \App\Models\Document::where('status', 'approved')
                 ->whereNotNull('admin_signed_at')
@@ -89,18 +81,6 @@
 
 {{-- Users Section --}}
 <div id="section-users" class="dashboard-section role-section">
-
-    <div class="role-page-header">
-        <div>
-            <h2 class="section-title">
-                Role Assignment
-            </h2>
-
-            <p class="role-page-subtitle">
-                Create user accounts and assign document workflow roles.
-            </p>
-        </div>
-    </div>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -355,14 +335,6 @@
 
     <div class="documents-card">
 
-        <div class="documents-card-header">
-
-            <h2 class="section-title">
-                Audit Trail
-            </h2>
-
-        </div>
-
         @if($auditLogs->count())
 
             <div style="padding: 0 24px 24px;">
@@ -467,11 +439,7 @@
 <div id="section-signature"
     class="dashboard-section"
     >
-
-    <h2 class="section-title">
-        My Signature
-    </h2>
-
+    
     <div class="form-card">
 
         @if(auth()->user()->signature_path)
