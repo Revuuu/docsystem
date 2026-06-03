@@ -48,10 +48,10 @@ class DocumentController extends Controller
 
         if ($approvers->isEmpty()) {
 
-            return back()->with(
-                'error',
-                'Please select at least one valid approver.'
-            );
+            return redirect()
+                ->route('dashboard')
+                ->with('document_error', 'Please select at least one valid approver.')
+                ->with('section', 'documents');
         }
 
        $uploadedFile = $request->file('file');
@@ -112,6 +112,7 @@ Storage::disk('local')->put(
 
         return redirect()
             ->route('dashboard')
-            ->with('success', 'Document uploaded successfully!');
+            ->with('document_success', 'Document uploaded successfully!')
+            ->with('section', 'documents');
     }
 }

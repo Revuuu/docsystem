@@ -25,7 +25,7 @@ class ApprovalController extends Controller
     if ($approval->status !== 'pending') {
         return back()->with('error', 'This approval is not active.');
     }
-
+    try { 
     \DB::transaction(function () use ($request, $approval, &$signedPath) {
 
     // Generate signed PDF
@@ -145,8 +145,23 @@ $newFile = $approval->document
     });
 
     return redirect()
-    ->route('dashboard')
-    ->with('success', 'Document approved successfully.');
+            ->route('dashboard')
+            ->with('approval_success', 'Document approved successfully.')
+            ->with('section', 'documents');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return redirect()
+            ->route('dashboard')
+            ->withErrors($e->errors(), 'approval')
+            ->with('approval_error', $e->validator->errors()->first())
+            ->with('section', 'documents');
+
+    } catch (\Exception $e) {
+        return redirect()
+            ->route('dashboard')
+            ->with('approval_error', 'Something went wrong while approving the document.')
+            ->with('section', 'documents');
+    }
 }
 public function reject(Request $request, Approval $approval)
 {

@@ -12,10 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet">
-    {{-- Sidebar Icons --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    {{-- Bootstrap Icons --}}
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     {{-- Tabler Icons --}}
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -31,43 +34,59 @@
 
 <body>
 
-    @auth
-        <div class="overlay" id="overlay"></div>
-        <div class="dashboard-shell">
+@auth
+    <div class="overlay" id="overlay"></div>
 
-            @include('partials.sidebar')
+    <div class="dashboard-shell">
 
-            <div class="dashboard-main">
+        @include('partials.sidebar')
 
-                @include('partials.header-section')
+        <main class="dashboard-main">
 
-                @php
+            <header class="dashboard-topbar">
 
-                    $role =
-                        auth()->user()->roles->first()?->name
-                        ?? auth()->user()->role;
+                <div class="topbar-left">
+                    <button type="button" class="hamburger" id="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
 
-                @endphp
+                <div class="topbar-account">
+                    <div class="topbar-avatar">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
 
-                <div class="dashboard-banner">
+                    <div class="topbar-user-text">
+                        <strong>{{ auth()->user()->name }}</strong>
+                        <small>{{ ucfirst(auth()->user()->role) }}</small>
+                    </div>
+                </div>
+
+            </header>
+
+            <section class="dashboard-page">
+
+                <div class="dashboard-page-heading">
                     <h1 id="bannerTitle">Dashboard</h1>
+                    <p>Welcome to your document management dashboard</p>
                 </div>
 
                 <div class="content">
                     @yield('content')
                 </div>
 
-            </div>
+            </section>
 
-        </div>
+        </main>
 
-    @else
+    </div>
+@else
+    @yield('content')
+@endauth
 
-        @yield('content')
-
-    @endauth
-
-    @stack('scripts')
+@stack('scripts')
 
 </body>
 </html>

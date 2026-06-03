@@ -7,12 +7,6 @@
 {{-- Upload Section / Upload Modal --}}
 @include('partials.upload-section')
 
-@if ($errors->any())
-    <div class="alert alert-danger" style="margin: 20px;">
-        {{ $errors->first() }}
-    </div>
-@endif
-
 @php
     use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -84,12 +78,35 @@
     {{-- DASHBOARD SECTION --}}
     <div id="section-dashboard"
         class="dashboard-section">
-
+        
         @include('dashboard.user')
 
     </div>
         {{-- Documents --}}
         <div id="section-documents" class="dashboard-section">
+              @if(session('document_success'))
+                    <div class="alert alert-success" style="margin-bottom: 16px;">
+                        {{ session('document_success') }}
+                    </div>
+                @endif
+
+                @if(session('document_error'))
+                    <div class="alert alert-error" style="margin-bottom: 16px;">
+                        {{ session('document_error') }}
+                    </div>
+                @endif
+
+                 @if(session('approval_success'))
+                    <div class="alert alert-success" style="margin-bottom: 16px;">
+                        {{ session('approval_success') }}
+                    </div>
+                @endif
+
+                @if(session('approval_error'))
+                    <div class="alert alert-error" style="margin-bottom: 16px;">
+                        {{ session('approval_error') }}
+                    </div>
+                @endif
 
             <div class="documents-card">
 
@@ -366,9 +383,47 @@
             <div class="documents-card">
 
                 <div class="upload-modal-body" style="padding:24px;">
-                    @if(session('success'))
+                   @if(session('profile_success'))
                         <div class="alert alert-success">
-                            {{ session('success') }}
+                            {{ session('profile_success') }}
+                        </div>
+                    @endif
+
+                    @if(session('profile_error'))
+                        <div class="alert alert-error">
+                            {{ session('profile_error') }}
+                        </div>
+                    @endif
+
+                    @if(session('signature_success'))
+                        <div class="alert alert-success">
+                            {{ session('signature_success') }}
+                        </div>
+                    @endif
+
+                    @if(session('signature_error'))
+                        <div class="alert alert-error">
+                            {{ session('signature_error') }}
+                        </div>
+                    @endif
+
+                    @if($errors->profile->any())
+                        <div class="alert alert-error">
+                            <ul>
+                                @foreach($errors->profile->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if($errors->signature->any())
+                        <div class="alert alert-error">
+                            <ul>
+                                @foreach($errors->signature->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 
