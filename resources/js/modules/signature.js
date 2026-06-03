@@ -1,5 +1,5 @@
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -178,7 +178,9 @@ const Signature = {
         pdfUrl,
         signUrl
     ) {
-
+        console.log('DOC ID:', docId);
+    console.log('PDF URL:', pdfUrl);
+    console.log('SIGN URL:', signUrl);
         this.state.currentPdfUrl =
             pdfUrl;
 
@@ -401,5 +403,7 @@ window.checkSignatureAndOpenModal =
         Signature.checkSignature(
             ...args
         );
-
+document.addEventListener('DOMContentLoaded', () => {
+    Signature.init();
+});
 export default Signature;
