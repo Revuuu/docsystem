@@ -36,10 +36,10 @@
             onclick="showSection('{{ $item['section'] }}')">
 
             @if(isset($item['icon']))
-                {{ $item['icon'] }}
+                @include('partials.sidebar-icon', ['icon' => $item['icon']])
             @endif
 
-            {{ $item['label'] }}
+            <span>{{ $item['label'] }}</span>
 
         </button>
 

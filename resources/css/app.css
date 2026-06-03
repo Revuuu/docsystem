@@ -32,16 +32,21 @@ CLEANED APPLICATION CSS
 
 .nav-btn {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+
+    padding: 12px 16px;
     border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    background: var(--paper-warm);
+    background: transparent;
+
+    font-size: 14px;
+    font-family: inherit;
     color: var(--ink);
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    text-align: left;
+
     cursor: pointer;
-    transition: 0.2s ease;
+    text-align: left;
 }
 
 .nav-btn:hover {
@@ -574,6 +579,16 @@ body {
 
 .sidebar-logo span {
     line-height: normal;
+}
+.sidebar-icon {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    max-width: 18px;
+    min-height: 18px;
+    max-height: 18px;
+    flex-shrink: 0;
+    display: block;
 }
 
 .user-avatar {

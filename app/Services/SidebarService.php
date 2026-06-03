@@ -10,22 +10,22 @@ class SidebarService
             return [
                 [
                     'label' => 'Signed Documents',
-                    'icon' => '✅',
+                    'icon' => 'check-circle',
                     'section' => 'signed',
                 ],
                 [
                     'label' => 'Role Assignment',
-                    'icon' => '👥',
+                    'icon' => 'users',
                     'section' => 'users',
                 ],
                 [
                     'label' => 'Audit Trail',
-                    'icon' => '📜',
+                    'icon' => 'file-text',
                     'section' => 'audit',
                 ],
                 [
                     'label' => 'My Signature',
-                    'icon' => '✍️',
+                    'icon' => 'signature',
                     'section' => 'signature',
                 ],
             ];
@@ -34,14 +34,17 @@ class SidebarService
         return [
             [
                 'label' => 'Dashboard',
+                'icon' => 'layout-dashboard',
                 'section' => 'dashboard',
             ],
             [
                 'label' => 'My Documents',
+                'icon' => 'folder',
                 'section' => 'documents',
             ],
             [
                 'label' => 'My Profile',
+                'icon' => 'user-circle',
                 'section' => 'profile',
             ],
         ];
