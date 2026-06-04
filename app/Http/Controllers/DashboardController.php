@@ -70,7 +70,7 @@ class DashboardController extends Controller
 
             $auditLogs = AuditLog::with('user')
             ->latest()
-            ->paginate(20);
+            ->paginate(10);
 
             return view('admin.index', compact(
                 'users',

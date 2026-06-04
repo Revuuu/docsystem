@@ -14,7 +14,7 @@
             $signedDocs = \App\Models\Document::where('status', 'approved')
                 ->whereNotNull('admin_signed_at')
                 ->latest('admin_signed_at')
-                ->get();
+                ->paginate(10);
         @endphp
 
         @if($signedDocs->count() > 0)
@@ -66,6 +66,12 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                 <div class="documents-footer">
+
+                {{ $signedDocs->appends(['section' => 'signed'])->links() }}
+
+                </div>
             </div>
 
         @else
@@ -336,12 +342,6 @@
     <div class="documents-card">
 
         @if($auditLogs->count())
-
-            <div style="padding: 0 24px 24px;">
-
-                {{ $auditLogs->appends(['section' => 'audit'])->links() }}
-
-            </div>
 
             <div class="table-wrapper">
 
