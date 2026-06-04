@@ -1906,6 +1906,50 @@ ALERTS / PAGINATION
     background-color: #ffffff;
     opacity: 0.65;
 }
+/* =========================================================
+PROFILE
+========================================================= */
+.password-match-message {
+    margin: 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.password-rules {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.password-rules::before {
+    content: "Password Requirements";
+    display: block;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #374151;
+}
+
+.rule {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rule.invalid{
+    color:#dc2626;
+}
+
+.rule.valid{
+    color:#16a34a;
+}
+
+.rule i{
+    font-size:14px;
+}
+
 
 /* =========================================================
 LEGACY HERO / HOME SUPPORT

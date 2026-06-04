@@ -407,16 +407,6 @@
                         </div>
                     @endif
 
-                    @if($errors->profile->any())
-                        <div class="alert alert-error">
-                            <ul>
-                                @foreach($errors->profile->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
                     @if($errors->signature->any())
                         <div class="alert alert-error">
                             <ul>
@@ -427,7 +417,8 @@
                         </div>
                     @endif
 
-                    <form method="POST"
+                    <form id="profileForm"
+                          method="POST"
                           action="{{ route('profile.update') }}"
                           class="upload-form">
                         @csrf
@@ -444,6 +435,7 @@
                         <div class="form-group">
                             <label>New Password</label>
                             <input type="password"
+                                   id="password"
                                    name="password"
                                    placeholder="Leave blank if unchanged"
                                    autocomplete="new-password">
@@ -452,11 +444,47 @@
                         <div class="form-group">
                             <label>Confirm Password</label>
                             <input type="password"
+                                   id="password_confirmation"
                                    name="password_confirmation"
                                    placeholder="Confirm new password"
                                    autocomplete="new-password">
                         </div>
+                        <div id="passwordMatchMessage"
+                            class="password-match-message">
+                        </div>
+                        @error('password')
+                            <div class="text-danger mt-1">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                       
+                        <div class="password-rules" id="passwordRules">
+                            <div id="ruleLength" class="rule invalid">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                Minimum 12 characters
+                            </div>
 
+                            <div id="ruleLetter" class="rule invalid">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                Contains letters
+                            </div>
+
+                            <div id="ruleCase" class="rule invalid">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                Contains uppercase and lowercase
+                            </div>
+
+                            <div id="ruleNumber" class="rule invalid">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                Contains a number
+                            </div>
+
+                            <div id="ruleSymbol" class="rule invalid">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                Contains a symbol (!@#$%^&*)
+                            </div>
+                        </div>
+                       
                         <button type="button"
                                 class="btn-submit"
                                 onclick="openSignatureChoiceModal()">
@@ -478,6 +506,42 @@
                             Save Profile
                         </button>
                     </form>
+                        <div class="toast-container position-fixed top-0 end-0 p-3">
+
+                            <div id="profileErrorToast"
+                                class="toast text-bg-danger"
+                                role="alert">
+
+                                <div class="toast-header">
+                                    <strong class="me-auto">Profile Error</strong>
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="toast">
+                                    </button>
+                                </div>
+
+                                <div class="toast-body">
+                                    Please correct the errors and try again.
+                                </div>
+
+                            </div>
+                        </div>
+                        @if($errors->any())
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+
+                                const toast =
+                                    new bootstrap.Toast(
+                                        document.getElementById(
+                                            'profileErrorToast'
+                                        )
+                                    );
+
+                                toast.show();
+
+                            });
+                            </script>
+                        @endif
                 </div>
             </div>
         </div>
@@ -708,6 +772,159 @@
     </script>
 @endif
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('profileForm')
+.addEventListener('submit', function (e) {
+
+    const password =
+        document.getElementById('password');
+
+    const confirmation =
+        document.getElementById('password_confirmation');
+
+    if (
+        password.value &&
+        password.value !== confirmation.value
+    ) {
+
+        e.preventDefault();
+
+        const toast = new bootstrap.Toast(
+            document.getElementById('profileErrorToast')
+        );
+
+        document.querySelector(
+            '#profileErrorToast .toast-body'
+        ).textContent =
+            'The password confirmation does not match.';
+
+        toast.show();
+    }
+});
+
+    const passwordInput =
+        document.getElementById('password');
+
+    if (!passwordInput) return;
+
+    passwordInput.addEventListener('input', validatePassword);
+
+    function validatePassword() {
+
+        const value = passwordInput.value;
+
+        updateRule(
+            'ruleLength',
+            value.length >= 12
+        );
+
+        updateRule(
+            'ruleLetter',
+            /[a-zA-Z]/.test(value)
+        );
+
+        updateRule(
+            'ruleCase',
+            /[a-z]/.test(value) &&
+            /[A-Z]/.test(value)
+        );
+
+        updateRule(
+            'ruleNumber',
+            /\d/.test(value)
+        );
+
+        updateRule(
+            'ruleSymbol',
+            /[^A-Za-z0-9]/.test(value)
+        );
+    }
+
+    function updateRule(id, valid) {
+
+        const rule =
+            document.getElementById(id);
+
+        const icon =
+            rule.querySelector('i');
+
+        if (valid) {
+
+            rule.classList.remove('invalid');
+            rule.classList.add('valid');
+
+            icon.classList.remove(
+                'bi-x-circle-fill',
+                'text-danger'
+            );
+
+            icon.classList.add(
+                'bi-check-circle-fill',
+                'text-success'
+            );
+
+        } else {
+
+            rule.classList.remove('valid');
+            rule.classList.add('invalid');
+
+            icon.classList.remove(
+                'bi-check-circle-fill',
+                'text-success'
+            );
+
+            icon.classList.add(
+                'bi-x-circle-fill',
+                'text-danger'
+            );
+        }
+    }
+     const password =
+        document.getElementById('password');
+
+    const confirmation =
+        document.getElementById(
+            'password_confirmation'
+        );
+
+    const matchMessage =
+        document.getElementById(
+            'passwordMatchMessage'
+        );
+
+    function checkMatch() {
+
+    if (confirmation.value.length === 0) {
+
+        matchMessage.innerHTML = '';
+        return;
+    }
+
+    if (password.value === confirmation.value) {
+
+        matchMessage.innerHTML =
+            '<i class="bi bi-check-circle-fill text-success"></i> Passwords match';
+
+    } else {
+
+        matchMessage.innerHTML =
+            '<i class="bi bi-exclamation-circle-fill text-danger"></i> Passwords do not match';
+    }
+}
+
+    password.addEventListener(
+        'input',
+        checkMatch
+    );
+
+    confirmation.addEventListener(
+        'input',
+        checkMatch
+    );
+
+});
+</script>
 @include('partials.password-modal')
 
 @endsection
