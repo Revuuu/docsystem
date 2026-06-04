@@ -113,6 +113,9 @@ class SignatureController extends Controller
                 Storage::disk('private')->delete($user->signature_path);
             }
 
+            Log::info('DRAWN BASE64:');
+            Log::info($request->signature_data);
+            
             $image = $request->signature_data;
             $image = str_replace('data:image/png;base64,', '', $image);
             $image = str_replace(' ', '+', $image);
