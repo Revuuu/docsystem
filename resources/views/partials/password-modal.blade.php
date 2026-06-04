@@ -6,9 +6,7 @@
         {{-- Header --}}
         <div class="password-modal-header">
             <div class="password-modal-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#2563eb" width="24" height="24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
+                <i class="bi bi-lock-fill"></i>
             </div>
             <div class="password-modal-text">
                 <h2 class="password-modal-title">Confirm Password</h2>
@@ -28,10 +26,7 @@
                        onkeydown="if(event.key === 'Enter') submitProtectedForm()">
                 
                 <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()" title="Toggle password visibility">
-                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#6b7280" width="20" height="20">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <i id="eyeIcon" class="bi bi-eye-fill"></i>
                 </button>
             </div>
             <div id="modalErrorMessage"
@@ -340,7 +335,37 @@ async function submitProtectedForm() {
 }
 
 function togglePasswordVisibility() {
-    const input = document.getElementById('modalPassword');
-    input.type = input.type === 'password' ? 'text' : 'password';
+
+    const input =
+        document.getElementById(
+            'modalPassword'
+        );
+
+    const eyeIcon =
+        document.getElementById(
+            'eyeIcon'
+        );
+
+   if (input.type === 'password') {
+        input.type = 'text';
+       
+        eyeIcon.classList.remove(
+            'bi-eye-fill'
+        );
+
+        eyeIcon.classList.add(
+            'bi-eye-slash-fill'
+        );
+    } else {
+        input.type = 'password';
+        
+        eyeIcon.classList.remove(
+            'bi-eye-slash-fill'
+        );
+
+        eyeIcon.classList.add(
+            'bi-eye-fill'
+        );
+    }
 }
 </script>
