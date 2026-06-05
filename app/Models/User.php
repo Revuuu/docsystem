@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\HasRolesAndPermissions;
 use Laratrust\Contracts\LaratrustUser;
+use App\Models\LoginOtp;
 
 class User extends Authenticatable implements LaratrustUser
 {
@@ -49,5 +50,9 @@ class User extends Authenticatable implements LaratrustUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function loginOtps()
+    {
+        return $this->hasMany(LoginOtp::class);
     }
 }

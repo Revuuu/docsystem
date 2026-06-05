@@ -8,6 +8,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\LoginOtp;
+use App\Mail\LoginOtpMail;
+use Illuminate\Support\Facades\Mail;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,7 +31,32 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+LoginOtp::where('user_id', $user->id)
+    ->delete();
+
+$otp = str_pad(
+    random_int(0, 999999),
+    6,
+    '0',
+    STR_PAD_LEFT
+);
+
+LoginOtp::create([
+    'user_id' => $user->id,
+    'otp_code' => $otp,
+    'expires_at' => now()->addMinutes(3),
+]);
+
+Mail::to($user->email)
+    ->send(new LoginOtpMail($otp));
+
+session([
+    'otp_verified' => false,
+]);
+
+return redirect()->route('otp.form');
     }
 
     /**
@@ -37,7 +65,9 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
+        $request->session()->forget(
+            'otp_verified'
+        );
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();

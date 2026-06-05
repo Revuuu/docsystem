@@ -13,7 +13,7 @@ use App\Http\Controllers\FileController;
 Route::redirect('/', '/dashboard');
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'otp'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
@@ -97,5 +97,17 @@ Route::get(
     [FileController::class, 'signature']
 )->name('signatures.view');
 });
+Route::get('/test-mail', function () {
 
+    Mail::raw(
+        'DOCSYSTEM SMTP test.',
+        function ($message) {
+
+            $message->to('makarovdreyar28@gmail.com')
+                    ->subject('DOCSYSTEM Mail Test');
+        }
+    );
+
+    return 'Mail Sent';
+});
 require __DIR__.'/auth.php';
