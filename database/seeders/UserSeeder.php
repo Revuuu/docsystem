@@ -13,34 +13,11 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Staff User',
-                'email' => 'staff@docsystem.com',
-                'role' => 'staff',
-            ],
-            [
-                'name' => 'Supervisor User',
-                'email' => 'supervisor@docsystem.com',
-                'role' => 'supervisor',
-            ],
-            [
-                'name' => 'Department Head User',
-                'email' => 'depthead@docsystem.com',
-                'role' => 'depthead',
-            ],
-            [
-                'name' => 'Division User',
-                'email' => 'division@docsystem.com',
-                'role' => 'division',
-            ],
-            [
-                'name' => 'Executive User',
-                'email' => 'executive@docsystem.com',
-                'role' => 'executive',
-            ],
-            [
-                'name' => 'Admin User',
-                'email' => 'admin@docsystem.com',
+                'name' => 'Jermaine Lee',
+                'email' => 'tester@uphmc.com.ph',
+                'password' => Hash::make('#PIKAchu0220?'),
                 'role' => 'admin',
+                'email_verified_at' => now(),
             ],
         ];
 
@@ -50,8 +27,9 @@ class UserSeeder extends Seeder
                 ['email' => $data['email']],
                 [
                     'name' => $data['name'],
-                    'password' => Hash::make('password123'),
+                    'password' => $data['password'],
                     'role' => $data['role'],
+                    'email_verified_at' => $data['email_verified_at'],
                 ]
             );
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class UserController extends Controller
 {
@@ -37,7 +38,10 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'gender' => $request->gender,
+            'email_verified_at' => null,
         ]);
+
+        event(new Registered($user));
 
         return redirect()->back()->with('success', 'User created successfully!');
     }

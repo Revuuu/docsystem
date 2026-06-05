@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use App\Models\LoginOtp;
 use App\Mail\LoginOtpMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -32,7 +33,17 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+        if (! $user->hasVerifiedEmail()) {
 
+    Auth::logout();
+
+    return redirect()
+        ->route('login')
+        ->withErrors([
+            'email' =>
+                'Your email address has not been verified. Contact the administrator.',
+        ]);
+}
 LoginOtp::where('user_id', $user->id)
     ->delete();
 
@@ -45,7 +56,7 @@ $otp = str_pad(
 
 LoginOtp::create([
     'user_id' => $user->id,
-    'otp_code' => $otp,
+    'otp_code' => Hash::make($otp),
     'expires_at' => now()->addMinutes(3),
 ]);
 

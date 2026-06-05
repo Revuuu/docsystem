@@ -8,6 +8,7 @@ use App\Models\LoginOtp;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\LoginOtpMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 
 class OtpController extends Controller
 {   
@@ -54,7 +55,7 @@ class OtpController extends Controller
                 ]);
         }
 
-        if ($request->otp !== $otp->otp_code) {
+        if (! Hash::check($request->otp, $otp->otp_code)) {
 
             $otp->increment('attempts');
 
@@ -105,7 +106,7 @@ class OtpController extends Controller
 
         LoginOtp::create([
             'user_id' => $user->id,
-            'otp_code' => $otp,
+            'otp_code' => Hash::make($otp),
             'expires_at' => now()->addMinutes(3),
         ]);
 
