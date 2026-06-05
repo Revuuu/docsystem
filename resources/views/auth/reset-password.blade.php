@@ -344,7 +344,31 @@ body{
 .forgot-password a:hover{
     text-decoration:underline;
 }
+.password-rules{
+    margin-top:10px;
+    font-size:13px;
+}
 
+.rule{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:4px;
+}
+
+.rule.valid{
+    color:#16a34a;
+}
+
+.rule.invalid{
+    color:#dc2626;
+}
+
+.password-match-message{
+    margin-top:10px;
+    font-size:13px;
+    font-weight:500;
+}
 @keyframes floatLogo{
 
     0%,100%{
@@ -501,7 +525,7 @@ function togglePassword(id, iconId)
 
         </div>
 
-        <form method="POST"
+        <form id="resetPasswordForm" method="POST"
               action="{{ route('password.store') }}">
 
             @csrf
@@ -560,31 +584,199 @@ function togglePassword(id, iconId)
                 </button>
 
             </div>
-
-            @if ($errors->any())
-                <div class="login-error-box">
-
-                    @foreach ($errors->all() as $error)
-
-                        <p>{{ $error }}</p>
-
-                    @endforeach
-
+            <div id="passwordMatchMessage" class="password-match-message">
+            </div>
+            @error('password')
+                <div class="text-danger mt-1">
+                    {{ $message }}
                 </div>
-            @endif
+            @enderror
 
-            <button type="submit"
-                    class="login-btn">
+            <div class="password-rules" id="passwordRules">
+                <div id="ruleLength" class="rule invalid">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    Minimum 12 characters
+                </div>
 
+                <div id="ruleLetter" class="rule invalid">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    Contains letters
+                </div>
+
+                <div id="ruleCase" class="rule invalid">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    Contains uppercase and lowercase
+                </div>
+
+                <div id="ruleNumber" class="rule invalid">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    Contains a number
+                </div>
+
+                <div id="ruleSymbol" class="rule invalid">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                    Contains a symbol (!@#$%^&*)
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
                 CREATE PASSWORD
-
             </button>
-
         </form>
-
     </div>
-
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('resetPasswordForm')
+.addEventListener('submit', function (e) {
 
+    const password =
+        document.getElementById('password');
+
+    const confirmation =
+        document.getElementById('password_confirmation');
+
+    if (
+        password.value &&
+        password.value !== confirmation.value
+    ) {
+
+        e.preventDefault();
+
+        const toast = new bootstrap.Toast(
+            document.getElementById('profileErrorToast')
+        );
+
+        document.querySelector(
+            '#profileErrorToast .toast-body'
+        ).textContent =
+            'The password confirmation does not match.';
+
+        toast.show();
+    }
+});
+
+    const passwordInput =
+        document.getElementById('password');
+
+    if (!passwordInput) return;
+
+    passwordInput.addEventListener('input', validatePassword);
+
+    function validatePassword() {
+
+        const value = passwordInput.value;
+
+        updateRule(
+            'ruleLength',
+            value.length >= 12
+        );
+
+        updateRule(
+            'ruleLetter',
+            /[a-zA-Z]/.test(value)
+        );
+
+        updateRule(
+            'ruleCase',
+            /[a-z]/.test(value) &&
+            /[A-Z]/.test(value)
+        );
+
+        updateRule(
+            'ruleNumber',
+            /\d/.test(value)
+        );
+
+        updateRule(
+            'ruleSymbol',
+            /[^A-Za-z0-9]/.test(value)
+        );
+    }
+
+    function updateRule(id, valid) {
+
+        const rule =
+            document.getElementById(id);
+
+        const icon =
+            rule.querySelector('i');
+
+        if (valid) {
+
+            rule.classList.remove('invalid');
+            rule.classList.add('valid');
+
+            icon.classList.remove(
+                'bi-x-circle-fill',
+                'text-danger'
+            );
+
+            icon.classList.add(
+                'bi-check-circle-fill',
+                'text-success'
+            );
+
+        } else {
+
+            rule.classList.remove('valid');
+            rule.classList.add('invalid');
+
+            icon.classList.remove(
+                'bi-check-circle-fill',
+                'text-success'
+            );
+
+            icon.classList.add(
+                'bi-x-circle-fill',
+                'text-danger'
+            );
+        }
+    }
+     const password =
+        document.getElementById('password');
+
+    const confirmation =
+        document.getElementById(
+            'password_confirmation'
+        );
+
+    const matchMessage =
+        document.getElementById(
+            'passwordMatchMessage'
+        );
+
+    function checkMatch() {
+
+    if (confirmation.value.length === 0) {
+
+        matchMessage.innerHTML = '';
+        return;
+    }
+
+    if (password.value === confirmation.value) {
+
+        matchMessage.innerHTML =
+            '<i class="bi bi-check-circle-fill text-success"></i> Passwords match';
+
+    } else {
+
+        matchMessage.innerHTML =
+            '<i class="bi bi-exclamation-circle-fill text-danger"></i> Passwords do not match';
+    }
+}
+
+    password.addEventListener(
+        'input',
+        checkMatch
+    );
+
+    confirmation.addEventListener(
+        'input',
+        checkMatch
+    );
+
+});
+</script>
 </body>
 </html>

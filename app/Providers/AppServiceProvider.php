@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Validation\Rules\Password;
 
 use App\Models\Document;
 use App\Models\Approval;
@@ -31,9 +32,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Document::observe(DocumentObserver::class);
-Approval::observe(ApprovalObserver::class);
-User::observe(UserObserver::class);
-DocumentFile::observe(DocumentFileObserver::class);
-Paginator::useBootstrapFive();
+        Approval::observe(ApprovalObserver::class);
+        User::observe(UserObserver::class);
+        DocumentFile::observe(DocumentFileObserver::class);
+        Paginator::useBootstrapFive();
+
+        Password::defaults(function () {
+                return Password::min(12)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols();
+        });
     }
 }
