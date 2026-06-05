@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeUserMail;
 
 class UserController extends Controller
 {
@@ -18,7 +22,6 @@ class UserController extends Controller
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:male,female',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|confirmed|min:8',
             'role' => 'required|in:staff,supervisor,depthead,division,executive',
         ]);
 
@@ -31,18 +34,33 @@ class UserController extends Controller
              $request->last_name 
         );
 
+        $tempPassword = Str::random(8);
+
         // Create the user
         $user = User::create([
             'name' => $fullName,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($tempPassword),
             'role' => $request->role,
             'gender' => $request->gender,
             'email_verified_at' => null,
         ]);
 
-        event(new Registered($user));
+        $token = Password::createToken($user);
 
+        $setupUrl = url(
+            route(
+                'password.reset',
+                [
+                    'token' => $token,
+                    'email' => $user->email,
+                ],
+                false
+            )
+        );
+         
+            Mail::to($user->email)
+    ->send(new WelcomeUserMail($setupUrl));
         return redirect()->back()->with('success', 'User created successfully!');
     }
 }

@@ -238,26 +238,6 @@
                         required>
                 </div>
 
-                <div class="role-form-row">
-
-                    <div class="form-group">
-                        <label>Password</label>
-
-                        <input type="password"
-                            name="password"
-                            required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-
-                        <input type="password"
-                            name="password_confirmation"
-                            required>
-                    </div>
-
-                </div>
-
                 <button type="submit"
                         class="btn-submit role-create-btn">
                     Create User
