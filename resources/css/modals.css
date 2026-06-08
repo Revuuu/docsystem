@@ -113,7 +113,7 @@ body.modal-open {
     background: #ffffff;
     border-top: 1px solid var(--border-soft);
     gap: 16px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .hint {
