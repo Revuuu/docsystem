@@ -2,7 +2,7 @@
 
 <div class="login-header">
     <h2>Welcome Back</h2>
-    <p>Sign in to continue</p>
+    <p>Get your documents all signed and ready.</p>
 </div>
 <form method="POST" action="{{ route('login') }}">
     @csrf

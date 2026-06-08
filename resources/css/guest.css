@@ -92,14 +92,16 @@ body{
 }
 
 .login-header h2{
-    font-size:32px;
+    font-size:25px;
     font-weight:800;
     color:#18181b;
     margin-bottom:6px;
+    text-align:center;
 }
 
 .login-header p{
     color:#71717a;
+    text-align:center;
 }
 .login-card{
     position:relative;
