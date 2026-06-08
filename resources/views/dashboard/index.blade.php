@@ -570,11 +570,12 @@
 
         <div class="modal-footer">
             <button class="btn-cancel" onclick="closeSignModal()">Cancel</button>
-            <span class="hint" id="hintText">Click anywhere on the document to place your signature</span>
+            
             <button class="btn-confirm" id="btnConfirm" onclick="submitSignature()" disabled>
                 ✔ Approve & Sign
             </button>
         </div>
+        <span class="hint" id="hintText">Click anywhere on the document to place your signature</span>
     </div>
 </div>
 
