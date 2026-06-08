@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\HasRolesAndPermissions;
 use Laratrust\Contracts\LaratrustUser;
+use App\Notifications\ResetPasswordNotification;
 use App\Models\LoginOtp;
 
 class User extends Authenticatable implements LaratrustUser, MustVerifyEmail
@@ -55,5 +56,11 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmail
     public function loginOtps()
     {
         return $this->hasMany(LoginOtp::class);
+    }
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(
+            new ResetPasswordNotification($token)
+        );
     }
 }

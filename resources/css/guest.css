@@ -282,7 +282,7 @@ body{
     margin-bottom:3px;
 }
 
-.login-btn{
+.login-btn, .reset-btn{
     width:100%;
     height:48px;
 
@@ -304,7 +304,7 @@ body{
     transition:all .3s ease;
 }
 
-.login-btn:hover{
+.login-btn:hover, .reset-btn:hover{
     background:#15803d;
 
     transform:translateY(-2px);
@@ -312,7 +312,8 @@ body{
     box-shadow:
         0 8px 24px rgba(22,163,74,.25);
 }
-.login-btn::before{
+
+.login-btn::before, .reset-btn:before{
     content:'';
 
     position:absolute;
@@ -333,9 +334,24 @@ body{
     transition:.8s;
 }
 
-.login-btn:hover::before{
+.login-btn:hover::before, .reset-btn:hover::before{
     left:120%;
 }
+
+.back-login{
+    margin-top:18px;
+    text-align:center;
+}
+
+.back-login a{
+    color:#16a34a;
+    text-decoration:none;
+}
+
+.back-login a:hover{
+    text-decoration:underline;
+}
+
 .forgot-password{
     margin-top:16px;
     text-align:center;
@@ -428,6 +444,21 @@ body{
     border-radius:10px;
 
     margin-bottom:20px;
+}
+
+.status-message{
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #bbf7d0;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:18px;
+}
+
+.error-message{
+    color:#dc2626;
+    font-size:13px;
+    margin-top:5px;
 }
 
 @keyframes floatLogo{

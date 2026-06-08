@@ -118,19 +118,13 @@
     overflow: visible;
 }
 
-/* If your layout already uses dashboard-page, avoid double padding */
 .dashboard-page .content {
     padding: 0;
 }
 
-/* Current app.blade uses dashboard-banner outside content */
 .dashboard-banner + .content {
     padding-top: 0;
 }
-
-/* =========================================================
-SIDEBAR
-========================================================= */
 
 .sidebar {
     width: 250px;
@@ -150,7 +144,6 @@ SIDEBAR
     transition: transform 0.25s ease, width 0.25s ease, min-width 0.25s ease;
 }
 
-/* Old sidebar logo */
 .sidebar-logo,
 .sidebar-brand {
     min-height: 44px;
@@ -181,7 +174,6 @@ SIDEBAR
     align-items: center;
 }
 
-/* Old user block now looks like a clean account card */
 .sidebar-user,
 .sidebar-user-card {
     width: 100%;
@@ -354,10 +346,6 @@ SIDEBAR
     overflow: hidden !important;
 }
 
-/* =========================================================
-HAMBURGER / OVERLAY
-========================================================= */
-
 .hamburger {
     width: 42px;
     height: 42px;
@@ -408,10 +396,6 @@ HAMBURGER / OVERLAY
 .overlay.show {
     display: block;
 }
-
-/* =========================================================
-SECTIONS / CARDS
-========================================================= */
 
 .dashboard-section {
     display: none;
