@@ -19,6 +19,7 @@ import MoreMenu from './modules/more-menu';
 import { initRoleAssignmentForm } from './modules/role-assignment';
 
 import Auth from './modules/auth';
+import PasswordModal from './modules/password-modal';
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.init();
@@ -44,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     UserProfile.init();
 
     MoreMenu.init();
+
+    PasswordModal.init();
 
     initRoleAssignmentForm();
 });

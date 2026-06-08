@@ -24,7 +24,7 @@
                 name="password"
                 placeholder="Password"
                 required>
-        <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()" title="Toggle password visibility">
+        <button type="button" class="password-toggle-btn" onclick="togglePassword('loginPassword', 'eyeIcon')" title="Toggle password visibility">
             <i id="eyeIcon" class="bi bi-eye-fill"></i>
         </button>
     </div>
