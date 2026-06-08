@@ -18,7 +18,10 @@ import UserProfile from './modules/user-profile';
 import MoreMenu from './modules/more-menu';
 import { initRoleAssignmentForm } from './modules/role-assignment';
 
+import Auth from './modules/auth';
+
 document.addEventListener('DOMContentLoaded', () => {
+    Auth.init();
 
     Sidebar.init();
 

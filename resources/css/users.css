@@ -1,0 +1,166 @@
+/* =========================================================
+ROLE ASSIGNMENT
+========================================================= */
+
+#section-users.role-section {
+    padding: 0;
+    background: transparent;
+}
+
+#section-users .role-page-header {
+    margin-bottom: 20px;
+}
+
+#section-users .role-page-header .section-title {
+    margin-bottom: 6px;
+}
+
+#section-users .role-page-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+#section-users .role-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 680px) minmax(280px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+#section-users .role-form-card,
+#section-users .role-guide-card {
+    background: #ffffff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    box-shadow: none;
+}
+
+#section-users .role-form-card {
+    padding: 24px;
+}
+
+#section-users .role-card-header {
+    margin-bottom: 22px;
+}
+
+#section-users .role-card-header h3,
+#section-users .role-guide-card h3 {
+    margin-bottom: 6px;
+    color: var(--text-main);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+#section-users .role-card-header p,
+#section-users .role-guide-card p {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+#section-users .role-user-form {
+    gap: 18px;
+}
+
+#section-users .role-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+#section-users .role-create-btn {
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+#section-users .role-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+#section-users .role-guide-card {
+    padding: 24px;
+}
+
+#section-users .role-guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+#section-users .role-guide-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+#section-users .role-guide-item strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+#section-users .role-guide-item small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+#section-users .role-dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+#section-users .role-dot.staff {
+    background: #64748b;
+}
+
+#section-users .role-dot.supervisor {
+    background: var(--blue);
+}
+
+#section-users .role-dot.depthead {
+    background: var(--yellow);
+}
+
+#section-users .role-dot.division {
+    background: #7c3aed;
+}
+
+#section-users .role-dot.executive {
+    background: var(--green);
+}
+
+#section-users .security-card {
+    background: #fafafa;
+}
+
+@media (max-width: 1100px) {
+    #section-users .role-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+
+    #section-users .role-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    #section-users .role-form-card,
+    #section-users .role-guide-card {
+        border-radius: var(--radius-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    #section-users .role-form-card,
+    #section-users .role-guide-card {
+        padding: 18px;
+    }
+}

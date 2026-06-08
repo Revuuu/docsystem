@@ -1,0 +1,136 @@
+.more-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.more-menu-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: #ffffff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.more-menu.open .more-menu-dropdown {
+    display: block;
+}
+
+.more-menu-dropdown a,
+.more-menu-dropdown button {
+    width: 100%;
+    display: block;
+    padding: 11px 14px;
+    text-align: left;
+    background: #ffffff;
+    border: none;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.more-menu-dropdown a:hover,
+.more-menu-dropdown button:hover {
+    background: #fafafa;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    padding: 24px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    width: min(1120px, 96vw);
+    height: 90vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-modal);
+}
+
+.modal-header {
+    padding: 14px 18px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.modal-close {
+    width: 34px;
+    height: 34px;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: var(--text-main);
+    font-size: 22px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.modal-close:hover {
+    background: var(--bg-muted);
+}
+
+
+.modal-footer {
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-top: 1px solid var(--border-soft);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.hint {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+}
+@media (max-width: 900px) {
+    .modal-box {
+        width: 96vw;
+        height: 90vh;
+    }
+}
+@media (max-width:640px) {
+
+    .modal-footer {
+        flex-direction:column;
+        align-items:stretch;
+    }
+}

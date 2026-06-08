@@ -1,0 +1,169 @@
+.form-card,
+.signature-preview-card {
+    padding: 24px;
+    max-width: 620px;
+}
+
+.form-card h3,
+.signature-preview-card h3 {
+    margin-bottom: 16px;
+    color: var(--text-main);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.user-form,
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label,
+.upload-form label {
+    color: #374151;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.upload-form input,
+.upload-form select,
+.upload-form textarea {
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 0 14px;
+    outline: none;
+}
+
+.form-group textarea,
+.upload-form textarea {
+    min-height: 110px;
+    padding-top: 12px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.upload-form input:focus,
+.upload-form select:focus,
+.upload-form textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14);
+}
+
+.form-group input[type="file"],
+.upload-form input[type="file"] {
+    min-height: auto;
+    padding: 14px;
+    border: 1px dashed #d4d4d8;
+    background: #fafafa;
+}
+
+.middle-name-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-body);
+    font-size: 13px;
+}
+
+.middle-name-checkbox {
+    width: 16px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    accent-color: var(--green);
+    cursor: pointer;
+}
+
+.input-disabled {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+}
+
+.no-data,
+.empty-state {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.empty-state {
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+}
+
+.password-match-message {
+    margin: 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.password-rules {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.password-rules::before {
+    content: "Password Requirements";
+    display: block;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #374151;
+}
+
+.rule {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rule.invalid{
+    color:#dc2626;
+}
+
+.rule.valid{
+    color:#16a34a;
+}
+
+.rule i{
+    font-size:14px;
+}
+
+@media (max-width: 480px) {
+    .form-card,
+    .signature-preview-card {
+        padding: 18px;
+    }
+}
