@@ -439,6 +439,9 @@
                                    name="password"
                                    placeholder="Leave blank if unchanged"
                                    autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('password', 'eyeIcon1')" title="Toggle password visibility">
+                                <i id="eyeIcon1" class="bi bi-eye-fill"></i>
+                            </button>
                         </div>
 
                         <div class="form-group">
@@ -448,6 +451,9 @@
                                    name="password_confirmation"
                                    placeholder="Confirm new password"
                                    autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('password_confirmation', 'eyeIcon2')" title="Toggle password visibility">
+                                <i id="eyeIcon2" class="bi bi-eye-fill"></i>
+                            </button>
                         </div>
                         <div id="passwordMatchMessage"
                             class="password-match-message">
