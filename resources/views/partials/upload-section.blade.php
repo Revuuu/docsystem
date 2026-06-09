@@ -37,17 +37,22 @@
                     <label>
                         PDF File
                     </label>
-
+  
                     <input type="file"
                             name="file"
                             accept=".pdf"
                             required>
-
-                    @error('file')
-                        <div class="text-danger mt-1">
-                            {{ $message }}
-                        </div>
-                    @enderror
+                    
+                            <div id="fileError"
+                                class="validation-error"
+                                style="display:none;">
+                            </div>
+                            
+                            @error('file')
+                                <div class="text-danger mt-1">
+                                    {{ $message }}
+                                </div>
+                            @enderror
 
                 </div>
 
