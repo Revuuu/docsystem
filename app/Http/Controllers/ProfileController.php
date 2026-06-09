@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
@@ -15,8 +16,29 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'password' => ['nullable', 'confirmed', 'min:8'],
-            'signature' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'password' => [
+                'nullable',
+                'confirmed',
+                Password::min(12)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+
+            'signature' => [
+                'nullable', 
+                'image', 
+                'mimes:png,jpg,jpeg', 
+                'max:2048'
+            ],
+        ],
+        [
+            'password.confirmed' =>
+                'Password confirmation does not match.',
+
+            'name.required' =>
+                'Name is required.',
         ]);
 
         $user = auth()->user();

@@ -458,12 +458,6 @@
                         <div id="passwordMatchMessage"
                             class="password-match-message">
                         </div>
-
-                        @error('password')
-                            <div class="text-danger mt-1">
-                                {{ $message }}
-                            </div>
-                        @enderror
                        
                         <div class="password-rules" id="passwordRules">
                             <div id="ruleLength" class="rule invalid">
