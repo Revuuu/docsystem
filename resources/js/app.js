@@ -20,6 +20,9 @@ import { initRoleAssignmentForm } from './modules/role-assignment';
 
 import Auth from './modules/auth';
 import PasswordModal from './modules/password-modal';
+import * as bootstrap from 'bootstrap';
+
+window.bootstrap = bootstrap;
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.init();

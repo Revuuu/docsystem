@@ -172,6 +172,40 @@
     overflow: hidden;
 }
 
+.profile-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 320px;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    z-index: 9999;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all .25s ease;
+}
+
+.profile-toast.show-toast {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.profile-toast .toast-header {
+    padding: 12px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,.2);
+}
+
+.profile-toast .toast-body {
+    padding: 12px 16px;
+}
+
 @media (max-width: 480px) {
     .section-title {
         font-size: 18px;

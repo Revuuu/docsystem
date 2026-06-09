@@ -429,7 +429,7 @@
                             <input type="text"
                                    name="name"
                                    value="{{ auth()->user()->name }}"
-                                   required>
+                                   >
                         </div>
 
                         <div class="form-group">
@@ -452,6 +452,7 @@
                         <div id="passwordMatchMessage"
                             class="password-match-message">
                         </div>
+
                         @error('password')
                             <div class="text-danger mt-1">
                                 {{ $message }}
@@ -506,42 +507,43 @@
                             Save Profile
                         </button>
                     </form>
-                        <div class="toast-container position-fixed top-0 end-0 p-3">
+                 
+                    <div id="profileErrorToast"
+                        class="profile-toast">
 
-                            <div id="profileErrorToast"
-                                class="toast text-bg-danger"
-                                role="alert">
-
-                                <div class="toast-header">
-                                    <strong class="me-auto">Profile Error</strong>
-                                    <button type="button"
-                                            class="btn-close"
-                                            data-bs-dismiss="toast">
-                                    </button>
-                                </div>
-
-                                <div class="toast-body">
-                                    Please correct the errors and try again.
-                                </div>
-
+                        <div class="toast-header">
+                            <strong class="me-auto">Error</strong>
+                            <div class="toast-body">
+                                Please correct the errors and try again.
                             </div>
                         </div>
-                        @if($errors->any())
-                            <script>
-                            document.addEventListener('DOMContentLoaded', function () {
 
-                                const toast =
-                                    new bootstrap.Toast(
-                                        document.getElementById(
-                                            'profileErrorToast'
-                                        )
-                                    );
+                        <div class="toast-body">
+                            Please correct the errors and try again.
+                        </div>
 
-                                toast.show();
+                    </div>
+        
+                    @if($errors->any())
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                        console.log('Laravel Errors:');
+                            console.log(@json($errors->all()));
+                            const toast =
+                            document.getElementById('profileErrorToast');
 
-                            });
-                            </script>
-                        @endif
+                        toast.querySelector('.toast-body').innerHTML =
+                            @json(implode('<br>', $errors->all()));
+
+                        toast.classList.add('show-toast');
+
+                        setTimeout(() => {
+                            toast.classList.remove('show-toast');
+                        }, 5000);
+
+                        });
+                        </script>
+                    @endif
                 </div>
             </div>
         </div>
