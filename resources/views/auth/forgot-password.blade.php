@@ -22,7 +22,7 @@
                 value="{{ old('email') }}"
                 required
                 autofocus
-                placeholder="Enter your email"
+                placeholder="juandelacruz@gmail.com"
             >
 
             @error('email')
