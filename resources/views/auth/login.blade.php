@@ -8,11 +8,11 @@
     @csrf
 
     <div class="form-group">
-        <label>User ID</label>
+        <label>Email</label>
         <input type="text"
                 name="email"
                 value="{{ old('email') }}"
-                placeholder="User ID"
+                placeholder="juandelacruz@gmail.com"
                 required
                 autofocus>
     </div>

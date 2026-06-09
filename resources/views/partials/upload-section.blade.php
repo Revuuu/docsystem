@@ -43,6 +43,12 @@
                             accept=".pdf"
                             required>
 
+                    @error('file')
+                        <div class="text-danger mt-1">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
                 <div class="form-group">
@@ -91,6 +97,15 @@
                 </button>
 
             </form>
+
+            @if ($errors->has('file'))
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    openUploadModal();
+                });
+                </script>
+            @endif
+            
         </div>
     </div>
 </div>

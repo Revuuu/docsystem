@@ -15,12 +15,20 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $request->validate(
+        [
             'title' => 'required|string|max:255',
             'file' => 'required|mimes:pdf|max:10240',
             'approvers' => 'required|array|min:1',
             'approvers.*' => 'exists:users,id',
-        ]);
+        ],
+        [
+            'file.max' => 'The uploaded file exceeds the maximum allowed size of 10 MB.',
+            'file.required' => 'Please select a PDF file.',
+            'file.mimes' => 'Only PDF files are allowed.',
+        ],
+        
+        );
 
         $hierarchy = [
             'staff' => 1,
@@ -64,20 +72,20 @@ class DocumentController extends Controller
         ]);
 
         $storageFileName =
-    'document_' .
-    $document->id .
-    '_v1.pdf';
+            'document_' .
+            $document->id .
+            '_v1.pdf';
 
-$storagePath =
-    'document/' .
-    $storageFileName;
+        $storagePath =
+            'document/' .
+            $storageFileName;
 
-Storage::disk('local')->put(
-    $storagePath,
-    file_get_contents(
-        $uploadedFile->getRealPath()
-    )
-);
+        Storage::disk('local')->put(
+            $storagePath,
+            file_get_contents(
+                $uploadedFile->getRealPath()
+            )
+        );
 
         $document->files()->create([
 
