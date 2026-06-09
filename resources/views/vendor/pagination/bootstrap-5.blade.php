@@ -1,8 +1,7 @@
 @if ($paginator->hasPages())
     <nav class="d-flex justify-items-center justify-content-between">
 
-
-        <div class="d-none flex-sm-fill d-sm-flex align-items-sm-center justify-content-sm-between">
+        <div class="d-none flex-sm-fill d-sm-flex flex-column align-items-left">
             <div>
                 <p class="small text-muted">
                     {!! __('Showing') !!}
