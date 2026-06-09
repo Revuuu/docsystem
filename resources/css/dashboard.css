@@ -566,12 +566,32 @@
     }
 }
 
+@media (min-width: 820px) and (max-width: 1024px) {
+    .login-layout {
+        display: flex;
+        flex-direction:column;
+    }
+    .login-card {
+        width: 100%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 @media(max-width:768px){
 
     .stats-grid{
         grid-template-columns:1fr;
     }
+    .topbar-account .topbar-user-text {
+        display: none;
+    }
 
+    .login-card {
+        margin-left:auto;
+        margin-right:auto;
+    }
 }
 
 @media (max-width: 640px) {
@@ -600,8 +620,17 @@
         font-size: 22px;
     }
 }
-@media (max-width: 768px) {
-    .topbar-account .topbar-user-text {
-        display: none;
+
+@media (max-width: 540px) {
+    .login-card {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 30px;
+    }
+    .branding-header img{
+        width: 20%;
+        height: 20%;
+        margin-top: 30px;
     }
 }
