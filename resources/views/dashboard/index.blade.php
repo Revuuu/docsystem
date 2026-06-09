@@ -144,7 +144,7 @@
                         </select>
 
                         <button class="upload-document-btn" type="button" onclick="openUploadModal()">
-                            ＋ UPLOAD NEW DOCUMENT
+                            <i class="bi bi-plus"></i> UPLOAD NEW DOCUMENT
                         </button>
                     </div>
                 </div>

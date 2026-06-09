@@ -4,7 +4,7 @@
 
         <button class="upload-modal-close"
                 onclick="closeUploadModal()">
-            x
+            <i class="bi bi-x"></i>
         </button>
 
         <div id="section-upload" class="upload-modal-body">
@@ -91,7 +91,7 @@
                             class="btn-add-approver"
                             onclick="addApprover()">
 
-                        + Add Another Approver
+                    <i class="bi bi-plus"></i> Add Another Approver
 
                     </button>
 
