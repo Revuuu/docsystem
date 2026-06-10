@@ -6,6 +6,10 @@ use App\Models\Approval;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use setasign\Fpdi\Tcpdf\Fpdi;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApprovalPendingNotification;
+use App\Mail\ApprovalProgressNotification;
+use App\Mail\ApprovalCompletedNotification;
 
 class ApprovalController extends Controller
 {
@@ -108,6 +112,12 @@ $newFile = $approval->document
     'sig_page'  => $request->sig_page,
 ]);
 
+$document = $approval->document;
+
+Mail::to($document->uploader->email)
+    ->queue(
+        new ApprovalProgressNotification($approval)
+    );
         // IMPORTANT: reload fresh data
         $approval->refresh();
 
@@ -125,6 +135,9 @@ $newFile = $approval->document
                 'received_at' => now(),
             ]);
 
+            Mail::to($nextApproval->user->email)
+    ->queue(new ApprovalPendingNotification($nextApproval));
+
             $document = $approval->document;
 
             $document->update([
@@ -140,6 +153,11 @@ $newFile = $approval->document
                 'admin_signed_at' => now(),
                 'approver_id'     => null,
             ]);
+
+            Mail::to($document->uploader->email)
+    ->queue(
+        new ApprovalCompletedNotification($document)
+    );
         }
 
     });

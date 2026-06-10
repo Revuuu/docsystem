@@ -7,6 +7,8 @@ use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Approval;
+use App\Mail\ApprovalPendingNotification;
+use Illuminate\Support\Facades\Mail;
 
 class DocumentController extends Controller
 {
@@ -107,15 +109,24 @@ class DocumentController extends Controller
 
         ]);
 
+        $firstApproval=null;
 
         foreach ($approvers as $index => $approver) {
-            Approval::create([
+            $approval = Approval::create([
                 'document_id' => $document->id,
                 'user_id' => $approver->id,
                 'step_order' => $index + 1,
                 'status' => $index === 0 ? 'pending' : 'waiting',
                 'received_at' => $index === 0 ? now() : null,
             ]);
+
+            if($index === 0){
+                $firstApproval = $approval;
+            }
+        }
+
+        if($firstApproval){
+            Mail::to($firstApproval->user->email)->queue(new ApprovalPendingNotification($firstApproval));
         }
 
         return redirect()
