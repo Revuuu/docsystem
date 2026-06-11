@@ -470,9 +470,29 @@
     border-radius:999px;
 }
 
-.status-badge.in_progress{
+.status-badge.blue{
+    background:#dbeafe;
+    color:#1d4ed8;
+    border-radius:999px;
+    padding:4px 12px;
+}
+.status-badge.green{
+    background:#d1fae5;
+    color:#047857;
+    border-radius:999px;
+    padding:4px 12px;
+}
+.status-badge.yellow{
     background:#f7e5b8;
     color:#946200;
+    border-radius:999px;
+    padding:4px 12px;
+}
+.status-badge.red{
+    background:#f8d7da;
+    color:#9b1d1d;
+    border-radius:999px;
+    padding:4px 12px;
 }
 
 .step-complete{

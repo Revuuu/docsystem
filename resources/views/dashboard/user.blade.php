@@ -202,17 +202,27 @@
                                     @endif
 
                             </td>
-
-
+                            
                             <td>
+                                @if($doc->status === 'approved')
+                                    <span class="status-badge green">
+                                        Approved
+                                    </span>
+                                @elseif($doc->status === 'pending')
+                                    <span class="status-badge yellow">                                  
+                                        Pending
+                                    </span>
+                                
+                                @elseif($doc->status === 'in_progress')
+                                    <span class="status-badge blue">                                  
+                                        In Progress 
+                                    </span>
 
-                                <span class="status-badge
-                                    {{ $doc->status }}">
-
-                                    {{ ucfirst($doc->status) }}
-
-                                </span>
-
+                                @elseif($doc->status === 'rejected')
+                                    <span class="status-badge red">
+                                        Rejected
+                                    </span>
+                                @endif
                             </td>
 
                             <td>
