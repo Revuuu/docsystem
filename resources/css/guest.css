@@ -340,6 +340,15 @@ body{
     left:120%;
 }
 
+.remember-device{
+    margin:15px 0 20px 0;
+}
+
+.remember-device label {
+    color: #52525b;
+    font-size: 14px;
+}
+
 .back-login{
     margin-top:18px;
     text-align:center;

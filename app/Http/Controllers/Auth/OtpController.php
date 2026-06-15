@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Mail\LoginOtpMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use App\Models\TrustedDevice;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cookie;
 
 class OtpController extends Controller
 {   
@@ -84,10 +87,58 @@ class OtpController extends Controller
             'otp_verified' => true,
         ]);
 
+        if (session('remember_device')) {
+
+            $token = Str::random(64);
+            
+            TrustedDevice::where(
+                'user_id',
+                auth()->id()
+            )
+            ->where(
+                'user_agent',
+                request()->userAgent()
+            )
+            ->delete();
+            
+            TrustedDevice::create([
+                'user_id' => auth()->id(),
+
+                'token_hash' => hash(
+                    'sha256',
+                    $token
+                ),
+
+                'ip_address' => request()->ip(),
+
+                'user_agent' => request()->userAgent(),
+
+                'last_used_at' => now(),
+
+                'expires_at' => now()
+                    ->addDays(30),
+            ]);
+
+            Cookie::queue(
+                cookie(
+                    'trusted_device',
+                    $token,
+                    60 * 24 * 30,
+                    '/',
+                    null,
+                    config('app.env') !== 'local',
+                    true,
+                    false,
+                    'Strict'
+                )
+            );
+        }
+
+        session()->forget('remember_device');
+
         return redirect()
             ->route('dashboard');
     }
-    
     public function resend()
     {
         $user = auth()->user();

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\TrustedDevice;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,46 +35,83 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+        $trustedToken = $request->cookie('trusted_device');
+
+        if ($trustedToken) {
+
+            $trustedDevice = TrustedDevice::where(
+                'user_id',
+                $user->id
+            )
+            ->where(
+                'token_hash',
+                hash('sha256', $trustedToken)
+            )
+            ->where(
+                'expires_at',
+                '>',
+                now()
+            )
+            ->first();
+
+            if ($trustedDevice) {
+
+                $trustedDevice->update([
+                    'last_used_at' => now(),
+                ]);
+
+                session([
+                    'otp_verified' => true,
+                ]);
+
+                return redirect()
+                    ->route('dashboard');
+            }
+        }
+
         if (! $user->hasVerifiedEmail()) {
 
-    Auth::logout();
+            Auth::logout();
 
-    return redirect()
-        ->route('login')
-        ->withErrors([
-            'email' =>
-                'Your email address has not been verified. Contact the administrator.',
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' =>
+                        'Your email address has not been verified. Contact the administrator.',
+                ]);
+        }
+
+        LoginOtp::where('user_id', $user->id)
+            ->delete();
+
+        $otp = str_pad(
+            random_int(0, 999999),
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        LoginOtp::create([
+            'user_id' => $user->id,
+            'otp_code' => Hash::make($otp),
+            'expires_at' => now()->addMinutes(3),
         ]);
-}
-LoginOtp::where('user_id', $user->id)
-    ->delete();
 
-$otp = str_pad(
-    random_int(0, 999999),
-    6,
-    '0',
-    STR_PAD_LEFT
-);
+        Mail::to($user->email)
+            ->send(new LoginOtpMail($otp));
 
-LoginOtp::create([
-    'user_id' => $user->id,
-    'otp_code' => Hash::make($otp),
-    'expires_at' => now()->addMinutes(3),
-]);
+        session([
+            'otp_verified' => false,
+        ]);
 
-Mail::to($user->email)
-    ->send(new LoginOtpMail($otp));
-
-session([
-    'otp_verified' => false,
-]);
-
-return redirect()->route('otp.form');
+        session([
+            'remember_device' =>
+                $request->boolean('remember_device')
+        ]);
+        return redirect()->route('otp.form');
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
