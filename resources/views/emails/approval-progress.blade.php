@@ -1,24 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<body>
-<h2>Document Approval Progress</h2>
+@extends('emails.layouts.app')
 
-<p>
-Your document
-<b>{{ $approval->document->title }}</b>
-has been approved by
-<b>{{ $approval->user->name }}</b>.
+@section('content')
+
+<h2 style="margin-top:0;color:#111827;">
+    Document Approval Progress
+</h2>
+
+<p style="color:#4b5563;line-height:1.6;">
+    Your document
+    <strong>{{ $approval->document->title }}</strong>
+    has been approved by
+    <strong>{{ $approval->user->name }}</strong>.
 </p>
 
-<p>
-Current Progress:
-{{ $approval->document->approvals()->where('status','approved')->count() }}
-/
-{{ $approval->document->approvals()->count() }}
-approvals completed.
-</p>
-</body>
-</html>
+<div style="
+    background:#ecfdf5;
+    border:1px solid #bbf7d0;
+    border-radius:8px;
+    padding:16px;
+">
+    Current Progress:
+    {{ $approval->document->approvals()->where('status','approved')->count() }}
+    /
+    {{ $approval->document->approvals()->count() }}
+</div>
+
+@endsection

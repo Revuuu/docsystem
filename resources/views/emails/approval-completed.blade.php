@@ -1,23 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<body>
-<h2>Document Fully Approved</h2>
+@extends('emails.layouts.app')
 
-<p>
-Your document
-<b>{{ $document->title }}</b>
-has completed the approval process.
+@section('content')
+
+<h2 style="margin-top:0;color:#111827;">
+    Document Fully Approved
+</h2>
+
+<p style="color:#4b5563;line-height:1.6;">
+    Your document
+    <strong>{{ $document->title }}</strong>
+    has completed the approval process.
 </p>
 
-<p>Approved By:</p>
+<div style="
+    background:#ecfdf5;
+    border:1px solid #bbf7d0;
+    border-radius:8px;
+    padding:16px;
+">
+    <strong>Approved By:</strong>
 
-<ul>
-@foreach($document->approvals()->where('status','approved')->get() as $approval)
-    <li>{{ $approval->user->name }}</li>
-@endforeach
-</ul>
-</body>
-</html>
+    <ul>
+        @foreach($document->approvals->where('status', 'approved') as $approval)
+            <li>{{ $approval->user->name }}</li>
+        @endforeach
+    </ul>
+</div>
+
+@endsection

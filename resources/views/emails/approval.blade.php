@@ -1,46 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<body>
+@extends('emails.layouts.app')
 
-<h2>Document Approval Required</h2>
+@section('content')
 
-<p>Hello {{ $approval->user->name }},</p>
+<h2 style="margin-top:0;color:#111827;">
+    Document Approval Required
+</h2>
 
-<p>
-A document is waiting for your approval.
+<p style="color:#4b5563;line-height:1.6;">
+    Hello <strong>{{ $approval->user->name }}</strong>,
 </p>
 
-<p>
-<b>Document:</b>
-{{ $approval->document->title }}
+<p style="color:#4b5563;line-height:1.6;">
+    A document is currently awaiting your review and approval.
 </p>
 
-<p>
-Please log in to the system and review the document.
-</p>
+<div style="
+    background:#f9fafb;
+    border:1px solid #e5e7eb;
+    border-left:4px solid #16a34a;
+    border-radius:8px;
+    padding:16px;
+    margin:24px 0;
+">
+    <strong>{{ $approval->document->title }}</strong>
+</div>
 
-<p>
-    <a href="{{ route('dashboard') }}"
-       style="
-           background:#0d6efd;
-           border:1px solid #0d6efd;
-           border-radius:6px;
-           color:#ffffff !important;
-           display:inline-block;
-           font-family:Arial, sans-serif;
-           font-size:14px;
-           font-weight:bold;
-           line-height:44px;
-           text-align:center;
-           text-decoration:none;
-           width:200px;
-           -webkit-text-size-adjust:none;
-       ">
-        Review Document
-    </a>
-</p>
-</body>
-</html>
+@endsection
