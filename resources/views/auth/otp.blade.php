@@ -42,6 +42,21 @@
            name="otp"
            id="otp">
 
+    <div class="remember-device">
+        <input
+            type="checkbox"
+            class="form-check-input"
+            id="remember_device"
+            name="remember_device"
+            value="1">
+
+        <label
+            class="form-check-label"
+            for="remember_device">
+            Remember this device for 30 days
+        </label>
+    </div>
+    
     <button type="submit"
             class="login-btn">
         VERIFY CODE

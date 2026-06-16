@@ -26,6 +26,10 @@ class OtpController extends Controller
             'otp' => [
                 'required',
                 'digits:6'
+            ],
+            'remember_device' => [
+                'nullable',
+                'boolean'
             ]
         ]);
 
@@ -87,7 +91,7 @@ class OtpController extends Controller
             'otp_verified' => true,
         ]);
 
-        if (session('remember_device')) {
+        if ($request->boolean('remember_device')) {
 
             $token = Str::random(64);
             
@@ -133,8 +137,6 @@ class OtpController extends Controller
                 )
             );
         }
-
-        session()->forget('remember_device');
 
         return redirect()
             ->route('dashboard');
