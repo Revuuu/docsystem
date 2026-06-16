@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\TrustedDevice;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cookie;
+use Jenssegers\Agent\Agent;
 
 class OtpController extends Controller
 {   
@@ -93,34 +94,55 @@ class OtpController extends Controller
 
         if ($request->boolean('remember_device')) {
 
-            $token = Str::random(64);
+            $agent = new Agent();
+
+            $agent->setUserAgent(
+                $request->userAgent()
+            );
+
+            $hostname = @gethostbyaddr(
+                $request->ip()
+            );
+
+            $deviceName = $hostname && $hostname !== $request->ip()
+                ? explode('.', $hostname)[0]
+                : sprintf(
+                    '%s - %s',
+                    $agent->platform() ?: 'Unknown OS',
+                    $agent->browser() ?: 'Unknown Browser'
+                );
             
+            $token = Str::random(64);
+
             TrustedDevice::where(
                 'user_id',
                 auth()->id()
             )
             ->where(
                 'user_agent',
-                request()->userAgent()
+                $request->userAgent()
             )
             ->delete();
             
             TrustedDevice::create([
                 'user_id' => auth()->id(),
 
+                'device_name' => $deviceName,
+
+                'hostname' => $hostname,
+
                 'token_hash' => hash(
                     'sha256',
                     $token
                 ),
 
-                'ip_address' => request()->ip(),
+                'ip_address' => $request->ip(),
 
-                'user_agent' => request()->userAgent(),
+                'user_agent' => $request->userAgent(),
 
                 'last_used_at' => now(),
 
-                'expires_at' => now()
-                    ->addDays(30),
+                'expires_at' => now()->addDays(30),
             ]);
 
             Cookie::queue(
