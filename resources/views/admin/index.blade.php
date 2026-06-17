@@ -232,15 +232,15 @@
 {{-- Users Section --}}
 <div id="section-users" class="dashboard-section role-section">
 
-    @if(session('success'))
+    @if(session('role_success'))
         <div class="alert alert-success">
-            {{ session('success') }}
+            {{ session('role_success') }}
         </div>
     @endif
 
-    @if(session('error'))
+    @if(session('role_error'))
         <div class="alert alert-error">
-            {{ session('error') }}
+            {{ session('role_error') }}
         </div>
     @endif
 
@@ -460,8 +460,30 @@
 </div>
 {{-- User Directory --}}
 <div id="section-user-management" class="dashboard-section">
-    <div class="documents-card" style="margin-top:24px;">
+    @if(session('user_success'))
+        <div class="alert alert-success">
+            {{ session('user_success') }}
+        </div>
+    @endif
 
+    @if(session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-error">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>
+                        {{ $error }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    <div class="documents-card" style="margin-top:24px;">
         <div class="card-header"
             style="
                 display:flex;
@@ -560,25 +582,63 @@
 
                             <td>
 
-                                <form method="POST"
-                                    action="{{ route('users.destroy', $user) }}"
-                                    style="display:inline;">
+                                <div class="more-menu">
 
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit"
-                                            class="btn-delete"
-                                            onclick="return confirm('Delete user?')">
-
-                                        Delete
-
+                                    <button type="button"
+                                            class="table-action-btn"
+                                            onclick="toggleMoreMenu(event, this)">
+                                        More ⋮
                                     </button>
 
-                                </form>
+                                    <div class="more-dropdown">
+
+                                        <button type="button"
+                                                class="dropdown-item"
+                                                onclick="editUser(
+                                                        {{ $user->id }},
+                                                        '{{ addslashes($user->name) }}',
+                                                        '{{ $user->email }}',
+                                                        '{{ $user->role }}'
+                                                    )">
+                                            Edit User
+                                        </button>
+
+                                        <form method="POST"
+                                            action="{{ route('users.resetPassword', $user) }}">
+
+                                            @csrf
+
+                                            <button type="submit"
+                                                    class="dropdown-item"
+                                                    onclick="return confirm('Send password reset email?')">
+
+                                            Reset Password
+
+                                            </button>
+
+                                        </form>
+
+                                        <form method="POST"
+                                            action="{{ route('users.destroy', $user) }}">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="dropdown-item danger"
+                                                    onclick="return confirm('Delete user?')">
+
+                                            Delete User
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
 
                             </td>
-
                         </tr>
 
                     @empty
@@ -776,5 +836,71 @@
             height="100%">
         </iframe>
     </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal-overlay" style="display:none;">
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <h3>Edit User</h3>
+
+            <button type="button"
+                    onclick="closeEditUserModal()">
+                ✕
+            </button>
+        </div>
+
+        <form id="editUserForm"
+              method="POST">
+
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label>Name</label>
+
+                <input type="text"
+                       id="edit_name"
+                       name="name"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+
+                <input type="email"
+                       id="edit_email"
+                       name="email"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>Role</label>
+
+                <select id="edit_role"
+                        name="role"
+                        required>
+
+                    <option value="staff">Staff</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="depthead">Department Head</option>
+                    <option value="division">Division Head</option>
+                    <option value="executive">Executive</option>
+                    <option value="admin">Admin</option>
+
+                </select>
+            </div>
+
+            <button type="submit"
+                    class="btn-submit">
+                Save Changes
+            </button>
+
+        </form>
+
+    </div>
+
 </div>
 @endsection

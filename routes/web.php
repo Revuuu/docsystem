@@ -46,8 +46,15 @@ Route::middleware(['auth', 'otp'])->group(function () {
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])
             ->name('users.updateRole');
 
+        Route::post('/users/{user}/reset-password',[UserController::class, 'resetPassword'])->name('users.resetPassword');
+
         Route::delete('/users/{user}', [UserController::class, 'destroy'])
             ->name('users.destroy');
+
+        Route::put(
+    '/users/{user}',
+    [UserController::class, 'update']
+)->name('users.update');
     });
 
     Route::get('/signature', [SignatureController::class, 'index'])
@@ -97,6 +104,19 @@ Route::get(
     [FileController::class, 'signature']
 )->name('signatures.view');
 });
+
+Route::get('/users/{user}/edit',
+    [UserController::class, 'edit'])
+    ->name('users.edit');
+
+Route::patch('/users/{user}',
+    [UserController::class, 'update'])
+    ->name('users.update');
+
+Route::post('/users/{user}/reset-password',
+    [UserController::class, 'resetPassword'])
+    ->name('users.resetPassword');
+
 Route::get('/test-mail', function () {
 
     Mail::raw(

@@ -63,6 +63,88 @@ class UserController extends Controller
          
             Mail::to($user->email)
     ->send(new WelcomeUserMail($setupUrl));
-        return redirect()->back()->with('success', 'User created successfully!');
+        return redirect()
+    ->route('dashboard', [
+        'section' => 'users'
+    ])
+    ->with('role_success', 'User created successfully.');
     }
+    public function resetPassword(User $user)
+{
+    $token = Password::createToken($user);
+
+    $resetUrl = url(
+        route(
+            'password.reset',
+            [
+                'token' => $token,
+                'email' => $user->email,
+            ],
+            false
+        )
+    );
+
+    Mail::to($user->email)
+        ->send(new WelcomeUserMail($resetUrl));
+
+    return redirect()
+        ->route('dashboard', [
+            'section' => 'user-management'
+        ])
+        ->with(
+            'user_success',
+            'Password reset email sent successfully.'
+        );
+}
+
+public function destroy(User $user)
+{
+    if ($user->id === auth()->id()) {
+
+        return redirect()
+            ->back()
+            ->with(
+                'role_error',
+                'You cannot delete your own account.'
+            );
+    }
+
+    $user->syncRoles([]);
+
+    $user->delete();
+
+   return redirect()
+    ->route('dashboard', [
+        'section' => 'user-management'
+    ])
+    ->with('user_success', 'User deleted successfully.');
+}
+public function update(Request $request, User $user)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'role' => 'required|in:staff,supervisor,depthead,division,executive,admin',
+        'gender' => 'nullable|in:male,female',
+    ]);
+
+    $oldRole = $user->roles->first()?->name;
+
+    $user->update([
+        'name' => $request->name,
+        'email' => $request->email,
+        'role' => $request->role,
+        'gender' => $request->gender,
+    ]);
+
+    if ($oldRole !== $request->role) {
+        $user->syncRoles([$request->role]);
+    }
+
+   return redirect()
+    ->route('dashboard', [
+        'section' => 'user-management'
+    ])
+    ->with('user_success', 'User updated successfully.');
+}
 }

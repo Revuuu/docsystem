@@ -820,6 +820,253 @@
     color:#94a3b8;
 }
 
+.action-buttons{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.btn-action{
+    border:none;
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn-action:hover{
+    transform:translateY(-1px);
+}
+
+.btn-edit{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.btn-role{
+    background:#ede9fe;
+    color:#7c3aed;
+}
+
+.btn-reset{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.btn-delete{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+.more-menu{
+    position:relative;
+    display:inline-block;
+}
+
+.table-action-btn{
+    border:none;
+    background:#f3f4f6;
+    color:#374151;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+}
+
+.table-action-btn:hover{
+    background:#e5e7eb;
+}
+
+.more-dropdown{
+    display:none;
+    position:absolute;
+    right:0;
+    top:40px;
+    min-width:200px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+    z-index:999;
+    overflow:hidden;
+}
+
+.more-menu .more-dropdown{
+    display:none;
+}
+
+.more-menu.open .more-dropdown{
+    display:block;
+}
+
+.dropdown-item{
+    width:100%;
+    padding:12px 16px;
+    border:none;
+    background:none;
+    text-align:left;
+    cursor:pointer;
+    font-size:14px;
+    color:#374151;
+}
+
+.dropdown-item:hover{
+    background:#f9fafb;
+}
+
+.dropdown-item.danger{
+    color:#dc2626;
+}
+
+.dropdown-item.danger:hover{
+    background:#fef2f2;
+}
+
+.table-action-btn{
+    min-width:90px;
+    border:none;
+    border-radius:10px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    padding:8px 14px;
+    font-weight:600;
+}
+
+/* ==========================
+   EDIT USER MODAL
+========================== */
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.55);
+    backdrop-filter:blur(4px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    padding:20px;
+}
+
+.modal-card{
+    width:100%;
+    max-width:550px;
+    background:#ffffff;
+    border-radius:18px;
+    box-shadow:
+        0 25px 50px rgba(0,0,0,.15),
+        0 10px 20px rgba(0,0,0,.08);
+    overflow:hidden;
+    animation:modalSlide .25s ease;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 24px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.modal-header h3{
+    margin:0;
+    font-size:22px;
+    font-weight:700;
+    color:#0f172a;
+}
+
+.modal-header button{
+    width:36px;
+    height:36px;
+    border:none;
+    border-radius:8px;
+    background:#f8fafc;
+    color:#64748b;
+    cursor:pointer;
+    font-size:18px;
+    transition:.2s;
+}
+
+.modal-header button:hover{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+#editUserForm{
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.form-group label{
+    font-size:13px;
+    font-weight:600;
+    color:#475569;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    height:48px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    padding:0 14px;
+    font-size:14px;
+    background:#fff;
+    transition:.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    outline:none;
+    border-color:#16a34a;
+    box-shadow:0 0 0 4px rgba(34,197,94,.15);
+}
+
+.btn-submit{
+    margin-top:8px;
+    height:48px;
+    border:none;
+    border-radius:10px;
+    background:#16a34a;
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn-submit:hover{
+    background:#15803d;
+    transform:translateY(-1px);
+}
+
+.btn-submit:active{
+    transform:translateY(0);
+}
+
+@keyframes modalSlide{
+    from{
+        opacity:0;
+        transform:translateY(-10px) scale(.98);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
 /* responsive */
 
 @media(max-width:900px){

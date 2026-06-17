@@ -3,6 +3,11 @@ const Dashboard = {
     init()
     {
         console.log('DASHBOARD INIT');
+        window.editUser =
+    this.editUser.bind(this);
+
+window.closeEditUserModal =
+    this.closeEditUserModal.bind(this);
 
         window.showSection =
             this.showSection.bind(this);
@@ -70,7 +75,36 @@ const Dashboard = {
             ?.classList.add('active');
 
         this.updateBanner(section);
-    }
+    },
+    editUser(id, name, email, role)
+    {
+    document.getElementById(
+        'edit_name'
+    ).value = name;
+
+    document.getElementById(
+        'edit_email'
+    ).value = email;
+
+    document.getElementById(
+        'edit_role'
+    ).value = role;
+
+    document.getElementById(
+        'editUserForm'
+    ).action = `/users/${id}`;
+
+    document.getElementById(
+        'editUserModal'
+    ).style.display = 'flex';
+},
+
+closeEditUserModal()
+{
+    document.getElementById(
+        'editUserModal'
+    ).style.display = 'none';
+}
 };
 
 export default Dashboard;
