@@ -152,7 +152,8 @@ STATUS
 }
 
 .status-pill.success,
-.status-approved {
+.status-approved,
+.status-pill.approved {
     background: #dcfce7;
     color: #166534;
 }

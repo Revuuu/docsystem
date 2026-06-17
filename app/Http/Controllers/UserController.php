@@ -46,6 +46,8 @@ class UserController extends Controller
             'email_verified_at' => null,
         ]);
 
+        $user->addRole($request->role);
+
         $token = Password::createToken($user);
 
         $setupUrl = url(

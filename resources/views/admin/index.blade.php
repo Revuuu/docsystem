@@ -4,6 +4,150 @@
 
 @section('content')
 
+{{-- Dashboard --}}
+<div id="section-admin-dashboard" class="dashboard-section">
+
+    {{-- KPI Cards --}}
+    <div class="analytics-grid">
+
+        <div class="analytics-card primary">
+            <div class="analytics-value">{{ $totalDocuments }}</div>
+            <div class="analytics-label">Total Documents</div>
+        </div>
+
+        <div class="analytics-card warning">
+            <div class="analytics-value">{{ $pendingDocuments }}</div>
+            <div class="analytics-label">Pending Approvals</div>
+        </div>
+
+        <div class="analytics-card success">
+            <div class="analytics-value">{{ $approvedDocuments }}</div>
+            <div class="analytics-label">Approved</div>
+        </div>
+
+        <div class="analytics-card danger">
+            <div class="analytics-value">{{ $rejectedDocuments }}</div>
+            <div class="analytics-label">Rejected</div>
+        </div>
+
+        <div class="analytics-card info">
+            <div class="analytics-value">{{ $totalUsers }}</div>
+            <div class="analytics-label">Users</div>
+        </div>
+
+        <div class="analytics-card dark">
+            <div class="analytics-value">{{ $documentsThisMonth }}</div>
+            <div class="analytics-label">Documents This Month</div>
+        </div>
+
+    </div>
+
+    {{-- Workflow Status --}}
+    <div class="dashboard-row">
+
+        <div class="dashboard-panel">
+
+            <h2>Workflow Status</h2>
+
+            <div class="workflow-bars">
+
+                <div class="workflow-item">
+                    <span>Pending</span>
+                    <div class="bar pending">
+                        <div style="width: {{ $pendingDocuments }}%"></div>
+                    </div>
+                    <strong>{{ $pendingDocuments }}</strong>
+                </div>
+
+                <div class="workflow-item">
+                    <span>Approved</span>
+                    <div class="bar approved">
+                        <div style="width: {{ $approvedDocuments }}%"></div>
+                    </div>
+                    <strong>{{ $approvedDocuments }}</strong>
+                </div>
+
+                <div class="workflow-item">
+                    <span>Rejected</span>
+                    <div class="bar rejected">
+                        <div style="width: {{ $rejectedDocuments }}%"></div>
+                    </div>
+                    <strong>{{ $rejectedDocuments }}</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-panel">
+
+            <h2>System Summary</h2>
+
+            <table class="summary-table">
+                <tr>
+                    <td>Documents Today</td>
+                    <td>{{ $documentsToday }}</td>
+                </tr>
+
+                <tr>
+                    <td>Documents This Month</td>
+                    <td>{{ $documentsThisMonth }}</td>
+                </tr>
+
+                <tr>
+                    <td>Total Users</td>
+                    <td>{{ $totalUsers }}</td>
+                </tr>
+
+                <tr>
+                    <td>Audit Logs</td>
+                    <td>{{ $auditLogs->total() }}</td>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
+
+    {{-- Recent Activities --}}
+    <div class="dashboard-panel">
+
+        <h2>Recent Activities</h2>
+
+        <div class="activity-list">
+
+            @forelse($recentActivities as $activity)
+
+                <div class="activity-item">
+
+                    <div class="activity-user">
+                        {{ $activity->user?->name ?? 'System' }}
+                    </div>
+
+                    <div class="activity-desc">
+                        {{ $activity->description }}
+                    </div>
+
+                    <div class="activity-time">
+                        {{ $activity->created_at->diffForHumans() }}
+                    </div>
+
+                </div>
+
+            @empty
+
+                <div class="no-data">
+                    No recent activity found.
+                </div>
+
+            @endforelse
+
+        </div>
+
+    </div>
+
+</div>
+
 {{-- My Documents --}}
 
 <div id="section-signed" class="dashboard-section">
@@ -314,7 +458,150 @@
     </div>
 
 </div>
+{{-- User Directory --}}
+<div id="section-user-management" class="dashboard-section">
+    <div class="documents-card" style="margin-top:24px;">
 
+        <div class="card-header"
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:20px;
+            ">
+
+            <h3>User Directory</h3>
+
+            <input type="text"
+                id="userSearch"
+                placeholder="Search users..."
+                class="search-input">
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <table class="modern-docs-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Email Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="userTable">
+
+                    @forelse($users as $user)
+
+                        <tr>
+
+                            <td>
+                                {{ $user->name }}
+                            </td>
+
+                            <td>
+                                {{ $user->email }}
+                            </td>
+
+                            <td>
+                            @if($user->roles->count())
+                                @foreach($user->roles as $role)
+                                    <span class="role-badge">
+                                        {{ ucfirst($role->name) }}
+                                    </span>
+
+                                @endforeach
+
+                            @elseif($user->role)
+
+                                <span class="role-badge">
+                                    {{ ucfirst($user->role) }}
+                                </span>
+                            @else
+
+                     
+                                    <span class="role-badge">
+                                        -
+                                    </span>
+                            @endif
+
+                            </td>
+
+                            <td>
+
+                                @if($user->email_verified_at)
+
+                                    <span class="status-pill approved">
+                                        Verified
+                                    </span>
+
+                                @else
+
+                                    <span class="status-pill rejected">
+                                        Unverified
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+                            <td>
+
+                                {{ $user->created_at->format('M d, Y') }}
+
+                            </td>
+
+                            <td>
+
+                                <form method="POST"
+                                    action="{{ route('users.destroy', $user) }}"
+                                    style="display:inline;">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                            class="btn-delete"
+                                            onclick="return confirm('Delete user?')">
+
+                                        Delete
+
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                No users found.
+
+                            </td>
+
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+</div>
 {{-- Audit Trail Section --}}
 <div id="section-audit"
     class="dashboard-section">

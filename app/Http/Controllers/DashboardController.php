@@ -72,6 +72,31 @@ class DashboardController extends Controller
             ->latest()
             ->paginate(10);
 
+            $totalDocuments = Document::count();
+
+            $pendingDocuments = Document::where('status', 'pending')->count();
+
+            $approvedDocuments = Document::where('status', 'approved')->count();
+
+            $rejectedDocuments = Document::where('status', 'rejected')->count();
+
+            $totalUsers = User::count();
+
+            $documentsThisMonth = Document::whereMonth(
+                'created_at',
+                now()->month
+            )->count();
+
+            $documentsToday = Document::whereDate(
+                'created_at',
+                today()
+            )->count();
+
+            $recentActivities = AuditLog::with('user')
+                ->latest()
+                ->take(10)
+                ->get();
+                
             return view('admin.index', compact(
                 'users',
                 'allDocuments',
@@ -81,7 +106,15 @@ class DashboardController extends Controller
                 'pendingDocuments',
                 'approvers',
                 'auditLogs',
-                'section'
+                'section',
+
+                'totalDocuments',
+                'approvedDocuments',
+                'rejectedDocuments',
+                'totalUsers',
+                'documentsThisMonth',
+                'documentsToday',
+                'recentActivities'
             ));
         }
 

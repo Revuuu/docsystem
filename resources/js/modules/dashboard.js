@@ -7,13 +7,16 @@ const Dashboard = {
         window.showSection =
             this.showSection.bind(this);
 
-        const section =
-            new URLSearchParams(
+         const urlSection = new URLSearchParams(
                 window.location.search
-            ).get('section')
-            || 'dashboard';
+            ).get('section');
 
-        this.showSection(section);
+            const defaultSection =
+                document.getElementById('section-admin-dashboard')
+                    ? 'admin-dashboard'
+                    : 'dashboard';
+
+        this.showSection(urlSection || defaultSection);
     },
 
     getSectionTitle(section)
@@ -26,6 +29,8 @@ const Dashboard = {
             users: 'Role Assignment',
             audit: 'Audit Trail',
             signature: 'My Signature',
+            'admin-dashboard': 'Admin Dashboard',
+            'user-management': 'User Management',
         };
 
         return titles[section] ?? 'Dashboard';

@@ -3,9 +3,17 @@
     @case('check-circle')
         <i class="bi bi-check-circle"></i>
         @break
+    
+    @case('house-door')
+    <i class="bi bi-house-door"></i>
+    @break
+    
+    @case('people-fill')
+        <i class="bi bi-people-fill"></i>
+        @break
 
     @case('users')
-        <i class="bi bi-people sidebar-icon"></i>
+        <i class="bi bi-person-gear"></i>
         @break
 
     @case('file-text')
@@ -27,5 +35,7 @@
     @case('user-circle')
         <i class="bi bi-person-circle sidebar-icon"></i>
         @break
-
+    @case('file-earmark-check')
+        <i class="bi bi-file-earmark-check sidebar-icon"></i>
+        @break
 @endswitch

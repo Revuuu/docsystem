@@ -9,9 +9,19 @@ class SidebarService
         if ($role === 'admin') {
             return [
                 [
+                    'label' => 'Dashboard',
+                    'icon' => 'house-door',
+                    'section' => 'admin-dashboard',
+                ],
+                [
                     'label' => 'Signed Documents',
-                    'icon' => 'check-circle',
+                    'icon' => 'file-earmark-check',
                     'section' => 'signed',
+                ],
+                    [
+                    'label' => 'User Management',
+                    'icon' => 'people-fill',
+                    'section' => 'user-management',
                 ],
                 [
                     'label' => 'Role Assignment',
