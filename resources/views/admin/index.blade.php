@@ -574,26 +574,24 @@
                             </td>
 
                             <td>
-                            @if($user->roles->count())
-                                @foreach($user->roles as $role)
+                                @if($user->roles->count())
+                                    @foreach($user->roles as $role)
+                                        <span class="role-badge">
+                                            {{ ucfirst($role->name) }}
+                                        </span>
+
+                                    @endforeach
+
+                                @elseif($user->role)
+
                                     <span class="role-badge">
-                                        {{ ucfirst($role->name) }}
+                                        {{ ucfirst($user->role) }}
                                     </span>
-
-                                @endforeach
-
-                            @elseif($user->role)
-
-                                <span class="role-badge">
-                                    {{ ucfirst($user->role) }}
-                                </span>
-                            @else
-
-                     
+                                @else
                                     <span class="role-badge">
                                         -
                                     </span>
-                            @endif
+                                @endif
 
                             </td>
 
@@ -660,16 +658,21 @@
                                         </form>
 
                                         <form method="POST"
-                                            action="{{ route('users.destroy', $user) }}">
+                                            action="{{ route('users.destroy', $user) }}"
+                                            class="delete-user-form">
 
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit"
+                                            <input type="hidden"
+                                                name="password"
+                                                class="password-hidden-input">
+                                                
+                                            <button type="button"
                                                     class="dropdown-item danger"
-                                                    onclick="return confirm('Delete user?')">
+                                                    onclick="return openPasswordModal(event, this.closest('form'))">
 
-                                            Delete User
+                                                Delete User
 
                                             </button>
 
@@ -944,4 +947,5 @@
     </div>
 
 </div>
+@include('partials.password-modal')
 @endsection
