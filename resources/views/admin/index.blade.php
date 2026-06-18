@@ -483,21 +483,62 @@
             </ul>
         </div>
     @endif
-    <div class="documents-card" style="margin-top:24px;">
-        <div class="card-header"
-            style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:20px;
-            ">
+    <div id="userTableContainer" class="documents-card" style="margin-top:24px;">
+        <div class="card-header">
+    <div class="user-filters-card">
 
-            <h3>User Directory</h3>
+        {{-- Search Row --}}
+        <div class="search-row">
 
-            <input type="text"
-                id="userSearch"
-                placeholder="Search users..."
-                class="search-input">
+            <div class="search-box">
+
+                <i class="bi bi-search" id="search-icon"></i>
+
+                <input
+                    type="text"
+                    id="userSearch"
+                    placeholder="Search by Name, Email, or Role">
+
+            </div>
+            
+               <button
+                    id="clearFilters"
+                    class="clear-filters-btn"
+                    type="button">
+                    Clear All
+                </button>
+        </div>
+
+        {{-- Filter Controls --}}
+        <div class="filter-grid">
+
+            <select id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="staff">Staff</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="depthead">Department Head</option>
+                <option value="division">Division Head</option>
+                <option value="executive">Executive</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="verified">Verified</option>
+                <option value="unverified">Unverified</option>
+            </select>
+
+            <input type="date" id="dateFilter">
+
+        </div>
+
+        <div class="results-info">
+
+            Showing {{ $users->count() }} users
+
+        </div>
+
+    </div>
 
         </div>
 

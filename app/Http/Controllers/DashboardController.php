@@ -65,7 +65,55 @@ class DashboardController extends Controller
         $pendingDocuments = $approvals->map(fn ($approval) => $approval->document);
 
         if ($userRole === 'admin') {
-            $users = User::latest()->get();
+            $search = request('search');
+            $role = request('role');
+            $status = request('status');
+            $date = request('date');
+
+            $users = User::query()
+
+                ->when($search, function ($query) use ($search) {
+
+                    $query->where(function ($q) use ($search) {
+
+                        $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+
+                    });
+
+                })
+
+                ->when($role, function ($query) use ($role) {
+
+                    $query->where('role', $role);
+
+                })
+
+                ->when($status, function ($query) use ($status) {
+
+                    if ($status === 'verified') {
+                        $query->whereNotNull('email_verified_at');
+                    }
+
+                    if ($status === 'unverified') {
+                        $query->whereNull('email_verified_at');
+                    }
+
+                })
+
+                ->when($date, function ($query) use ($date) {
+
+                    $query->whereDate(
+                        'created_at',
+                        $date
+                    );
+
+                })
+
+                ->latest()
+
+                ->get();
+
             $allDocuments = Document::latest()->get();
 
             $auditLogs = AuditLog::with('user')

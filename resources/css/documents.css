@@ -52,7 +52,7 @@ SEARCH / FILTER / BUTTONS
     height: 44px;
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
-    padding: 0 14px;
+    padding: 0 40px;
     background: #ffffff;
     color: var(--text-main);
     font-size: 14px;

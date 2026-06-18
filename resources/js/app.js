@@ -7,6 +7,7 @@ import SignatureDraw from './modules/signature-draw';
 import Approver from './modules/approver';
 
 import DocumentSearch from './modules/document-search';
+import UserSearch from './modules/user-search';
 
 import PdfViewer from './modules/pdf-viewer';
 
@@ -39,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     DocumentSearch.init();
 
+    UserSearch.init();
+    
     PdfViewer.init();
 
     UploadModal.init();
