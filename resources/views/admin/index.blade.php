@@ -497,7 +497,7 @@
                 <input
                     type="text"
                     id="userSearch"
-                    placeholder="Search by Name, Email, or Role">
+                    placeholder="Search by Name or Email">
 
             </div>
             
@@ -624,9 +624,9 @@
                                 <div class="more-menu">
 
                                     <button type="button"
-                                            class="table-action-btn"
+                                            class="table-action-btn btn-clear"
                                             onclick="toggleMoreMenu(event, this)">
-                                        More ⋮
+                                          <i class="bi bi-three-dots-vertical"></i>
                                     </button>
 
                                     <div class="more-dropdown">

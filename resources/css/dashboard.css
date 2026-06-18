@@ -537,10 +537,15 @@
     background:#fff;
     border-radius:20px;
     border:1px solid #e5e7eb;
-    overflow:hidden;
-    box-shadow:
-        0 1px 3px rgba(0,0,0,.05),
-        0 10px 20px rgba(0,0,0,.04);
+    overflow:visible !important;
+    position:relative;
+}
+
+#userTableContainer,
+#section-user-management,
+.documents-card,
+.table-wrapper {
+    overflow: visible !important;
 }
 
 .card-header{
@@ -1293,4 +1298,14 @@
         height: 20%;
         margin-top: 30px;
     }
+}
+
+.btn-clear {
+    min-width: unset !important;
+    border: unset !important;
+    background: transparent !important;
+}
+
+.btn-clear:hover {
+    background:transparent !important;
 }
