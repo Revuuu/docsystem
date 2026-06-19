@@ -1302,7 +1302,7 @@
     }
 }
 
-@media (min-width: 360px) and (max-width: 540px) {
+@media screen {
     html,
     body {
         width: 100%;
