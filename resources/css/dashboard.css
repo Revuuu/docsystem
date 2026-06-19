@@ -1392,8 +1392,8 @@
     }
 
     .modern-docs-table {
-        width: 900px !important;
-        min-width: 900px !important;
+        width: 100%;
+        min-width: 100%;
         border-collapse: collapse;
     }
 
