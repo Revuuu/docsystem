@@ -28,6 +28,7 @@
     width: 100%;
     padding: 18px 24px;
     border-top: 1px solid var(--border-soft);
+    border-radius: 0px 0px 20px 20px;
     background: #ffffff;
     display: flex;
     align-items: center;

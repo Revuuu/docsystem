@@ -236,10 +236,6 @@
     font-size: 14px;
 }
 
-.audit-table {
-    min-width: 1200px;
-}
-
 @media (max-width: 900px) {
      .audit-header,
     .audit-content-header {

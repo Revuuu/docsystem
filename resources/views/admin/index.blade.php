@@ -716,7 +716,7 @@
 
             <div class="table-wrapper">
 
-                <table class="modern-docs-table audit-table">
+                <table class="audit-table">
 
                     <thead>
                         <tr>
@@ -740,7 +740,7 @@
 
                                 <td>{{ $log->id }}</td>
 
-                                <td style="min-width: 320px;">
+                                <td>
                                     {{ $log->description ?? '-' }}
                                 </td>
 
@@ -770,7 +770,7 @@
                                     {{ $log->user?->name ?? 'System' }}
                                 </td>
 
-                                <td style="white-space: nowrap;">
+                                <td>
                                     {{ $log->created_at?->format('M d, Y h:i:s A') ?? '-' }}
                                 </td>
 
