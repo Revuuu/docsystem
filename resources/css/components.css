@@ -34,14 +34,41 @@
     letter-spacing: -0.01em;
 }
 .btn-submit {
-    width: 100%;
-    min-height: 50px;
-    padding: 0 18px;
-    margin-bottom: 0;
-    display: flex;
+    position: relative;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+}
+
+.btn-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,.45);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: uploadSpin .7s linear infinite;
+}
+
+.btn-submit.is-loading .btn-spinner {
+    display: inline-block;
+}
+
+.btn-submit.is-loading .btn-text {
+    opacity: 0.9;
+}
+
+.btn-submit.is-loading {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+@keyframes uploadSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .btn-confirm:disabled {

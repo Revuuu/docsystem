@@ -97,8 +97,11 @@
 
                 </div>
 
-                <button type="submit" class="btn-submit">
-                    Upload Document
+                <button type="submit"
+                        class="btn-submit"
+                        id="uploadSubmitBtn">
+                    <span class="btn-text">Upload Document</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
                 </button>
 
             </form>
