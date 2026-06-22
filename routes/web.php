@@ -50,12 +50,17 @@ Route::middleware(['auth', 'otp'])->group(function () {
 
         Route::delete('/users/{user}', [UserController::class, 'destroy'])
             ->name('users.destroy');
+    
+        Route::patch(
+            '/users/{user}/unverify',
+            [UserController::class, 'unverify']
+        )->name('users.unverify');
 
         Route::put(
-    '/users/{user}',
-    [UserController::class, 'update']
-)->name('users.update');
-    });
+            '/users/{user}',
+            [UserController::class, 'update']
+        )->name('users.update');
+            });
 
     Route::get('/signature', [SignatureController::class, 'index'])
     ->name('signature.index');

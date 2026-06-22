@@ -658,25 +658,41 @@
                                             </button>
 
                                         </form>
+                                        
+                                        @if($user->email_verified_at)
+                                            <form method="POST"
+                                                action="{{ route('users.unverify', $user) }}">
 
-                                        <form method="POST"
-                                            action="{{ route('users.destroy', $user) }}"
-                                            class="delete-user-form">
+                                                @csrf
+                                                @method('PATCH')
 
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <input type="hidden"
-                                                name="password"
-                                                class="password-hidden-input">
                                                 
-                                            <button type="button"
-                                                    class="dropdown-item danger"
-                                                    onclick="return openPasswordModal(event, this.closest('form'))">
 
-                                                Delete User
+                                                    <button type="submit"
+                                                            class="dropdown-item danger"
+                                                            onclick="return confirm('Mark this user as unverified?')">
 
-                                            </button>
+                                                        Unverify User
+
+                                                    </button>
+                                            </form>
+                                            
+                                        @elseif(!$user->email_verified_at)
+
+                                            <form method="POST"
+                                                action="{{ route('users.resetPassword', $user) }}">
+
+                                                @csrf
+                                                
+                                                    <button type="submit"
+                                                            class="dropdown-item danger"
+                                                            onclick="return confirm('Send an activation and reset password email to this user?')">
+
+                                                        Verify User
+
+                                                    </button>
+                                            </form>
+                                        @endif
 
                                         </form>
 

@@ -61,90 +61,101 @@ class UserController extends Controller
             )
         );
          
-            Mail::to($user->email)
-    ->send(new WelcomeUserMail($setupUrl));
-        return redirect()
-    ->route('dashboard', [
-        'section' => 'users'
-    ])
-    ->with('role_success', 'User created successfully.');
+        Mail::to($user->email)->send(new WelcomeUserMail($setupUrl));
+        
+        return redirect()->route(
+        'dashboard', 
+        ['section' => 'users'])
+        ->with('role_success', 'User created successfully.');
     }
+
     public function resetPassword(User $user)
-{
-    $token = Password::createToken($user);
+    {
+        $token = Password::createToken($user);
 
-    $resetUrl = url(
-        route(
-            'password.reset',
-            [
-                'token' => $token,
-                'email' => $user->email,
-            ],
-            false
-        )
-    );
+        $resetUrl = url(
+            route(
+                'password.reset',
+                [
+                    'token' => $token,
+                    'email' => $user->email,
+                ],
+                false
+            )
+        );
 
-    Mail::to($user->email)
-        ->send(new WelcomeUserMail($resetUrl));
+        Mail::to($user->email)
+            ->send(new WelcomeUserMail($resetUrl));
+
+        return redirect()
+            ->route('dashboard', [
+                'section' => 'user-management'
+            ])
+            ->with(
+                'user_success',
+                'Password reset email sent successfully.'
+            );
+    }
+
+    public function destroy(User $user)
+    {
+        if ($user->id === auth()->id()) {
+
+            return redirect()
+                ->back()
+                ->with(
+                    'role_error',
+                    'You cannot delete your own account.'
+                );
+        }
+
+        $user->syncRoles([]);
+
+        $user->delete();
 
     return redirect()
         ->route('dashboard', [
             'section' => 'user-management'
         ])
-        ->with(
-            'user_success',
-            'Password reset email sent successfully.'
-        );
-}
+        ->with('user_success', 'User deleted successfully.');
+    }
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:staff,supervisor,depthead,division,executive,admin',
+            'gender' => 'nullable|in:male,female',
+        ]);
 
-public function destroy(User $user)
-{
-    if ($user->id === auth()->id()) {
+        $oldRole = $user->roles->first()?->name;
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'gender' => $request->gender,
+        ]);
+
+        if ($oldRole !== $request->role) {
+            $user->syncRoles([$request->role]);
+        }
+
+    return redirect()
+        ->route('dashboard', [
+            'section' => 'user-management'
+        ])
+        ->with('user_success', 'User updated successfully.');
+    }
+
+    public function unverify(User $user)
+    {
+        $user->forceFill([
+            'email_verified_at' => null,
+        ])->save();
 
         return redirect()
-            ->back()
-            ->with(
-                'role_error',
-                'You cannot delete your own account.'
-            );
+            ->route('dashboard', ['section' => 'user-management'])
+            ->with('user_success', 'User email has been marked as unverified.');
     }
-
-    $user->syncRoles([]);
-
-    $user->delete();
-
-   return redirect()
-    ->route('dashboard', [
-        'section' => 'user-management'
-    ])
-    ->with('user_success', 'User deleted successfully.');
-}
-public function update(Request $request, User $user)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'role' => 'required|in:staff,supervisor,depthead,division,executive,admin',
-        'gender' => 'nullable|in:male,female',
-    ]);
-
-    $oldRole = $user->roles->first()?->name;
-
-    $user->update([
-        'name' => $request->name,
-        'email' => $request->email,
-        'role' => $request->role,
-        'gender' => $request->gender,
-    ]);
-
-    if ($oldRole !== $request->role) {
-        $user->syncRoles([$request->role]);
-    }
-
-   return redirect()
-    ->route('dashboard', [
-        'section' => 'user-management'
-    ])
-    ->with('user_success', 'User updated successfully.');
-}
 }
