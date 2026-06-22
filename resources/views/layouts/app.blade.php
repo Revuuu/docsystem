@@ -47,11 +47,7 @@
             <header class="dashboard-topbar">
 
                 <div class="topbar-left">
-                    <button type="button" class="hamburger" id="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
+                    @include('partials.header-section')
                 </div>
 
                 <div class="topbar-account">
