@@ -670,9 +670,9 @@
 
                                                     <button type="submit"
                                                             class="dropdown-item danger"
-                                                            onclick="return confirm('Mark this user as unverified?')">
+                                                            onclick="return confirm('Mark this user as deactivated?')">
 
-                                                        Unverify User
+                                                        Deactivate User
 
                                                     </button>
                                             </form>
@@ -688,7 +688,7 @@
                                                             class="dropdown-item danger"
                                                             onclick="return confirm('Send an activation and reset password email to this user?')">
 
-                                                        Verify User
+                                                        Activate User
 
                                                     </button>
                                             </form>
