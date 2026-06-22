@@ -1,38 +1,28 @@
-import debounce
-from '../utils/debounce';
+import debounce from '../utils/debounce';
 
-import UserService
-from '../services/user.service';
+import UserService from '../services/user.service';
 
 const UserSearch = {
-
     init()
     {
         this.search =
-            document.getElementById(
-                'userSearch'
-            );
+            document.getElementById('userSearch');
 
         this.container =
-            document.getElementById(
-                'userTableContainer'
-            );
+            document.getElementById('userTableContainer');
 
-    this.status =
-        document.getElementById(
-            'statusFilter'
-        );
+        this.status =
+            document.getElementById('statusFilter');
 
-
-    this.role =
-        document.getElementById(
-            'roleFilter'
-        );
+        this.role =
+            document.getElementById('roleFilter');
 
         this.date =
-    document.getElementById(
-        'dateFilter'
-    );
+            document.getElementById('dateFilter');
+
+        this.resultsInfo =
+            document.getElementById('userResultsInfo');
+
         if (!this.search) return;
 
         this.bindEvents();
@@ -42,60 +32,42 @@ const UserSearch = {
     {
         this.search.addEventListener(
             'input',
-            debounce(
-                () => this.fetch()
-            )
+            debounce(() => this.fetch())
         );
-        this.role.addEventListener(
+
+        this.role?.addEventListener(
             'change',
             () => this.fetch()
         );
 
-        this.status.addEventListener(
+        this.status?.addEventListener(
             'change',
             () => this.fetch()
-        );
-
-         document
-        .getElementById('clearFilters')
-        ?.addEventListener(
-            'click',
-            () => this.clearFilters()
         );
 
         this.date?.addEventListener(
-    'change',
-    () => this.fetch()
-);
+            'change',
+            () => this.fetch()
+        );
+
+        document
+            .getElementById('clearFilters')
+            ?.addEventListener(
+                'click',
+                () => this.clearFilters()
+            );
     },
 
     async fetch(page = 1)
     {
-           const params = {
-        page,
-        section: 'user-management',
-        search: this.search.value
-    };
-
         const html =
             await UserService.search({
-
                 page,
-
-                section:
-                    'user-management',
-
-                search:
-                    this.search.value,
-
-                role:
-                    this.role.value,
-
-                status:
-                    this.status.value,
-                
-                date: 
-                    this.date?.value
+                section: 'user-management',
+                search: this.search.value,
+                role: this.role?.value,
+                status: this.status?.value,
+                date: this.date?.value
             });
 
         const parser =
@@ -108,36 +80,62 @@ const UserSearch = {
             );
 
         const newTable =
-            userDoc.getElementById(
-                'userTable'
-            );
+            userDoc.getElementById('userTable');
 
-        if (newTable) {
-            document.getElementById('userTable'
-            ).innerHTML =
+        const currentTable =
+            document.getElementById('userTable');
+
+        if (newTable && currentTable) {
+            currentTable.innerHTML =
                 newTable.innerHTML;
-
         }
+
+        this.updateVisibleCount();
     },
+
+    updateVisibleCount()
+    {
+        const rows =
+            document.querySelectorAll('#userTable tr');
+
+        const filteredCount =
+            [...rows].filter(row => {
+                const cells =
+                    row.querySelectorAll('td');
+
+                return cells.length > 1;
+            }).length;
+
+        const info =
+            document.getElementById('userResultsInfo');
+
+        if (!info) return;
+
+        const total =
+            info.dataset.total || filteredCount;
+
+        info.textContent =
+            `Showing ${filteredCount} of ${total} users`;
+    },
+
     clearFilters()
-{
-    this.search.value = '';
+    {
+        this.search.value = '';
 
-    const role =
-        document.getElementById('roleFilter');
+        if (this.role) {
+            this.role.value = '';
+        }
 
-    const status =
-        document.getElementById('statusFilter');
+        if (this.status) {
+            this.status.value = '';
+        }
 
-    if (this.date) {
-    this.date.value = '';
-}
+        if (this.date) {
+            this.date.value = '';
+        }
 
-    if (role) role.value = '';
-    if (status) status.value = '';
-
-    this.fetch();
-},
+        this.fetch();
+    },
 };
 
 export default UserSearch;

@@ -532,10 +532,12 @@
 
         </div>
 
-        <div class="results-info">
-
-            Showing {{ $users->count() }} users
-
+        <div
+            class="results-info"
+            id="userResultsInfo"
+            data-total="{{ $users->count() }}"
+        >
+            Showing {{ $users->count() }} of {{ $users->count() }} users
         </div>
 
     </div>
