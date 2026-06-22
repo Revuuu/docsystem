@@ -621,7 +621,7 @@
             </button>
         </div>
 
-        <div class="modal-footer" style="flex-direction:column;">
+        <div class="modal-footer signature-modal-footer">
             <button type="button"
                     class="btn-submit"
                     onclick="openSignatureUploadModal()">
