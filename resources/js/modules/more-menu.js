@@ -35,6 +35,10 @@ const MoreMenu = {
         this.positionDropdown(currentMenu, button);
     },
 
+    getDropdown(menu) {
+        return menu.querySelector('.more-dropdown, .more-menu-dropdown');
+    },
+
     closeAll(exceptMenu = null) {
         document
             .querySelectorAll('.more-menu.open')
@@ -46,7 +50,7 @@ const MoreMenu = {
     },
 
     closeMenu(menu) {
-        const dropdown = menu.querySelector('.more-dropdown');
+        const dropdown = this.getDropdown(menu);
 
         menu.classList.remove('open', 'drop-up');
 
@@ -54,11 +58,13 @@ const MoreMenu = {
             dropdown.style.top = '';
             dropdown.style.left = '';
             dropdown.style.right = '';
+            dropdown.style.display = '';
+            dropdown.style.visibility = '';
         }
     },
 
     positionDropdown(menu, button) {
-        const dropdown = menu.querySelector('.more-dropdown');
+        const dropdown = this.getDropdown(menu);
         if (!dropdown) return;
 
         dropdown.style.visibility = 'hidden';

@@ -3,18 +3,24 @@
     display: inline-block;
 }
 
+.more-menu.open {
+    z-index: 99999;
+}
+
 .more-menu-dropdown {
     display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
+    position: fixed;
     min-width: 180px;
     background: #ffffff;
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-soft);
     overflow: hidden;
-    z-index: 9999;
+    z-index: 999999;
+}
+
+.more-menu.open .more-menu-dropdown {
+    display: block;
 }
 
 .more-menu.open .more-menu-dropdown {
