@@ -11,7 +11,7 @@
             <img src="{{ asset('images/phmc-logo.png') }}" alt="PHMC Logo">
         </div>
 
-        <span>PHMC</span>
+        <span class="brand-text">PHMC</span>
     </div>
 
     <nav class="sidebar-nav">
@@ -27,7 +27,7 @@
                     @include('partials.sidebar-icon', ['icon' => $item['icon']])
                 @endif
 
-                <span>{{ $item['label'] }}</span>
+                <span class="nav-text">{{ $item['label'] }}</span>
 
             </button>
 
@@ -53,7 +53,7 @@
 
         <button type="submit" class="btn-logout">
             <i class="bi bi-box-arrow-right"></i>
-            Logout
+            <span>Logout</span>
         </button>
     </form>
 

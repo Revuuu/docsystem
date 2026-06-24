@@ -14,13 +14,13 @@ const Sidebar = {
     bindEvents() {
         this.hamburger.addEventListener('click', () => {
             if (window.innerWidth <= 860) {
-                this.sidebar.classList.remove('is-hidden');
+                this.sidebar.classList.remove('collapsed');
                 this.sidebar.classList.toggle('mobile-open');
                 this.overlay?.classList.toggle('show');
             } else {
                 this.sidebar.classList.remove('mobile-open');
                 this.overlay?.classList.remove('show');
-                this.sidebar.classList.toggle('is-hidden');
+                this.sidebar.classList.toggle('collapsed');
             }
         });
 
@@ -36,7 +36,7 @@ const Sidebar = {
 
     syncMode() {
         if (window.innerWidth <= 860) {
-            this.sidebar.classList.remove('is-hidden');
+            this.sidebar.classList.remove('collapsed');
             this.sidebar.classList.remove('mobile-open');
             this.overlay?.classList.remove('show');
         } else {
