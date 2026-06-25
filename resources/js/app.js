@@ -22,8 +22,11 @@ import { initRoleAssignmentForm } from './modules/role-assignment';
 import Auth from './modules/auth';
 import PasswordModal from './modules/password-modal';
 import * as bootstrap from 'bootstrap';
+import Chat from './modules/chat';
+import Messenger from './modules/messenger';
 
 window.bootstrap = bootstrap;
+window.Chat = Chat;
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.init();
@@ -53,6 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     MoreMenu.init();
 
     PasswordModal.init();
+    
+    Chat.init();
+
+    Messenger.init();
 
     initRoleAssignmentForm();
 });

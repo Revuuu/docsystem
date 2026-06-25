@@ -374,8 +374,47 @@
                         </div>
 
                     </div>
+
+                    <div class="modal-overlay chat-modal-overlay"
+                        id="documentChatModal"
+                        style="display:none;">
+
+                        <div class="chat-modal">
+
+                            <div class="chat-header">
+                                <div>
+                                    <h3 id="chatDocumentTitle">Document Chat</h3>
+                                    <small>Document conversation room</small>
+                                </div>
+
+                                <button type="button"
+                                        class="chat-close-btn"
+                                        onclick="closeDocumentChat()">
+                                    ×
+                                </button>
+                            </div>
+
+                            <input type="hidden" id="activeDocumentId">
+
+                            <div id="chatMessages" class="chat-messages"></div>
+
+                            <form id="chatForm" class="chat-form">
+                                <input type="text"
+                                    id="chatInput"
+                                    placeholder="Type a message..."
+                                    autocomplete="off">
+
+                                <button type="submit">
+                                    Send
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </div>
                 </div>
             </div>
+            
         </div>
 
         {{-- Profile --}}
@@ -761,6 +800,52 @@
     </div>
 </div>
 
+<div class="messenger-widget">
+
+    <button type="button"
+            class="messenger-float-btn"
+            onclick="toggleMessengerRooms()">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+
+    <div id="messengerRoomsPanel"
+     class="messenger-rooms-panel">
+
+    <div class="messenger-rooms-panel-inner">
+
+        <div class="messenger-header">
+            <strong>Document Chats</strong>
+
+            <button type="button"
+                    onclick="toggleMessengerRooms()">
+                ×
+            </button>
+        </div>
+
+        <div class="messenger-room-list">
+            @foreach($myDocuments as $doc)
+                <button type="button"
+                        class="messenger-room-item"
+                        onclick="openDocumentChatFromMessenger(
+                            {{ $doc->id }},
+                            @js($doc->title)
+                        )">
+                    <span class="room-title">
+                        {{ $doc->title }}
+                    </span>
+
+                    <small>
+                        {{ ucfirst($doc->status) }}
+                    </small>
+                </button>
+            @endforeach
+        </div>
+
+    </div>
+
+</div>
+
+</div>
 @if(session('uploaded_signature_base64'))
     <script>
         console.log('UPLOADED SIGNATURE BASE64:');
@@ -927,6 +1012,54 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
 });
+
+window.authUserId = {{ auth()->id() }};
+window.authUserName = @json(auth()->user()->name);
+
+function openDocumentChat(
+    documentId,
+    title
+) {
+    Chat.open(
+        documentId,
+        title
+    );
+}
+
+function closeDocumentChat() {
+    Chat.close();
+}
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        const form =
+            document.getElementById(
+                'chatForm'
+            );
+
+        const input =
+            document.getElementById(
+                'chatInput'
+            );
+
+        form.addEventListener(
+            'submit',
+            (e) => {
+
+                e.preventDefault();
+
+                Chat.send(
+                    input.value
+                );
+
+                input.value = '';
+            }
+        );
+    }
+);
+
 </script>
 @include('partials.password-modal')
 

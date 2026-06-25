@@ -8,7 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\FileController;
-
+use App\Http\Controllers\DocumentMessageController;
 
 Route::redirect('/', '/dashboard');
 
@@ -108,6 +108,12 @@ Route::get(
     '/signatures/view/{id}',
     [FileController::class, 'signature']
 )->name('signatures.view');
+
+Route::get('/documents/{document}/messages', [DocumentMessageController::class, 'index'])
+->name('documents.messages.index');
+
+Route::post('/documents/{document}/messages', [DocumentMessageController::class, 'store'])
+    ->name('documents.messages.store');
 });
 
 Route::get('/users/{user}/edit',
