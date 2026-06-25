@@ -231,16 +231,20 @@
 
                                     <div class="progress-track">
 
+                                        @for($i = 1; $i < $totalApprovers; $i++)
+                                            <span class="progress-marker"
+                                                style="left: {{ ($i / $totalApprovers) * 100 }}%">
+                                            </span>
+                                        @endfor
+
                                         <div class="progress-fill"
-                                             style="width:{{ $progress }}%">
+                                            style="width:{{ $progress }}%">
                                         </div>
 
                                     </div>
 
                                     <small>
-
                                         {{ $progress }}%
-
                                     </small>
 
                                 </div>
