@@ -390,7 +390,7 @@
                                 <button type="button"
                                         class="chat-close-btn"
                                         onclick="closeDocumentChat()">
-                                    ×
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
                                 </button>
                             </div>
 
@@ -817,8 +817,9 @@
             <strong>Document Chats</strong>
 
             <button type="button"
+                    class="chat-close-btn"
                     onclick="toggleMessengerRooms()">
-                ×
+                <i class="bi bi-x-circle-fill text-danger"></i>
             </button>
         </div>
 

@@ -329,16 +329,18 @@ body.modal-open {
 }
 
 .chat-close-btn {
-    width: 36px;
-    height: 36px;
     border: none;
-    border-radius: 50%;
-    background: #e5e7eb;
-    color: #111827;
-    font-size: 1.4rem;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     cursor: pointer;
 }
-
+.chat-close-btn i {
+    font-size: 1.8rem;
+}
 .chat-messages {
     flex: 1;
     overflow-y: auto;
