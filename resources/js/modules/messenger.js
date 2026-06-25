@@ -1,5 +1,7 @@
 const Messenger = {
     init() {
+        this.bindSectionWatcher();
+
         window.toggleMessengerRooms =
             this.toggle.bind(this);
 
@@ -23,6 +25,43 @@ const Messenger = {
 
             panel.classList.remove('show');
         });
+    },
+
+    bindSectionWatcher() {
+        const widget =
+            document.getElementById('messengerWidget');
+
+        if (!widget) {
+            return;
+        }
+
+        const updateVisibility = () => {
+            const documentsSection =
+                document.getElementById('section-documents');
+
+            const isVisible =
+                documentsSection &&
+                getComputedStyle(documentsSection).display !== 'none';
+
+            widget.style.display =
+                isVisible
+                    ? 'block'
+                    : 'none';
+        };
+
+        updateVisibility();
+
+        const observer =
+            new MutationObserver(updateVisibility);
+
+        observer.observe(
+            document.body,
+            {
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class'],
+            }
+        );
     },
 
     toggle() {
