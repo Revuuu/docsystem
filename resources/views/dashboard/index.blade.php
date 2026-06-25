@@ -414,7 +414,50 @@
                     </div>
                 </div>
             </div>
-            
+            <div class="messenger-widget">
+
+                <button type="button"
+                        class="messenger-float-btn"
+                        onclick="toggleMessengerRooms()">
+                    <i class="bi bi-chat-dots-fill"></i>
+                </button>
+
+                <div id="messengerRoomsPanel"
+                    class="messenger-rooms-panel">
+
+                    <div class="messenger-rooms-panel-inner">
+
+                        <div class="messenger-header">
+                            <strong>Document Chats</strong>
+
+                            <button type="button"
+                                    class="chat-close-btn"
+                                    onclick="toggleMessengerRooms()">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            </button>
+                        </div>
+
+                        <div class="messenger-room-list">
+                            @foreach($myDocuments as $doc)
+                                <button type="button"
+                                        class="messenger-room-item"
+                                        onclick="openDocumentChatFromMessenger(
+                                            {{ $doc->id }},
+                                            @js($doc->title)
+                                        )">
+                                    <span class="room-title">
+                                        {{ $doc->title }}
+                                    </span>
+
+                                    <small>
+                                        {{ ucfirst($doc->status) }}
+                                    </small>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Profile --}}
@@ -800,53 +843,6 @@
     </div>
 </div>
 
-<div class="messenger-widget">
-
-    <button type="button"
-            class="messenger-float-btn"
-            onclick="toggleMessengerRooms()">
-        <i class="bi bi-chat-dots-fill"></i>
-    </button>
-
-    <div id="messengerRoomsPanel"
-     class="messenger-rooms-panel">
-
-    <div class="messenger-rooms-panel-inner">
-
-        <div class="messenger-header">
-            <strong>Document Chats</strong>
-
-            <button type="button"
-                    class="chat-close-btn"
-                    onclick="toggleMessengerRooms()">
-                <i class="bi bi-x-circle-fill text-danger"></i>
-            </button>
-        </div>
-
-        <div class="messenger-room-list">
-            @foreach($myDocuments as $doc)
-                <button type="button"
-                        class="messenger-room-item"
-                        onclick="openDocumentChatFromMessenger(
-                            {{ $doc->id }},
-                            @js($doc->title)
-                        )">
-                    <span class="room-title">
-                        {{ $doc->title }}
-                    </span>
-
-                    <small>
-                        {{ ucfirst($doc->status) }}
-                    </small>
-                </button>
-            @endforeach
-        </div>
-
-    </div>
-
-</div>
-
-</div>
 @if(session('uploaded_signature_base64'))
     <script>
         console.log('UPLOADED SIGNATURE BASE64:');
