@@ -1,173 +1,204 @@
 const SignatureDraw = {
+    canvas: null,
+    ctx: null,
+    drawing: false,
+    lastX: 0,
+    lastY: 0,
 
     init() {
+        this.canvas =
+            document.getElementById('signatureCanvas');
 
-        const canvas =
-            document.getElementById(
-                'signatureCanvas'
-            );
+        this.cursor =
+            document.getElementById('drawCursor');
 
-        if (!canvas) return;
+        if (!this.canvas) return;
 
-        const ctx =
-            canvas.getContext('2d');
+        this.ctx =
+            this.canvas.getContext('2d');
 
-        let drawing = false;
+        this.canvas.style.touchAction = 'none';
 
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        this.ctx.strokeStyle = '#000';
 
-        const getPosition = (e) => {
+        this.bindDrawingEvents();
 
-            const rect =
-                canvas.getBoundingClientRect();
+        window.clearSignatureCanvas =
+            () => this.clear();
 
-            if (
-                e.touches &&
-                e.touches.length > 0
-            ) {
-                return {
-                    x:
-                        e.touches[0].clientX -
-                        rect.left,
+        window.saveDrawnSignature =
+            () => this.save();
+    },
 
-                    y:
-                        e.touches[0].clientY -
-                        rect.top,
-                };
-            }
+    bindDrawingEvents() {
 
-            return {
-                x:
-                    e.clientX -
-                    rect.left,
+    this.canvas.addEventListener('pointerenter', (event) => {
 
-                y:
-                    e.clientY -
-                    rect.top,
-            };
-        };
+        if (this.cursor) {
+            this.cursor.style.display = 'block';
+            this.moveCursor(event);
+        }
 
-        const startDrawing = (e) => {
+    });
 
-            drawing = true;
+    this.canvas.addEventListener('pointermove', (event) => {
 
-            const pos =
-                getPosition(e);
+        this.moveCursor(event);
+        this.draw(event);
 
-            ctx.beginPath();
+    });
 
-            ctx.moveTo(
-                pos.x,
-                pos.y
-            );
-        };
+    this.canvas.addEventListener('pointerdown', (event) => {
 
-        const draw = (e) => {
+        this.moveCursor(event);
+        this.startDrawing(event);
 
-            if (!drawing) return;
+    });
 
-            e.preventDefault();
+    this.canvas.addEventListener('pointerup', (event) => {
 
-            const pos =
-                getPosition(e);
+        this.stopDrawing(event);
 
-            ctx.lineTo(
-                pos.x,
-                pos.y
-            );
+    });
 
-            ctx.stroke();
-        };
+    this.canvas.addEventListener('pointerleave', (event) => {
 
-        const stopDrawing = () => {
-            drawing = false;
-        };
+        if (this.cursor) {
+            this.cursor.style.display = 'none';
+        }
 
-        canvas.addEventListener(
-            'mousedown',
-            startDrawing
+        this.stopDrawing(event);
+
+    });
+
+    this.canvas.addEventListener('pointercancel', (event) => {
+
+        if (this.cursor) {
+            this.cursor.style.display = 'none';
+        }
+
+        this.stopDrawing(event);
+
+    });
+},
+
+    startDrawing(event) {
+        event.preventDefault();
+
+        this.drawing = true;
+
+        this.canvas.setPointerCapture?.(
+            event.pointerId
         );
 
-        canvas.addEventListener(
-            'mousemove',
-            draw
-        );
+        const pos =
+            this.getPosition(event);
 
-        canvas.addEventListener(
-            'mouseup',
-            stopDrawing
-        );
+        this.lastX = pos.x;
+        this.lastY = pos.y;
 
-        canvas.addEventListener(
-            'mouseleave',
-            stopDrawing
-        );
+        this.ctx.beginPath();
 
-        canvas.addEventListener(
-            'touchstart',
-            startDrawing
-        );
-
-        canvas.addEventListener(
-            'touchmove',
-            draw
-        );
-
-        canvas.addEventListener(
-            'touchend',
-            stopDrawing
+        this.ctx.moveTo(
+            this.lastX,
+            this.lastY
         );
     },
 
-    clear() {
+    draw(event) {
+        if (!this.drawing) return;
 
-        const canvas =
-            document.getElementById(
-                'signatureCanvas'
+        event.preventDefault();
+
+        const pos =
+            this.getPosition(event);
+
+        const midX =
+            (this.lastX + pos.x) / 2;
+
+        const midY =
+            (this.lastY + pos.y) / 2;
+
+        this.ctx.quadraticCurveTo(
+            this.lastX,
+            this.lastY,
+            midX,
+            midY
+        );
+
+        this.ctx.stroke();
+
+        this.lastX = pos.x;
+        this.lastY = pos.y;
+    },
+
+    stopDrawing(event) {
+        if (!this.drawing) return;
+
+        this.drawing = false;
+
+        this.ctx.beginPath();
+
+        if (event?.pointerId) {
+            this.canvas.releasePointerCapture?.(
+                event.pointerId
             );
+        }
+    },
 
-        if (!canvas) return;
+    getPosition(event) {
+        const rect =
+            this.canvas.getBoundingClientRect();
 
-        const ctx =
-            canvas.getContext('2d');
+        return {
+            x:
+                (event.clientX - rect.left) *
+                (this.canvas.width / rect.width),
 
-        ctx.clearRect(
+            y:
+                (event.clientY - rect.top) *
+                (this.canvas.height / rect.height),
+        };
+    },
+
+    moveCursor(event) {
+
+    if (!this.cursor) return;
+
+    this.cursor.style.left =
+        `${event.clientX}px`;
+
+    this.cursor.style.top =
+        `${event.clientY}px`;
+},
+
+    clear() {
+        if (!this.canvas || !this.ctx) return;
+
+        this.ctx.clearRect(
             0,
             0,
-            canvas.width,
-            canvas.height
+            this.canvas.width,
+            this.canvas.height
         );
     },
 
     save() {
-
-        const canvas =
-            document.getElementById(
-                'signatureCanvas'
-            );
-
         const input =
-            document.getElementById(
-                'signatureData'
-            );
+            document.getElementById('signatureData');
 
-        if (!canvas || !input) {
-            return;
+        if (!this.canvas || !input) {
+            return false;
         }
 
         input.value =
-            canvas.toDataURL(
-                'image/png'
-            );
+            this.canvas.toDataURL('image/png');
+
+        return true;
     }
 };
-
-window.clearSignatureCanvas =
-    () => SignatureDraw.clear();
-
-window.saveDrawnSignature =
-    () => SignatureDraw.save();
 
 export default SignatureDraw;

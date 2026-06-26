@@ -128,6 +128,8 @@
 
             @csrf
 
+            <div id="drawCursor"></div>
+
             <canvas id="signatureCanvas"
                     width="500"
                     height="200"

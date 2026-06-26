@@ -555,6 +555,30 @@ body.modal-open {
 .messenger-room-item small {
     color: #6b7280;
 }
+
+.signature-canvas {
+    cursor: none;
+}
+
+#drawCursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    width: 6px;
+    height: 6px;
+
+    background: #111;
+    border-radius: 50%;
+
+    pointer-events: none;
+    z-index: 999999;
+
+    display: none;
+
+    transform: translate(-50%, -50%);
+}
+
 @keyframes modalPop {
     from {
         opacity: 0;
