@@ -67,7 +67,6 @@ body.modal-open {
 }
 
 .modal-box {
-    width: min(1120px, 96vw);
     height: 90vh;
     background: #ffffff;
     display: flex;

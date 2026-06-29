@@ -148,17 +148,14 @@ class ApprovalController extends Controller
             });
 
             return redirect()
-                ->route('dashboard')
-                ->with('approval_success', 'Document approved successfully.')
-                ->with('section', 'documents');
+                ->route('dashboard', ['section' => 'documents'])
+                ->with('approval_success', 'Document approved successfully.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()
-                ->route('dashboard')
+                ->route('dashboard', ['section' => 'documents'])
                 ->withErrors($e->errors(), 'approval')
-                ->with('approval_error', $e->validator->errors()->first())
-                ->with('section', 'documents');
-
+                ->with('approval_error', collect($e->errors())->flatten()->first());
         } catch (\Exception $e) {
             return redirect()
                 ->route('dashboard')
@@ -221,11 +218,8 @@ class ApprovalController extends Controller
         });
 
         return redirect()
-            ->route('dashboard')
-            ->with(
-                'success',
-                'Document rejected successfully.'
-            );
+            ->route('dashboard', ['section' => 'documents'])
+            ->with('approval_success', 'Document rejected successfully.');
     }
 
     protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string {
