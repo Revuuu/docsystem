@@ -14,9 +14,9 @@ class SidebarService
                     'section' => 'admin-dashboard',
                 ],
                 [
-                    'label' => 'Signed Documents',
+                    'label' => 'Document Workflow',
                     'icon' => 'file-earmark-check',
-                    'section' => 'signed',
+                    'section' => 'workflow',
                 ],
                     [
                     'label' => 'User Management',

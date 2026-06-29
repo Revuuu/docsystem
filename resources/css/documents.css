@@ -161,7 +161,8 @@ STATUS
 }
 
 .status-pill.waiting,
-.status-pending {
+.status-pill.pending,
+.status-pending{
     background: #fef3c7;
     color: #92400e;
 }

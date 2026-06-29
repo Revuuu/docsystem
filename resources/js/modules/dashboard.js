@@ -31,6 +31,7 @@ window.closeEditUserModal =
             documents: 'My Documents',
             profile: 'My Profile',
             signed: 'Signed Documents',
+            workflow: 'Document Workflow',
             users: 'Role Assignment',
             audit: 'Audit Trail',
             signature: 'My Signature',
