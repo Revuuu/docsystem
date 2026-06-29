@@ -148,8 +148,6 @@
 
 </div>
 
-{{-- My Documents --}}
-
 {{-- Document Workflow Monitor --}}
 <div id="section-workflow" class="dashboard-section">
 
@@ -165,164 +163,218 @@
         @endphp
 
         @if($workflowDocs->count() > 0)
+            <div id="documentsTableContainer">
 
-            <div class="table-wrapper">
+                <div class="card-header">
+                    <div class="user-filters-card">
 
-                <table class="modern-docs-table">
+                        <div class="workflow-filters-card">
 
-                    <thead>
-                        <tr>
-                            <th>Document</th>
-                            <th>Uploaded By</th>
-                            <th>Current Stage</th>
-                            <th>Current Approver</th>
-                            <th>Progress</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                            <div class="workflow-search-row">
 
-                    <tbody>
+                                <div class="workflow-search-box">
+                                    <i class="bi bi-search"></i>
 
-                        @foreach($workflowDocs as $doc)
+                                    <input
+                                        type="text"
+                                        id="documentSearchInput"
+                                        placeholder="Search documents...">
+                                </div>
+                                
+                                <div class="workflow-filter-grid">
 
-                            @php
-                                $approvals = $doc->approvals->sortBy('step_order');
+                                    <select id="documentStatusFilter">
+                                        <option value="">All Status</option>
+                                        <option value="pending">Ongoing</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
 
-                                $totalSteps = $approvals->count();
+                                </div>
 
-                                $approvedSteps = $approvals
-                                    ->where('status', 'approved')
-                                    ->count();
+                                <button
+                                    id="documentClearFilters"
+                                    class="workflow-clear-btn"
+                                    type="button">
+                                    Clear All
+                                </button>
+                            </div>
 
-                                $currentApproval = $approvals
-                                    ->where('status', 'pending')
-                                    ->first();
+                        </div>
 
-                                $rejectedApproval = $approvals
-                                    ->where('status', 'rejected')
-                                    ->first();
+                        <div
+                            class="results-info"
+                            id="docCountResultsInfo"
+                            data-total="{{ $workflowDocs->total() }}">
+                            Showing {{ $workflowDocs->count() }} of {{ $workflowDocs->total() }} documents
+                        </div>
 
-                                if ($doc->status === 'approved') {
-                                    $currentStage = 'Completed';
-                                    $currentApprover = 'Completed';
-                                } elseif ($doc->status === 'rejected') {
-                                    $currentStage = 'Rejected';
-                                    $currentApprover = $rejectedApproval?->user?->name ?? 'Unknown';
-                                } elseif ($currentApproval) {
-                                    $currentStage = ucfirst($currentApproval->user?->role ?? 'Pending');
-                                    $currentApprover = $currentApproval->user?->name ?? 'Unknown';
-                                } else {
-                                    $currentStage = 'Waiting';
-                                    $currentApprover = 'Waiting for next approver';
-                                }
-
-                                $progressPercent = $totalSteps > 0
-                                    ? round(($approvedSteps / $totalSteps) * 100)
-                                    : 0;
-
-                                $latestVersion = $doc->latestVersion();
-                            @endphp
-
-                            <tr>
-                                <td>
-                                    <strong>{{ $doc->title }}</strong>
-                                </td>
-
-                                <td>
-                                    <div class="table-user-info">
-                                        <strong>{{ $doc->uploader?->name ?? 'Unknown' }}</strong>
-                                        <small>{{ ucfirst($doc->uploader?->role ?? '-') }}</small>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    {{ $currentStage }}
-                                </td>
-
-                                <td>
-                                    {{ $currentApprover }}
-                                </td>
-
-                                <td>
-                                    <div class="progress-container">
-
-                                        <div class="progress-track">
-
-                                            <div class="progress-fill"
-                                                style="width: {{ $progressPercent }}%;">
-                                            </div>
-
-                                            @for($i = 1; $i < $totalSteps; $i++)
-                                                <span class="progress-marker"
-                                                    style="left: {{ ($i / $totalSteps) * 100 }}%;">
-                                                </span>
-                                            @endfor
-
-                                        </div>
-                                        
-                                        <small>{{ $progressPercent }}%</small>
-                                        
-
-                                    </div>
-                                </td>
-
-                                @php
-                                    $displayStatus = match (strtolower($doc->status)) {
-                                        'pending', 'waiting' => 'Ongoing',
-                                        'approved' => 'Approved',
-                                        'rejected' => 'Rejected',
-                                        default => ucfirst($doc->status),
-                                    };
-
-                                    $statusClass = strtolower($doc->status);
-                                @endphp
-
-                                <td>
-                                    <span class="status-pill {{ $statusClass }}">
-                                        {{ $displayStatus }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    @if($latestVersion)
-                                        <button type="button"
-                                                class="view-pdf-btn"
-                                                onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
-                                            View PDF
-                                        </button>
-                                    @else
-                                        <span class="no-data">No file</span>
-                                    @endif
-                                </td>
-                            </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-                <div class="documents-footer">
-                    {{ $workflowDocs->appends(['section' => 'signed'])->links() }}
+                    </div>
                 </div>
 
+                <div class="table-wrapper">
+
+                    <table class="modern-docs-table">
+
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Uploaded By</th>
+                                <th>Current Stage</th>
+                                <th>Current Approver</th>
+                                <th>Progress</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="documentsTableBody">
+
+                            @foreach($workflowDocs as $doc)
+
+                                @php
+                                    $approvals = $doc->approvals->sortBy('step_order');
+
+                                    $totalSteps = $approvals->count();
+
+                                    $approvedSteps = $approvals
+                                        ->where('status', 'approved')
+                                        ->count();
+
+                                    $currentApproval = $approvals
+                                        ->where('status', 'pending')
+                                        ->first();
+
+                                    $rejectedApproval = $approvals
+                                        ->where('status', 'rejected')
+                                        ->first();
+
+                                    if ($doc->status === 'approved') {
+                                        $currentStage = 'Completed';
+                                        $currentApprover = 'Completed';
+                                    } elseif ($doc->status === 'rejected') {
+                                        $currentStage = 'Rejected';
+                                        $currentApprover = $rejectedApproval?->user?->name ?? 'Unknown';
+                                    } elseif ($currentApproval) {
+                                        $currentStage = ucfirst($currentApproval->user?->role ?? 'Pending');
+                                        $currentApprover = $currentApproval->user?->name ?? 'Unknown';
+                                    } else {
+                                        $currentStage = 'Waiting';
+                                        $currentApprover = 'Waiting for next approver';
+                                    }
+
+                                    $progressPercent = $totalSteps > 0
+                                        ? round(($approvedSteps / $totalSteps) * 100)
+                                        : 0;
+
+                                    $latestVersion = $doc->latestVersion();
+                                @endphp
+
+                                <tr class="document-row"
+                                    data-title="{{ strtolower($doc->title) }}"
+                                    data-uploader="{{ strtolower($doc->uploader?->name ?? '') }}"
+                                    data-status="{{ strtolower($doc->status) }}">
+                                    <td>
+                                        <strong>{{ $doc->title }}</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="table-user-info">
+                                            <strong>{{ $doc->uploader?->name ?? 'Unknown' }}</strong>
+                                            <small>{{ ucfirst($doc->uploader?->role ?? '-') }}</small>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ $currentStage }}
+                                    </td>
+
+                                    <td>
+                                        {{ $currentApprover }}
+                                    </td>
+
+                                    <td>
+                                        <div class="progress-container">
+
+                                            <div class="progress-track">
+
+                                                <div class="progress-fill"
+                                                    style="width: {{ $progressPercent }}%;">
+                                                </div>
+
+                                                @for($i = 1; $i < $totalSteps; $i++)
+                                                    <span class="progress-marker"
+                                                        style="left: {{ ($i / $totalSteps) * 100 }}%;">
+                                                    </span>
+                                                @endfor
+
+                                            </div>
+                                            
+                                            <small>{{ $progressPercent }}%</small>
+                                            
+
+                                        </div>
+                                    </td>
+
+                                    @php
+                                        $displayStatus = match (strtolower($doc->status)) {
+                                            'pending', 'waiting' => 'Ongoing',
+                                            'approved' => 'Approved',
+                                            'rejected' => 'Rejected',
+                                            default => ucfirst($doc->status),
+                                        };
+
+                                        $statusClass = strtolower($doc->status);
+                                    @endphp
+
+                                    <td>
+                                        <span class="status-pill {{ $statusClass }}">
+                                            {{ $displayStatus }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if($latestVersion)
+                                            <button type="button"
+                                                    class="view-pdf-btn"
+                                                    onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
+                                                View PDF
+                                            </button>
+                                        @else
+                                            <span class="no-data">No file</span>
+                                        @endif
+                                    </td>
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                    </table>
+
+                    <div id="noResultsMessage"
+                        style="display:none; text-align:center; padding:20px; color:#777;">
+                        No documents found.
+                    </div>
+                    
+                    <div class="documents-footer">
+                        {{ $workflowDocs->appends(['section' => 'workflow'])->links() }}
+                    </div>
+
+                </div>
+
+                @else
+
+                    <div style="padding:24px;">
+                        <p class="alert alert-error">
+                            No documents found.
+                        </p>
+                    </div>
+
+                @endif
             </div>
-
-        @else
-
-            <div style="padding:24px;">
-                <p class="alert alert-error">
-                    No documents found.
-                </p>
-            </div>
-
-        @endif
-
     </div>
-
 </div>
-
 {{-- Users Section --}}
 <div id="section-users" class="dashboard-section role-section">
 

@@ -23,23 +23,64 @@ const DocumentSearch = {
                 'documentsTableContainer'
             );
 
-        if (!this.search) return;
+        this.clear =
+            document.getElementById(
+                'documentClearFilters'
+            );
+
+        if (!this.search || !this.container) return;
+
+        this.isWorkflow =
+            !!document.getElementById(
+                'section-workflow'
+            );
 
         this.bindEvents();
+        this.updateVisibleCount();
     },
 
     bindEvents()
     {
         this.search.addEventListener(
             'input',
-            debounce(
-                () => this.fetch()
-            )
+            debounce(() => {
+                if (this.isWorkflow) {
+                    this.filterWorkflowRows();
+                    return;
+                }
+
+                this.fetch();
+            })
         );
 
-        this.status.addEventListener(
+        this.status?.addEventListener(
             'change',
-            () => this.fetch()
+            () => {
+                if (this.isWorkflow) {
+                    this.filterWorkflowRows();
+                    return;
+                }
+
+                this.fetch();
+            }
+        );
+
+        this.clear?.addEventListener(
+            'click',
+            () => {
+                this.search.value = '';
+
+                if (this.status) {
+                    this.status.value = '';
+                }
+
+                if (this.isWorkflow) {
+                    this.filterWorkflowRows();
+                    return;
+                }
+
+                this.fetch();
+            }
         );
     },
 
@@ -57,7 +98,7 @@ const DocumentSearch = {
                     this.search.value,
 
                 status:
-                    this.status.value
+                    this.status?.value || ''
             });
 
         const parser =
@@ -75,38 +116,102 @@ const DocumentSearch = {
             );
 
         if (newContainer) {
-
             this.container.innerHTML =
                 newContainer.innerHTML;
-
         }
 
         this.updateVisibleCount();
     },
 
+    filterWorkflowRows()
+    {
+        const searchValue =
+            this.search.value
+                .trim()
+                .toLowerCase();
+
+        const statusValue =
+            this.status?.value || '';
+
+        const rows =
+            document.querySelectorAll(
+                '#documentsTableContainer .document-row'
+            );
+
+        rows.forEach(row => {
+            const title =
+                row.dataset.title || '';
+
+            const status =
+                row.dataset.status || '';
+
+            const matchesSearch =
+                !searchValue ||
+                title.includes(searchValue);
+
+            const matchesStatus =
+                !statusValue ||
+                status === statusValue;
+
+            row.style.display =
+                matchesSearch && matchesStatus
+                    ? ''
+                    : 'none';
+        });
+
+        this.updateVisibleCount();
+        this.toggleNoResults();
+    },
+
     updateVisibleCount()
     {
         const rows =
-            document.querySelectorAll('#documentsTableContainer tr');
+            document.querySelectorAll(
+                '#documentsTableContainer .document-row'
+            );
 
-        const filteredCount =
+        const visibleCount =
             [...rows].filter(row => {
-                const cells =
-                    row.querySelectorAll('td');
-
-                return cells.length > 1;
+                return row.style.display !== 'none';
             }).length;
 
         const info =
-            document.getElementById('docCountResultsInfo');
+            document.getElementById(
+                'docCountResultsInfo'
+            );
 
         if (!info) return;
 
         const total =
-            info.dataset.total || filteredCount;
+            info.dataset.total || rows.length;
 
         info.textContent =
-            `Showing ${filteredCount} of ${total} documents`;
+            `Showing ${visibleCount} of ${total} documents`;
+    },
+
+    toggleNoResults()
+    {
+        const rows =
+            document.querySelectorAll(
+                '#documentsTableContainer .document-row'
+            );
+
+        const noResults =
+            document.getElementById(
+                'noResultsMessage'
+            );
+
+        if (!noResults) return;
+
+        const visibleCount =
+            [...rows].filter(row => {
+                return row.style.display !== 'none';
+            }).length;
+
+        noResults.style.display =
+            visibleCount === 0
+                ? 'block'
+                : 'none';
     },
 };
 
