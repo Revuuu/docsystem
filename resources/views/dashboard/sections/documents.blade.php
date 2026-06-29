@@ -35,7 +35,6 @@
                 </div>
 
                 <select id="documentStatusFilter" class="documentStatusFilter">
-
                     <option value="" {{ request('status') == '' ? 'selected' : '' }}>
                         All Status
                     </option>
@@ -55,12 +54,18 @@
                     <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
                         Rejected
                     </option>
-
                 </select>
 
-                <button class="upload-document-btn" type="button" onclick="openUploadModal()">
+                <button class="upload-document-btn"
+                        type="button"
+                        onclick="openUploadModal()">
                     <i class="bi bi-plus"></i> UPLOAD NEW DOCUMENT
                 </button>
+            </div>
+            <div class="results-info"
+                id="docCountResultsInfo"
+                data-total="{{ $myDocuments->total() }}">
+                Showing {{ $filteredDocumentCount ?? $myDocuments->count() }} of {{ $myDocuments->total() }} documents
             </div>
         </div>
 

@@ -16,9 +16,13 @@
         ->pluck('document')
         ->filter();
 
-    $mergedDocuments = $documents
+    $allMyDocuments = $documents
         ->merge($assignedDocuments)
         ->unique('id')
+        ->sortByDesc('created_at')
+        ->values();
+
+    $filteredDocuments = $allMyDocuments
         ->filter(function ($doc) use ($search, $status) {
             $latestVersion = $doc->latestVersion();
 
@@ -48,20 +52,19 @@
                 $docStatus === $status
             );
         })
-        ->sortByDesc('created_at')
         ->values();
 
     $perPage = 10;
 
     $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
-    $currentItems = $mergedDocuments
+    $currentItems = $filteredDocuments
         ->slice(($currentPage - 1) * $perPage, $perPage)
         ->values();
 
     $myDocuments = new LengthAwarePaginator(
         $currentItems,
-        $mergedDocuments->count(),
+        $allMyDocuments->count(),
         $perPage,
         $currentPage,
         [
@@ -69,6 +72,8 @@
             'query' => request()->query(),
         ]
     );
+
+    $filteredDocumentCount = $filteredDocuments->count();
 @endphp
 
 <div id="section-dashboard" class="dashboard-section">

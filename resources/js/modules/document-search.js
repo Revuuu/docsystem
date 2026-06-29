@@ -80,7 +80,34 @@ const DocumentSearch = {
                 newContainer.innerHTML;
 
         }
-    }
+
+        this.updateVisibleCount();
+    },
+
+    updateVisibleCount()
+    {
+        const rows =
+            document.querySelectorAll('#documentsTableContainer tr');
+
+        const filteredCount =
+            [...rows].filter(row => {
+                const cells =
+                    row.querySelectorAll('td');
+
+                return cells.length > 1;
+            }).length;
+
+        const info =
+            document.getElementById('docCountResultsInfo');
+
+        if (!info) return;
+
+        const total =
+            info.dataset.total || filteredCount;
+
+        info.textContent =
+            `Showing ${filteredCount} of ${total} documents`;
+    },
 };
 
 export default DocumentSearch;
