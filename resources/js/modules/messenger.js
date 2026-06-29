@@ -1,6 +1,9 @@
 const Messenger = {
+    unreadCount: 0,
     init() {
         this.bindSectionWatcher();
+        this.bindUnreadListener();
+        this.updateUnreadBadge();
 
         window.toggleMessengerRooms =
             this.toggle.bind(this);
@@ -64,7 +67,90 @@ const Messenger = {
         );
     },
 
+    bindUnreadListener() {
+
+        window.addEventListener(
+            'document-chat:new-message',
+            (event) => {
+
+                const payload =
+                    event.detail;
+
+                console.log(
+                    'Unread message:',
+                    payload
+                );
+
+                if (
+                    Number(payload.user_id) ===
+                    Number(window.authUserId)
+                ) {
+                    return;
+                }
+
+                const modal =
+                    document.getElementById(
+                        'documentChatModal'
+                    );
+
+                const chatOpen =
+                    modal &&
+                    modal.style.display === 'flex';
+
+                if (
+                    chatOpen &&
+                    Number(window.Chat?.activeDocumentId) ===
+                    Number(payload.document_id)
+                ) {
+                    return;
+                }
+
+                this.unreadCount++;
+
+                this.updateUnreadBadge();
+            }
+        );
+    },
+
+    updateUnreadBadge() {
+
+        const badge =
+            document.getElementById(
+                'messengerUnreadBadge'
+            );
+
+        if (!badge) {
+            return;
+        }
+
+        if (this.unreadCount <= 0) {
+
+            badge.style.display =
+                'none';
+
+            return;
+        }
+
+        badge.style.display =
+            'flex';
+
+        badge.textContent =
+            this.unreadCount > 99
+                ? '99+'
+                : this.unreadCount;
+    },
+
+    resetUnread() {
+
+        this.unreadCount = 0;
+
+        this.updateUnreadBadge();
+    },
+
     toggle() {
+
+        this.resetUnread();
+
         document
             .getElementById('messengerRoomsPanel')
             ?.classList
@@ -72,6 +158,9 @@ const Messenger = {
     },
 
     openRoom(documentId, title) {
+
+        this.resetUnread();
+        
         document
             .getElementById('messengerRoomsPanel')
             ?.classList

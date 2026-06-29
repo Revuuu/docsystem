@@ -14,9 +14,15 @@ const Chat = {
         this.socket.on('connect', () => {
             console.log('Socket connected:', this.socket.id);
 
-            if (this.activeDocumentId) {
-                this.socket.emit('join-document-chat', this.activeDocumentId);
-            }
+            const documentIds =
+                window.messengerDocumentIds || [];
+
+            documentIds.forEach(documentId => {
+                this.socket.emit(
+                    'join-document-chat',
+                    documentId
+                );
+            });
         });
 
         this.socket.on('connect_error', (error) => {
@@ -24,6 +30,13 @@ const Chat = {
         });
 
         this.socket.on('receive-document-message', (payload) => {
+
+            window.dispatchEvent(
+                new CustomEvent('document-chat:new-message', {
+                    detail: payload,
+                })
+            );
+
             if (
                 Number(payload.document_id) !==
                 Number(this.activeDocumentId)
@@ -53,9 +66,6 @@ const Chat = {
     },
 
     async open(documentId, title) {
-        if (this.activeDocumentId) {
-            this.socket.emit('leave-document-chat', this.activeDocumentId);
-        }
 
         this.activeDocumentId = documentId;
 
@@ -70,9 +80,6 @@ const Chat = {
     },
 
     close() {
-        if (this.activeDocumentId) {
-            this.socket.emit('leave-document-chat', this.activeDocumentId);
-        }
 
         document.getElementById('documentChatModal').style.display = 'none';
 

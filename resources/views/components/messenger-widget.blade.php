@@ -10,6 +10,9 @@
                 class="messenger-float-btn"
                 onclick="toggleMessengerRooms()">
             <i class="bi bi-chat-dots-fill"></i>
+            <span id="messengerUnreadBadge" class="messenger-unread-badge">
+                0
+            </span>
         </button>
 
     <div id="messengerRoomsPanel"
@@ -47,4 +50,7 @@
             </div>
         </div>
     </div>
+    <script>
+    window.messengerDocumentIds = @json($documents->pluck('id')->values());
+</script>
 </div>
