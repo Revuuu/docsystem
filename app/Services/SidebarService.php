@@ -33,11 +33,6 @@ class SidebarService
                     'icon' => 'file-text',
                     'section' => 'audit',
                 ],
-                [
-                    'label' => 'My Signature',
-                    'icon' => 'signature',
-                    'section' => 'signature',
-                ],
             ];
         }
 

@@ -281,6 +281,25 @@ STATUS
     flex: 1;
 }
 
+.btn-remove-approver {
+    width: 25px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: #ef4444;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    transition: .2s;
+}
+
+.btn-remove-approver:hover {
+    background: #dc2626;
+}
+
 .btn-add-approver {
     width: 100%;
     min-height: 46px;
@@ -545,6 +564,6 @@ STATUS
     }
 
     .approver-row {
-        flex-direction: column;
+        flex-direction: row;
     }
 }

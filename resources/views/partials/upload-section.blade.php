@@ -82,7 +82,15 @@
                                 @endforeach
 
                             </select>
+                            
+                            <button type="button"
+                                    class="btn-remove-approver"
+                                    onclick="removeApprover(this)"
+                                    style="display:none;">
 
+                                <i class="bi bi-x-lg"></i>
+
+                            </button>
                         </div>
 
                     </div>
