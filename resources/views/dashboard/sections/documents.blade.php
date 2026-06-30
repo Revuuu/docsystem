@@ -28,6 +28,7 @@
         <div class="documents-card-header">
             <div class="documents-tools">
                 <div class="search-box">
+                    <i class="bi bi-search" id="search-icon"></i>
                     <input type="text"
                         id="documentSearchInput"
                         value="{{ request('search') }}"
