@@ -61,8 +61,9 @@ class ProfileController extends Controller
         $user->save();
 
         return redirect()
-            ->route('dashboard')
-            ->with('profile_success', 'Profile updated successfully!')
-            ->with('section', 'profile');
+        ->route('dashboard', [
+            'section' => 'profile',
+        ])
+        ->with('profile_success', 'Profile updated successfully!');
     }
 }

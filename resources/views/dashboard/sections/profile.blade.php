@@ -58,7 +58,7 @@
 
                     <form id="resetPasswordForm"
                           method="POST"
-                          action="{{ route('profile.update') }}"
+                          action="{{ route('profile.update', ['section' => 'profile']) }}"
                           class="upload-form">
 
                         @csrf

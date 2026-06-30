@@ -24,7 +24,7 @@
 .dashboard-header,
 .dashboard-topbar {
     min-height: 72px;
-    padding: 0 28px;
+    padding: 0 15px;
     background: #ffffff;
     border-bottom: 1px solid var(--border-soft);
     box-shadow: none;
