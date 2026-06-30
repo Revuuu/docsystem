@@ -166,7 +166,24 @@
 
 .profile-card {
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
+
+.profile-card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.upload-form,
+.signature-profile-layout,
+.empty-signature {
+    flex: 1;
+}
+
 
 .profile-card-header {
     padding: 20px 24px;
@@ -194,10 +211,6 @@
     font-size: 13px;
 }
 
-.profile-card-body {
-    padding: 24px;
-}
-
 .password-field {
     position: relative;
 }
@@ -211,7 +224,7 @@
     display: flex;
     justify-content: flex-end;
     padding-top: 18px;
-    margin-top: 18px;
+    margin-top: auto;
     border-top: 1px solid #eef2f7;
 }
 
@@ -225,7 +238,7 @@
 .signature-profile-layout {
     display: flex;
     flex-direction: column;
-    gap: 290px;
+    gap: 18px;
 }
 
 .signature-label {
