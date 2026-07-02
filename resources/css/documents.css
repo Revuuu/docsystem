@@ -176,6 +176,7 @@ STATUS
 .status-pill.rejected,
 .status-rejected {
     background: #fee2e2;
+    border-radius: 10px;
     color: #991b1b;
 }
 
@@ -534,6 +535,22 @@ STATUS
     .modern-docs-table,
     .docs-table {
         min-width: 1000px;
+    }
+
+    .status-pill.rejected,
+    .status-rejected  {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        max-width: 220px;
+        padding: 8px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: normal;
+        line-height: 1.25;
     }
 }
 @media (max-width: 640px) {

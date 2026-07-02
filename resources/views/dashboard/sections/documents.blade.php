@@ -79,6 +79,7 @@
                             <th>Uploaded By</th>
                             <th>Uploaded At</th>
                             <th>Status</th>
+                            <th>Remarks</th>
                             <th>Elapsed Time</th>
                             <th>Current Signatory</th>
                             <th>Action</th>
@@ -221,6 +222,22 @@
                                     <span class="status-pill {{ $statusClass }}">
                                         {{ $displayStatus }}
                                     </span>
+                                </td>
+
+                                <td>
+                                    @if($rejectedApproval)
+                                        <span class="status-pill rejected">
+                                            {{ $rejectedApproval->remarks ?? '-' }}
+                                        </span>
+                                    @elseif($doc->status === 'approved')
+                                        <span class="status-pill success">
+                                            -
+                                        </span>
+                                    @else
+                                        <span class="status-pill rejected">
+                                            {{ $rejectedApproval?->remarks ?? '-' }}
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td>
