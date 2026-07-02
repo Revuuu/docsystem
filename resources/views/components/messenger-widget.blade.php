@@ -3,20 +3,23 @@
 ])
 
 <div id="messengerWidget"
-     class="messenger-widget"
-     style="display:none;">
+     class="messenger-widget">
 
-        <button type="button"
-                class="messenger-float-btn"
-                onclick="toggleMessengerRooms()">
-            <i class="bi bi-chat-dots-fill"></i>
-            <span id="messengerUnreadBadge" class="messenger-unread-badge">
-                0
-            </span>
-        </button>
+    <button type="button"
+            class="messenger-float-btn"
+            onclick="toggleMessengerRooms()">
+
+        <i class="bi bi-chat-dots-fill"></i>
+
+        <span id="messengerUnreadBadge"
+              class="messenger-unread-badge">
+            0
+        </span>
+
+    </button>
 
     <div id="messengerRoomsPanel"
-        class="messenger-rooms-panel">
+         class="messenger-rooms-panel">
 
         <div class="messenger-rooms-panel-inner">
 
@@ -31,13 +34,15 @@
             </div>
 
             <div class="messenger-room-list">
-                @foreach($documents as $doc)
+                @forelse($documents as $doc)
+
                     <button type="button"
                             class="messenger-room-item"
                             onclick="openDocumentChatFromMessenger(
                                 {{ $doc->id }},
                                 @js($doc->title)
                             )">
+
                         <span class="room-title">
                             {{ $doc->title }}
                         </span>
@@ -45,12 +50,24 @@
                         <small>
                             {{ ucfirst($doc->status) }}
                         </small>
+
                     </button>
-                @endforeach
+
+                @empty
+
+                    <div class="no-data">
+                        No document chats available.
+                    </div>
+
+                @endforelse
             </div>
+
         </div>
+
     </div>
-    <script>
+
+</div>
+
+<script>
     window.messengerDocumentIds = @json($documents->pluck('id')->values());
 </script>
-</div>

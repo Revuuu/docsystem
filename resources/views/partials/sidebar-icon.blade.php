@@ -38,4 +38,7 @@
     @case('file-earmark-check')
         <i class="bi bi-file-earmark-check sidebar-icon"></i>
         @break
+    @case('chat-dots-fill')
+        <i class="bi bi-chat-dots-fill sidebar-icon"></i>
+        @break
 @endswitch

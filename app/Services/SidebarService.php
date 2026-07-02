@@ -52,6 +52,11 @@ class SidebarService
                 'icon' => 'user-circle',
                 'section' => 'profile',
             ],
+            [
+                'label' => 'Messenger',
+                'icon' => 'chat-dots-fill',
+                'section' => 'messenger',
+            ],
         ];
     }
 }

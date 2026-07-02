@@ -1,7 +1,7 @@
 const Messenger = {
     unreadCount: 0,
+
     init() {
-        this.bindSectionWatcher();
         this.bindUnreadListener();
         this.updateUnreadBadge();
 
@@ -18,7 +18,15 @@ const Messenger = {
             const button =
                 document.querySelector('.messenger-float-btn');
 
+            const messengerSection =
+                document.getElementById('section-messenger');
+
+            const messengerActive =
+                messengerSection &&
+                getComputedStyle(messengerSection).display !== 'none';
+
             if (
+                messengerActive ||
                 !panel ||
                 panel.contains(event.target) ||
                 button?.contains(event.target)
@@ -30,56 +38,48 @@ const Messenger = {
         });
     },
 
-    bindSectionWatcher() {
-        const widget =
-            document.getElementById('messengerWidget');
+    onSectionChanged(section) {
 
-        if (!widget) {
-            return;
-        }
+    const widget =
+        document.getElementById('messengerWidget');
 
-        const updateVisibility = () => {
-            const documentsSection =
-                document.getElementById('section-documents');
+    const panel =
+        document.getElementById('messengerRoomsPanel');
 
-            const isVisible =
-                documentsSection &&
-                getComputedStyle(documentsSection).display !== 'none';
+    const floatButton =
+        document.querySelector('.messenger-float-btn');
 
-            widget.style.display =
-                isVisible
-                    ? 'block'
-                    : 'none';
-        };
+    if (!widget || !panel || !floatButton) {
+        return;
+    }
 
-        updateVisibility();
+    if (section === 'messenger') {
 
-        const observer =
-            new MutationObserver(updateVisibility);
+        // Hide floating widget completely
+        widget.style.display = 'none';
 
-        observer.observe(
-            document.body,
-            {
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style', 'class'],
-            }
-        );
-    },
+        // Show the room list inside the Messenger page
+        panel.classList.add('show');
+
+        this.resetUnread();
+
+        return;
+    }
+
+    // Show floating widget on other pages
+    widget.style.display = 'block';
+
+    floatButton.style.display = 'flex';
+
+    panel.classList.remove('show');
+},
 
     bindUnreadListener() {
-
         window.addEventListener(
             'document-chat:new-message',
             (event) => {
-
                 const payload =
                     event.detail;
-
-                console.log(
-                    'Unread message:',
-                    payload
-                );
 
                 if (
                     Number(payload.user_id) ===
@@ -89,9 +89,7 @@ const Messenger = {
                 }
 
                 const modal =
-                    document.getElementById(
-                        'documentChatModal'
-                    );
+                    document.getElementById('documentChatModal');
 
                 const chatOpen =
                     modal &&
@@ -106,34 +104,24 @@ const Messenger = {
                 }
 
                 this.unreadCount++;
-
                 this.updateUnreadBadge();
             }
         );
     },
 
     updateUnreadBadge() {
-
         const badge =
-            document.getElementById(
-                'messengerUnreadBadge'
-            );
+            document.getElementById('messengerUnreadBadge');
 
-        if (!badge) {
-            return;
-        }
+        if (!badge) return;
 
         if (this.unreadCount <= 0) {
-
-            badge.style.display =
-                'none';
-
+            badge.style.display = 'none';
+            badge.textContent = '0';
             return;
         }
 
-        badge.style.display =
-            'flex';
-
+        badge.style.display = 'flex';
         badge.textContent =
             this.unreadCount > 99
                 ? '99+'
@@ -141,14 +129,11 @@ const Messenger = {
     },
 
     resetUnread() {
-
         this.unreadCount = 0;
-
         this.updateUnreadBadge();
     },
 
     toggle() {
-
         this.resetUnread();
 
         document
@@ -158,9 +143,8 @@ const Messenger = {
     },
 
     openRoom(documentId, title) {
-
         this.resetUnread();
-        
+
         document
             .getElementById('messengerRoomsPanel')
             ?.classList

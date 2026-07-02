@@ -87,6 +87,9 @@
 <x-chat-modal />
 
 <x-messenger-widget :documents="$myDocuments" />
+<div id="section-messenger" class="dashboard-section">
+    <x-messenger-panel :documents="$myDocuments" />
+</div>
 
 <x-signature-modals />
 
