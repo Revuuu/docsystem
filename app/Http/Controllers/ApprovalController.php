@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ApprovalPendingNotification;
 use App\Mail\ApprovalProgressNotification;
 use App\Mail\ApprovalCompletedNotification;
+use App\Mail\ApprovalRejectedNotification;
 
 class ApprovalController extends Controller
 {
@@ -217,9 +218,13 @@ class ApprovalController extends Controller
                 ]);
         });
 
+        // Send rejection notification
+        \Mail::to($approval->user)->send(new ApprovalRejectedNotification($approval->document));
+
         return redirect()
             ->route('dashboard', ['section' => 'documents'])
             ->with('approval_success', 'Document rejected successfully.');
+    
     }
 
     protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string {
