@@ -35,24 +35,18 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        $trustedToken = $request->cookie('trusted_device');
+        $trustedCookieName = 'trusted_device_' . $user->id;
+
+        $trustedToken = $request->cookie($trustedCookieName);
 
         if ($trustedToken) {
 
-            $trustedDevice = TrustedDevice::where(
-                'user_id',
-                $user->id
-            )
-            ->where(
-                'token_hash',
-                hash('sha256', $trustedToken)
-            )
-            ->where(
-                'expires_at',
-                '>',
-                now()
-            )
-            ->first();
+            $trustedDevice = TrustedDevice::where('user_id', $user->id)
+                ->where('token_hash', hash('sha256', $trustedToken))
+                ->where('ip_address', $request->ip())
+                ->where('user_agent', $request->userAgent())
+                ->where('expires_at', '>', now())
+                ->first();
 
             if ($trustedDevice) {
 

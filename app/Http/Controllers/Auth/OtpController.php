@@ -147,7 +147,7 @@ class OtpController extends Controller
 
             Cookie::queue(
                 cookie(
-                    'trusted_device',
+                    'trusted_device_' . auth()->id(),
                     $token,
                     60 * 24 * 30,
                     '/',
