@@ -33,33 +33,56 @@
                 </button>
             </div>
 
-            <div class="messenger-room-list">
-                @forelse($documents as $doc)
+            <div class="messenger-layout">
 
-                    <button type="button"
-                            class="messenger-room-item"
-                            onclick="openDocumentChatFromMessenger(
-                                {{ $doc->id }},
-                                @js($doc->title)
-                            )">
+                <div class="messenger-sidebar">
+                    <div class="messenger-title">
+                        <strong>Document Title</strong>
+                    </div>
+                    <div class="messenger-room-list">
+                        @forelse($documents as $doc)
 
-                        <span class="room-title">
-                            {{ $doc->title }}
-                        </span>
+                            <button type="button"
+                                    class="messenger-room-item"
+                                    onclick="openMessengerRoom(
+                                        {{ $doc->id }},
+                                        @js($doc->title),
+                                        'widgetConversationContainer' 
+                                    )">
 
-                        <small>
-                            {{ ucfirst($doc->status) }}
-                        </small>
+                                <div class="room-info">
+                                    <strong>
+                                        {{ $doc->title }}
+                                    </strong>
 
-                    </button>
+                                    <small>
+                                        {{ ucfirst($doc->status) }}
+                                    </small>
+                                </div>
 
-                @empty
+                            </button>
 
-                    <div class="no-data">
-                        No document chats available.
+                        @empty
+
+                            <div class="no-data">
+                                No document chats available.
+                            </div>
+
+                        @endforelse
                     </div>
 
-                @endforelse
+                </div>
+
+                <div class="messenger-content">
+
+                    <div id="widgetConversationContainer">
+                        <div class="empty-chat">
+                            Select a document to begin chatting.
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
         </div>

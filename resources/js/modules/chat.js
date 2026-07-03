@@ -65,14 +65,77 @@ const Chat = {
         });
     },
 
-    async open(documentId, title) {
+    bindEmbeddedForm(containerId) {
+        const form =
+            document.getElementById(`${containerId}Form`);
 
+        const input =
+            document.getElementById(`${containerId}Input`);
+
+        if (!form || !input) return;
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            await this.send(input.value);
+
+            input.value = '';
+        });
+    },
+
+    async open(documentId, title, containerId = null) {
         this.activeDocumentId = documentId;
 
-        document.getElementById('documentChatModal').style.display = 'flex';
-        document.getElementById('chatDocumentTitle').textContent = `Chat - ${title}`;
-        document.getElementById('activeDocumentId').value = documentId;
-        document.getElementById('chatMessages').innerHTML = '';
+        if (containerId) {
+            const container =
+                document.getElementById(containerId);
+
+            if (!container) {
+                console.error(
+                    'Conversation container not found:',
+                    containerId
+                );
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="chat-header">
+                    <div>
+                        <h3>Chat - ${this.escapeHtml(title)}</h3>
+                        <small>Document conversation</small>
+                    </div>
+                </div>
+
+                <div id="${containerId}Messages"
+                    class="chat-messages">
+                </div>
+
+                <form id="${containerId}Form"
+                    class="chat-form">
+                    <input id="${containerId}Input"
+                        type="text"
+                        placeholder="Type a message...">
+
+                    <button type="submit">
+                        Send
+                    </button>
+                </form>
+            `;
+
+            this.messagesContainer =
+                document.getElementById(`${containerId}Messages`);
+
+            this.bindEmbeddedForm(containerId);
+        } else {
+            document.getElementById('documentChatModal').style.display = 'flex';
+            document.getElementById('chatDocumentTitle').textContent = `Chat - ${title}`;
+            document.getElementById('activeDocumentId').value = documentId;
+
+            this.messagesContainer =
+                document.getElementById('chatMessages');
+
+            this.messagesContainer.innerHTML = '';
+        }
 
         this.socket.emit('join-document-chat', documentId);
 
@@ -99,6 +162,10 @@ const Chat = {
         }
 
         const messages = await response.json();
+
+        if (this.messagesContainer) {
+            this.messagesContainer.innerHTML = '';
+        }
 
         messages.forEach((message) => {
             this.appendMessage(message);
@@ -138,9 +205,7 @@ const Chat = {
     appendMessage(payload) {
 
     const messages =
-        document.getElementById(
-            'chatMessages'
-        );
+        this.messagesContainer;
 
     if (!messages) {
         return;

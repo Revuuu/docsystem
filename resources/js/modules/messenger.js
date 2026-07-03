@@ -11,6 +11,9 @@ const Messenger = {
         window.openDocumentChatFromMessenger =
             this.openRoom.bind(this);
 
+        window.openMessengerRoom = 
+            this.openConversation.bind(this);
+
         document.addEventListener('click', (event) => {
             const panel =
                 document.getElementById('messengerRoomsPanel');
@@ -155,8 +158,19 @@ const Messenger = {
             return;
         }
 
-        window.Chat.open(documentId, title);
+        window.Chat.open(documentId, title, 'widgetConversationContainer');
     },
+    
+    openConversation(documentId, title, containerId) {
+
+    this.resetUnread();
+
+    window.Chat.open(
+        documentId,
+        title,
+        containerId,
+    );
+},
 };
 
 export default Messenger;

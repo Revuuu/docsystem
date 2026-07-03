@@ -27,12 +27,15 @@ import Messenger from './modules/messenger';
 
 window.bootstrap = bootstrap;
 window.Chat = Chat;
+window.Messenger = Messenger;
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.init();
 
     Sidebar.init();
 
+    Messenger.init();
+    
     Dashboard.init();
 
     Signature.init();
@@ -58,8 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     PasswordModal.init();
     
     Chat.init();
-
-    Messenger.init();
 
     initRoleAssignmentForm();
 });

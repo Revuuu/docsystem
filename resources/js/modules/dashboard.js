@@ -77,7 +77,10 @@ window.closeEditUserModal =
             ?.classList.add('active');
 
         this.updateBanner(section);
+
+        window.Messenger?.onSectionChanged(section);
     },
+    
     editUser(id, name, email, role)
     {
     document.getElementById(
