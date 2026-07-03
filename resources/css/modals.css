@@ -67,7 +67,10 @@ body.modal-open {
 }
 
 .modal-box {
-    width: 90vh;
+    width: 900px;
+    max-width: calc(100vw - 32px);
+    height: 640px;
+    max-height: 90vh;
     background: #ffffff;
     display: flex;
     flex-direction: column;
@@ -640,10 +643,66 @@ body.modal-open {
 
 @media (max-width: 900px) {
     .modal-box {
-        width: 96vw;
-        height: 90vh;
+        width: 340px;
+        max-width: calc(100vw - 32px);
+        height: 640px;
+        max-height: 90vh;
     }
 }
+
+@media (max-width: 768px) {
+
+    #signModal .modal-box {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        max-height: calc(100vh - 16px);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    #signModal .modal-header,
+    #signModal .page-selector,
+    #signModal .modal-footer,
+    #signModal .hint {
+        flex: 0 0 auto;
+    }
+
+    #signModal #pdfWrapper {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100% !important;
+        height: auto !important;
+        overflow: auto !important;
+        position: relative;
+        display: block;
+        -webkit-overflow-scrolling: touch;
+        background: #f4f4f4;
+    }
+
+    #signModal #pdfCanvas {
+        display: block;
+        width: auto !important;
+        height: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+    }
+
+    #signModal #pdfClickLayer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        cursor: crosshair;
+        pointer-events: auto;
+    }
+
+    #signModal .sig-ghost {
+        z-index: 20;
+        pointer-events: none;
+    }
+}
+
 @media (max-width:640px) {
 
     .modal-footer {

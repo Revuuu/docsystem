@@ -402,8 +402,8 @@ STATUS
 }
 
 .sig-ghost {
-    width: 300px;
-    height: 180px;
+    width: 180px;
+    height: 80px;
     position: absolute;
     z-index: 3;
     pointer-events: none;
@@ -525,34 +525,329 @@ STATUS
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   MOBILE DOCUMENT LIST UI
+   Converts .modern-docs-table into clinical-style cards
+========================================================= */
+
 @media (max-width: 768px) {
-    .documents-card-header,
+
+    #section-documents,
+    #documentsTableContainer,
+    #documentsTableContainer .table-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible !important;
+        background: #f5f8fa;
+    }
+
+    .documents-card {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .documents-card-header {
+        padding: 16px;
+        background: #ffffff;
+        border-bottom: 1px solid #e7ecf1;
+        border-radius: 0;
+    }
+
+    .documents-tools {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .search-box,
+    .filter-select,
+    .documentStatusFilter,
+    .upload-document-btn {
+        width: 100%;
+        flex: none;
+    }
+
     .documents-footer {
+        padding: 14px 16px;
+        background: #f5f8fa;
+        border-top: none;
+        border-radius: 0;
+    }
+
+    .modern-docs-table {
+        display: block;
+        width: 100%;
+        min-width: 0 !important;
+        border: none;
+        background: transparent;
+        overflow: visible !important;
+    }
+
+    .modern-docs-table thead {
+        display: none;
+    }
+
+    .modern-docs-table tbody {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        padding: 14px 16px 28px;
+        background: #f5f8fa;
+        overflow: visible !important;
     }
 
-    .modern-docs-table,
-    .docs-table {
-        min-width: 1000px;
+    .modern-docs-table tr.document-row {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 136px;
+        padding: 14px 15px;
+        background: #ffffff;
+        border: 1px solid #e7ecf1;
+        border-radius: 14px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+        overflow: visible !important;
+        z-index: 1;
     }
 
-    .status-pill.rejected,
-    .status-rejected  {
+    .modern-docs-table td {
+        display: block;
+        width: auto;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        white-space: normal;
+        overflow: visible !important;
+    }
+
+    /* File name / document title */
+    .modern-docs-table td:nth-child(1) {
+        padding-right: 118px !important;
+    }
+
+    .modern-docs-table .file-name {
+        display: block;
+        color: #1a2b3d;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        word-break: break-word;
+    }
+
+    /* Elapsed time as document sub info */
+    .modern-docs-table td:nth-child(6) {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 500;
+        font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .modern-docs-table td:nth-child(6)::before {
+        content: "Elapsed: ";
+        color: #94a3b8;
+    }
+
+    /* Status pill */
+    .modern-docs-table td:nth-child(4) {
+        position: absolute;
+        top: 14px;
+        right: 48px;
+        max-width: 112px;
+    }
+
+    .modern-docs-table td:nth-child(4) .status-pill {
         display: inline-flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        max-width: 220px;
-        padding: 8px;
-        background: #fee2e2;
-        color: #991b1b;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        max-width: 112px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 10.5px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 80px;
+    }
+
+    .modern-docs-table td:nth-child(4) .status-pill::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: currentColor;
+        flex: 0 0 auto;
+    }
+
+    /* Uploaded by block with divider */
+    .modern-docs-table td:nth-child(2) {
+        margin-top: 14px;
+        padding-top: 12px !important;
+        border-top: 1px solid #e7ecf1 !important;
+    }
+
+    .modern-docs-table .table-user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+    }
+
+    .modern-docs-table .table-user::before {
+        content: "PH";
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #e3f2f1;
+        color: #0e7c86;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9.5px;
+        font-weight: 800;
+        flex: 0 0 auto;
+    }
+
+    .modern-docs-table .table-user-info strong {
+        display: block;
+        color: #1a2b3d;
         font-size: 12px;
         font-weight: 700;
-        white-space: normal;
-        line-height: 1.25;
+        line-height: 1.2;
     }
+
+    .modern-docs-table .table-user-info small {
+        display: block;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    /* Uploaded date bottom-right */
+    .modern-docs-table td:nth-child(3) {
+        position: absolute;
+        right: 15px;
+        bottom: 14px;
+        color: #64748b;
+        font-size: 11.5px;
+        line-height: 1.35;
+        text-align: right;
+        max-width: 100px;
+    }
+
+    .modern-docs-table td:nth-child(3) small {
+        color: #64748b;
+        font-size: 11.5px;
+    }
+
+    /* Hide less important mobile columns */
+    .modern-docs-table td:nth-child(5),
+    .modern-docs-table td:nth-child(7) {
+        display: none !important;
+    }
+
+    /* Action menu */
+    .modern-docs-table td:nth-child(8) {
+
+    position:absolute;
+
+    top:14px;
+
+    right:14px;
+
+    width:34px;
+
+    height:34px;
+
+    padding:0 !important;
+
+    overflow:visible !important;
+
+    z-index:500;
 }
+
+    .modern-docs-table .table-action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 999px;
+        background: #f8fafc;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 35px;
+    }
+
+    .modern-docs-table .more-menu{
+
+        position:static;
+
+        overflow:visible !important;
+    }
+
+    .modern-docs-table .more-menu-dropdown{
+
+        position:fixed;
+
+        min-width:190px;
+
+        background:#fff;
+
+        border:1px solid #e5e7eb;
+
+        border-radius:12px;
+
+        box-shadow:0 18px 40px rgba(0,0,0,.18);
+
+        z-index:999999;
+
+        display:none;
+    }
+
+    .modern-docs-table .more-menu-dropdown a,
+    .modern-docs-table .more-menu-dropdown button {
+        width: 100%;
+        padding: 12px 14px;
+        font-size: 13px;
+        text-align: left;
+        white-space: nowrap;
+    }
+ #section-documents .documents-card,
+    #section-documents .table-wrapper {
+        overflow: visible !important;
+    }
+
+    #section-documents .documents-card {
+        position: relative;
+        z-index: 1;
+    }
+
+    #section-documents .document-row:has(.more-menu.open) {
+        z-index: 9999;
+    }
+
+    #section-documents .more-menu-dropdown {
+        z-index: 999999 !important;
+    }
+
+    .sig-ghost {
+        width: 140px;
+        height: 60px;
+    }
+
+}
+
 @media (max-width: 640px) {
     
 
