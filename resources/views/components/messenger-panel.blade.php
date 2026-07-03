@@ -2,53 +2,55 @@
     'documents' => collect(),
 ])
 
-<div class="messenger-layout">
+<div class="documents-card">
 
-    <div class="messenger-sidebar">
-           <div class="messenger-title">
-                <strong>Document Title</strong>
-            </div>
-        <div class="messenger-room-list">
+    <div class="card-header">
+        <h3>Document Chats</h3>
+    </div>
 
-            @foreach($documents as $doc)
+    <div class="messenger-layout">
 
-                   <button type="button"
+        <div class="messenger-sidebar">
+            <div class="messenger-room-list">
+                @forelse($documents as $doc)
+
+                    <button type="button"
                             class="messenger-room-item"
                             onclick="openMessengerRoom(
                                 {{ $doc->id }},
                                 @js($doc->title),
-                                'panelConversationContainer' 
+                                'panelConversationContainer'
                             )">
 
-                    <div class="room-info">
+                        <div class="room-info">
+                            <strong>
+                                {{ $doc->title }}
+                            </strong>
 
-                        <strong>
-                            {{ $doc->title }}
-                        </strong>
+                            <small>
+                                {{ ucfirst($doc->status) }}
+                            </small>
+                        </div>
 
-                        <small>
-                            {{ ucfirst($doc->status) }}
-                        </small>
+                    </button>
 
+                @empty
+
+                    <div class="no-data">
+                        No document chats available.
                     </div>
 
-                </button>
-
-            @endforeach
+                @endforelse
+            </div>
 
         </div>
 
-    </div>
+        <div class="messenger-content">
 
-    <div class="messenger-content">
-
-        <div
-            id="panelConversationContainer">
-
-            <div class="empty-chat">
-
-                Select a document to begin chatting.
-
+            <div id="panelConversationContainer">
+                <div class="empty-chat">
+                    Select a document to begin chatting.
+                </div>
             </div>
 
         </div>

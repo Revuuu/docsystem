@@ -36,9 +36,7 @@
             <div class="messenger-layout">
 
                 <div class="messenger-sidebar">
-                    <div class="messenger-title">
-                        <strong>Document Title</strong>
-                    </div>
+                    
                     <div class="messenger-room-list">
                         @forelse($documents as $doc)
 
@@ -47,7 +45,7 @@
                                     onclick="openMessengerRoom(
                                         {{ $doc->id }},
                                         @js($doc->title),
-                                        'widgetConversationContainer' 
+                                        'widgetConversationContainer'
                                     )">
 
                                 <div class="room-info">

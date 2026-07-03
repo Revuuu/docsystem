@@ -9,9 +9,9 @@ const Messenger = {
             this.toggle.bind(this);
 
         window.openDocumentChatFromMessenger =
-            this.openRoom.bind(this);
+            this.openModalRoom.bind(this);
 
-        window.openMessengerRoom = 
+        window.openMessengerRoom =
             this.openConversation.bind(this);
 
         document.addEventListener('click', (event) => {
@@ -42,40 +42,31 @@ const Messenger = {
     },
 
     onSectionChanged(section) {
+        const widget =
+            document.getElementById('messengerWidget');
 
-    const widget =
-        document.getElementById('messengerWidget');
+        const panel =
+            document.getElementById('messengerRoomsPanel');
 
-    const panel =
-        document.getElementById('messengerRoomsPanel');
+        if (!widget) return;
 
-    const floatButton =
-        document.querySelector('.messenger-float-btn');
+        if (section === 'messenger') {
+            widget.style.display = 'none';
 
-    if (!widget || !panel || !floatButton) {
-        return;
-    }
+            if (panel) {
+                panel.classList.remove('show');
+            }
 
-    if (section === 'messenger') {
+            this.resetUnread();
+            return;
+        }
 
-        // Hide floating widget completely
-        widget.style.display = 'none';
+        widget.style.display = 'block';
 
-        // Show the room list inside the Messenger page
-        panel.classList.add('show');
-
-        this.resetUnread();
-
-        return;
-    }
-
-    // Show floating widget on other pages
-    widget.style.display = 'block';
-
-    floatButton.style.display = 'flex';
-
-    panel.classList.remove('show');
-},
+        if (panel) {
+            panel.classList.remove('show');
+        }
+    },
 
     bindUnreadListener() {
         window.addEventListener(
@@ -128,7 +119,7 @@ const Messenger = {
         badge.textContent =
             this.unreadCount > 99
                 ? '99+'
-                : this.unreadCount;
+                : String(this.unreadCount);
     },
 
     resetUnread() {
@@ -145,7 +136,7 @@ const Messenger = {
             .toggle('show');
     },
 
-    openRoom(documentId, title) {
+    openModalRoom(documentId, title) {
         this.resetUnread();
 
         document
@@ -153,24 +144,18 @@ const Messenger = {
             ?.classList
             .remove('show');
 
-        if (!window.Chat) {
-            console.error('Chat module is not available.');
-            return;
-        }
-
-        window.Chat.open(documentId, title, 'widgetConversationContainer');
+        window.Chat.open(documentId, title);
     },
-    
+
     openConversation(documentId, title, containerId) {
+        this.resetUnread();
 
-    this.resetUnread();
-
-    window.Chat.open(
-        documentId,
-        title,
-        containerId,
-    );
-},
+        window.Chat.open(
+            documentId,
+            title,
+            containerId
+        );
+    },
 };
 
 export default Messenger;

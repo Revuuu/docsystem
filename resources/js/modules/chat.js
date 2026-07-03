@@ -1,8 +1,10 @@
 import { io } from 'socket.io-client';
+import ChatService from '../services/chat-service';
 
 const Chat = {
     socket: null,
     activeDocumentId: null,
+    messagesContainer: null,
 
     init() {
         console.log('CHAT INIT');
@@ -30,7 +32,6 @@ const Chat = {
         });
 
         this.socket.on('receive-document-message', (payload) => {
-
             window.dispatchEvent(
                 new CustomEvent('document-chat:new-message', {
                     detail: payload,
@@ -47,12 +48,15 @@ const Chat = {
             this.appendMessage(payload);
         });
 
-        this.bindEvents();
+        this.bindModalForm();
     },
 
-    bindEvents() {
-        const form = document.getElementById('chatForm');
-        const input = document.getElementById('chatInput');
+    bindModalForm() {
+        const form =
+            document.getElementById('chatForm');
+
+        const input =
+            document.getElementById('chatInput');
 
         if (!form || !input) return;
 
@@ -107,18 +111,20 @@ const Chat = {
                 </div>
 
                 <div id="${containerId}Messages"
-                    class="chat-messages">
+                     class="chat-messages">
                 </div>
 
                 <form id="${containerId}Form"
-                    class="chat-form">
+                      class="chat-form">
+
                     <input id="${containerId}Input"
-                        type="text"
-                        placeholder="Type a message...">
+                           type="text"
+                           placeholder="Type a message...">
 
                     <button type="submit">
                         Send
                     </button>
+
                 </form>
             `;
 
@@ -143,33 +149,27 @@ const Chat = {
     },
 
     close() {
-
         document.getElementById('documentChatModal').style.display = 'none';
 
         this.activeDocumentId = null;
     },
 
     async loadMessages(documentId) {
-        const response = await fetch(`/documents/${documentId}/messages`, {
-            headers: {
-                Accept: 'application/json',
-            },
-        });
+        try {
+            const messages =
+                await ChatService.getMessages(documentId);
 
-        if (!response.ok) {
-            console.error('Failed to load chat messages.');
-            return;
+            if (this.messagesContainer) {
+                this.messagesContainer.innerHTML = '';
+            }
+
+            messages.forEach((message) => {
+                this.appendMessage(message);
+            });
+
+        } catch (error) {
+            console.error('Failed to load chat messages.', error);
         }
-
-        const messages = await response.json();
-
-        if (this.messagesContainer) {
-            this.messagesContainer.innerHTML = '';
-        }
-
-        messages.forEach((message) => {
-            this.appendMessage(message);
-        });
     },
 
     async send(message) {
@@ -177,94 +177,59 @@ const Chat = {
 
         if (!message || !this.activeDocumentId) return;
 
-        const response = await fetch(
-            `/documents/${this.activeDocumentId}/messages`,
-            {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken(),
-                },
-                body: JSON.stringify({
-                    message,
-                }),
-            }
-        );
+        try {
+            const savedMessage =
+                await ChatService.sendMessage(
+                    this.activeDocumentId,
+                    message
+                );
 
-        if (!response.ok) {
-            console.error('Failed to save chat message.');
-            return;
+            this.socket.emit(
+                'send-document-message',
+                savedMessage
+            );
+
+        } catch (error) {
+            console.error('Failed to save chat message.', error);
         }
-
-        const savedMessage = await response.json();
-
-        this.socket.emit('send-document-message', savedMessage);
     },
 
     appendMessage(payload) {
+        const messages =
+            this.messagesContainer;
 
-    const messages =
-        this.messagesContainer;
+        if (!messages) return;
 
-    if (!messages) {
-        return;
-    }
+        const isMine =
+            Number(payload.user_id) ===
+            Number(window.authUserId);
 
-    const isMine =
-        Number(payload.user_id) ===
-        Number(window.authUserId);
-
-    messages.insertAdjacentHTML(
-        'beforeend',
-        `
-        <div class="chat-row ${
-            isMine
-                ? 'chat-row-right'
-                : 'chat-row-left'
-        }">
-
-            <div class="
-                chat-bubble
-                ${
+        messages.insertAdjacentHTML(
+            'beforeend',
+            `
+            <div class="chat-row ${
+                isMine
+                    ? 'chat-row-right'
+                    : 'chat-row-left'
+            }">
+                <div class="chat-bubble ${
                     isMine
                         ? 'chat-bubble-right'
                         : 'chat-bubble-left'
-                }
-            ">
+                }">
+                    <div class="chat-meta">
+                        <strong>${this.escapeHtml(payload.user_name)}</strong>
+                        <small>${payload.sent_at ?? ''}</small>
+                    </div>
 
-                <div class="chat-meta">
-
-                    <strong>
-                        ${payload.user_name}
-                    </strong>
-
-                    <small>
-                        ${payload.sent_at ?? ''}
-                    </small>
-
+                    <p>${this.escapeHtml(payload.message)}</p>
                 </div>
-
-                <p>
-                    ${this.escapeHtml(
-                        payload.message
-                    )}
-                </p>
-
             </div>
+            `
+        );
 
-        </div>
-        `
-    );
-
-    messages.scrollTop =
-        messages.scrollHeight;
-},
-
-    getCsrfToken() {
-        return document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content');
+        messages.scrollTop =
+            messages.scrollHeight;
     },
 
     escapeHtml(value) {

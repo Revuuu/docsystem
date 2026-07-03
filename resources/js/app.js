@@ -1,3 +1,5 @@
+import './bootstrap';
+
 import Sidebar from './modules/sidebar';
 import Dashboard from './modules/dashboard';
 
