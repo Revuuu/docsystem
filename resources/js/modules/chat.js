@@ -223,6 +223,7 @@ const Chat = {
                     </div>
 
                     <p>${this.escapeHtml(payload.message)}</p>
+                  
                 </div>
             </div>
             `

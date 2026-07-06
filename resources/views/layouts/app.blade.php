@@ -65,11 +65,6 @@
 
             <section class="dashboard-page">
 
-                <div class="dashboard-page-heading">
-                    <h1 id="bannerTitle"></h1>
-                    <p>Welcome to your document management dashboard</p>
-                </div>
-
                 <div class="content">
                     @yield('content')
                 </div>

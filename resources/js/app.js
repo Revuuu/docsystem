@@ -10,6 +10,7 @@ import Approver from './modules/approver';
 
 import DocumentSearch from './modules/document-search';
 import UserSearch from './modules/user-search';
+import ChatSearch from './modules/chat-search';
 
 import PdfViewer from './modules/pdf-viewer';
 
@@ -49,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     DocumentSearch.init();
 
     UserSearch.init();
+
+    ChatSearch.init();
     
     PdfViewer.init();
 

@@ -4,13 +4,17 @@
 
 <div class="documents-card">
 
-    <div class="card-header">
-        <h3>Document Chats</h3>
-    </div>
-
     <div class="messenger-layout">
 
         <div class="messenger-sidebar">
+            <div class="messenger-search-box">
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="chatSearchInput"
+                    placeholder="Search messages...">
+            </div>
             <div class="messenger-room-list">
                 @forelse($documents as $doc)
 
@@ -29,6 +33,18 @@
 
                             <small>
                                 {{ ucfirst($doc->status) }}
+                            </small>
+                            
+                            @forelse($doc->approvals as $approval)
+                                <small>
+                                    {{ $approval->user?->name ?? 'Unknown user' }}
+                                </small>
+                            @empty
+                                <small>No user assigned</small>
+                            @endforelse
+
+                            <small>
+                                {{ ucfirst($doc->created_at->format('M j, Y')) }}
                             </small>
                         </div>
 

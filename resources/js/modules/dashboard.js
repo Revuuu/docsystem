@@ -35,7 +35,7 @@ window.closeEditUserModal =
             users: 'Role Assignment',
             audit: 'Audit Trail',
             signature: 'My Signature',
-            messenger: 'Chat Rooms',
+            messenger: 'Messenger',
             'admin-dashboard': 'Admin Dashboard',
             'user-management': 'User Management',
         };
