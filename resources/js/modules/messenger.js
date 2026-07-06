@@ -14,6 +14,9 @@ const Messenger = {
         window.openMessengerRoom =
             this.openConversation.bind(this);
 
+        window.backToMessengerRooms =
+            this.backToRooms.bind(this);
+
         document.addEventListener('click', (event) => {
             const panel =
                 document.getElementById('messengerRoomsPanel');
@@ -150,11 +153,28 @@ const Messenger = {
     openConversation(documentId, title, containerId) {
         this.resetUnread();
 
+        const container =
+            document.getElementById(containerId);
+
+        const layout =
+            container?.closest('.messenger-layout');
+
+        if (layout) {
+            layout.classList.add('chat-open');
+        }
+
         window.Chat.open(
             documentId,
             title,
             containerId
         );
+    },
+    backToRooms() {
+        document
+            .querySelectorAll('.messenger-layout.chat-open')
+            .forEach(layout => {
+                layout.classList.remove('chat-open');
+            });
     },
 };
 

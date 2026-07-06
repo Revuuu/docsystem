@@ -103,26 +103,34 @@ const Chat = {
             }
 
             container.innerHTML = `
-                <div class="chat-header">
+                <div class="chat-header mobile-chat-header">
+
+                    <button type="button"
+                            class="mobile-chat-back"
+                            onclick="backToMessengerRooms()">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
                     <div>
-                        <h3>Chat - ${this.escapeHtml(title)}</h3>
+                        <h3>${this.escapeHtml(title)}</h3>
                         <small>Document conversation</small>
                     </div>
+
                 </div>
 
                 <div id="${containerId}Messages"
-                     class="chat-messages">
+                    class="chat-messages">
                 </div>
 
                 <form id="${containerId}Form"
-                      class="chat-form">
+                    class="chat-form">
 
                     <input id="${containerId}Input"
-                           type="text"
-                           placeholder="Type a message...">
+                        type="text"
+                        placeholder="Type a message...">
 
                     <button type="submit">
-                        Send
+                        <i class="bi bi-send-fill"></i>
                     </button>
 
                 </form>
