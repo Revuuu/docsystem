@@ -16,6 +16,9 @@ const Messenger = {
 
         window.backToMessengerRooms =
             this.backToRooms.bind(this);
+        
+        window.openMessenger = 
+            this.openMessenger.bind(this);
 
         document.addEventListener('click', (event) => {
             const panel =
@@ -176,6 +179,24 @@ const Messenger = {
                 layout.classList.remove('chat-open');
             });
     },
+    openMessenger() {
+    this.resetUnread();
+
+    const panel =
+        document.getElementById('messengerRoomsPanel');
+
+    // Mobile: go to Messenger page/section
+    if (window.innerWidth <= 768) {
+        panel?.classList.remove('show');
+
+        window.showSection?.('messenger');
+
+        return;
+    }
+
+    // Desktop: open floating modal/panel
+    this.toggle();
+},
 };
 
 export default Messenger;

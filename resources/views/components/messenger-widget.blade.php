@@ -7,7 +7,7 @@
 
     <button type="button"
             class="messenger-float-btn"
-            onclick="toggleMessengerRooms()">
+            onclick="openMessenger()">
 
         <i class="bi bi-chat-dots-fill"></i>
 
