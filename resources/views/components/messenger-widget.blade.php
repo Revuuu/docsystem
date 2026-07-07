@@ -49,13 +49,27 @@
                                     )">
 
                                 <div class="room-info">
-                                    <strong>
-                                        {{ $doc->title }}
-                                    </strong>
+                                    <div class="room-title-row">
+                                        <strong class="room-title">
+                                            {{ $doc->title }}
+                                        </strong>
 
-                                    <small>
-                                        {{ ucfirst($doc->status) }}
-                                    </small>
+                                        <span class="room-status status-{{ strtolower($doc->status) }}">
+                                            {{ ucfirst($doc->status) }}
+                                        </span>
+
+                                        @forelse($doc->approvals as $approval)
+                                            <small>
+                                                {{ $approval->user?->name ?? 'Unknown user' }}
+                                            </small>
+                                        @empty
+                                            <small>No user assigned</small>
+                                        @endforelse
+
+                                        <small>
+                                            {{ $doc->created_at?->format('M j, Y') }}
+                                        </small>
+                                    </div>
                                 </div>
 
                             </button>
