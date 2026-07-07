@@ -120,12 +120,8 @@
                                     ->sortByDesc('signed_at')
                                     ->first();
 
-                                /*
-                                    Display rules:
-                                    - Status column only shows: Pending, Approved, Rejected, Upcoming
-                                    - Elapsed Time column only shows time
-                                    - Current Signatory column only shows the active signer
-                                */
+                                $currentSignatoryRole = '';
+
                                 if ($myApproval?->status === 'approved') {
                                     $displayStatus = 'Approved';
                                     $statusClass = 'success';
@@ -147,6 +143,7 @@
                                         : $doc->created_at->diffForHumans(now(), true);
 
                                     $currentSignatory = auth()->user()->name;
+                                    $currentSignatoryRole = ucfirst($currentPendingApproval?->user?->role ?? 'Unknown role');
 
                                 } elseif ($myApproval?->status === 'waiting') {
                                     $displayStatus = 'Upcoming';
@@ -188,6 +185,7 @@
 
                                         $currentSignatory = $currentPendingApproval?->user?->name
                                             ?? 'Unknown approver';
+                                        $currentSignatoryRole = ucfirst($currentPendingApproval?->user?->role ?? 'Unknown role');
                                     }
                                 }
                             @endphp
@@ -246,6 +244,9 @@
 
                                 <td>
                                     {{ $currentSignatory }}
+                                     
+                                    <br>
+                                    <small>{{ $currentSignatoryRole }}</small>
                                 </td>
 
                                 <td>
