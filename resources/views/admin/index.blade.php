@@ -220,8 +220,7 @@
                             <tr>
                                 <th>Document</th>
                                 <th>Uploaded By</th>
-                                <th>Current Stage</th>
-                                <th>Current Approver</th>
+                                <th>Current Signatory</th>
                                 <th>Progress</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -285,12 +284,69 @@
                                         </div>
                                     </td>
 
-                                    <td>
-                                        {{ $currentStage }}
-                                    </td>
 
                                     <td>
-                                        {{ $currentApprover }}
+                                        @php
+
+                                            $currentApproval =
+                                                $doc->approvals
+                                                    ->where('status', 'pending')
+                                                    ->first();
+                                            $currentSignatoryRole = ucfirst($currentApproval?->user?->role ?? 'Unknown role');
+                                        @endphp
+
+                                        @if($doc->status === 'approved')
+
+                                            <span class="step-complete">
+
+                                                Complete
+
+                                            </span>
+
+                                        @elseif(
+                                            $doc->status === 'pending'
+                                            || $doc->status === 'in_progress'
+                                        )
+
+                                            @if($currentApproval)
+
+                                                <span class="step-pending">
+
+                                                
+                                                    {{ $currentApproval->user->name }}
+                                                    <br>
+                                                    <small>{{ $currentSignatoryRole }}</small>
+
+                                                </span>
+
+                                            @else
+
+                                                <span class="step-pending">
+
+                                                    In Progress
+
+                                                </span>
+
+                                            @endif
+
+                                        @elseif($doc->status === 'rejected')
+
+                                            <span class="step-rejected">
+
+                                                Rejected Document
+
+                                            </span>
+
+                                        @else
+
+                                            <span class="step-draft">
+
+                                                Draft Stage
+
+                                            </span>
+
+                                        @endif
+
                                     </td>
 
                                     <td>

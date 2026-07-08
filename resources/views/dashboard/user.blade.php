@@ -94,7 +94,7 @@
 
                         <th>ID</th>
                         <th>Title</th>
-                        <th>Current Step</th>
+                        <th>Current Signatory</th>
                         <th>Status</th>
                         <th>Progress</th>
 
@@ -148,7 +148,7 @@
                                             $doc->approvals
                                                 ->where('status', 'pending')
                                                 ->first();
-
+                                        $currentSignatoryRole = ucfirst($currentApproval?->user?->role ?? 'Unknown role');
                                     @endphp
 
                                     @if($doc->status === 'approved')
@@ -168,8 +168,10 @@
 
                                             <span class="step-pending">
 
-                                                Awaiting
+                                            
                                                 {{ $currentApproval->user->name }}
+                                                <br>
+                                                <small>{{ $currentSignatoryRole }}</small>
 
                                             </span>
 
@@ -187,7 +189,7 @@
 
                                         <span class="step-rejected">
 
-                                            Rejected Review
+                                            Rejected Document
 
                                         </span>
 
