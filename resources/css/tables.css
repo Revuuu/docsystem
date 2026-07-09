@@ -59,7 +59,6 @@
     color: #52525b;
     text-align: left;
     font-family: var(--font-body);
-    font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -198,9 +197,9 @@ td {
 }
 
 th {
-    background: var(--bg-muted);
-    color: var(--text-main);
+    color: #52525b;
     font-weight: 700;
+    background:#fafafa;
 }
 
 tbody tr:hover {

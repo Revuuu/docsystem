@@ -845,7 +845,340 @@ STATUS
         width: 140px;
         height: 60px;
     }
+     #section-workflow,
+    #section-workflow #documentsTableContainer,
+    #section-workflow .table-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible !important;
+        background: #f5f8fa;
+    }
+  #section-workflow .table-wrapper {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
 
+        max-height: calc(100dvh - 260px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+
+        -webkit-overflow-scrolling: touch !important;
+        background: #f5f8fa !important;
+        padding-bottom: 24px !important;
+    }
+    #section-workflow .admin-docs-table {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        overflow: visible !important;
+    }
+
+    #section-workflow .admin-docs-table thead {
+        display: none !important;
+    }
+
+    #section-workflow .admin-docs-table .table-user-info {
+        min-width: 0 !important;
+        max-width: 150px !important;
+    }
+
+    #section-workflow .admin-docs-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100% !important;
+        padding: 14px 16px 28px !important;
+        background: #f5f8fa !important;
+        overflow: visible !important;
+    }
+
+    #section-workflow .admin-docs-table tr.document-row {
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+        min-height: 122px !important;
+        padding: 14px 46px 14px 15px !important;
+        background: #ffffff !important;
+        border: 1px solid #e7ecf1 !important;
+        border-radius: 14px !important;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04) !important;
+        overflow: visible !important;
+        z-index: 1 !important;
+    }
+
+    #section-workflow .admin-docs-table tr.document-row:has(.more-menu.open) {
+    z-index: 999999 !important;
+}
+    #section-workflow .admin-docs-table td {
+        display: block !important;
+        width: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+
+    /* File name */
+    #section-workflow .admin-docs-table td:nth-child(1) {
+        padding-right: 118px !important;
+    }
+
+    #section-workflow .admin-docs-table .file-name {
+        display: block !important;
+        color: #1a2b3d !important;
+        font-size: 14px !important;
+        font-weight: 800 !important;
+        line-height: 1.35 !important;
+        word-break: break-word !important;
+    }
+
+       /* Uploaded by block */
+    #section-workflow .admin-docs-table td:nth-child(2) {
+        margin-top: 14px !important;
+        padding-top: 10px !important;
+        padding-right: 96px !important;
+        border-top: 1px solid #e7ecf1 !important;
+    }
+
+
+       #section-workflow .admin-docs-table .table-user {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        max-width: 100% !important;
+    }
+
+    #section-workflow .admin-docs-table .table-user::before {
+        content: "PH";
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #e3f2f1;
+        color: #0e7c86;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9.5px;
+        font-weight: 800;
+        flex: 0 0 auto;
+    }
+
+
+    #section-workflow .admin-docs-table .table-user-info strong {
+        display: block !important;
+        max-width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+    }
+
+    #section-workflow .admin-docs-table .table-user-info small {
+        display: block !important;
+        font-size: 9.5px !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Uploaded date */
+    #section-workflow .admin-docs-table td:nth-child(3) {
+        position: absolute !important;
+        right: 15px !important;
+        bottom: 14px !important;
+        color: #64748b !important;
+        font-size: 10.5px !important;
+        line-height: 1.25 !important;
+        text-align: right !important;
+        max-width: 90px !important;
+    }
+
+    #section-workflow .admin-docs-table td:nth-child(3) small {
+        color: #64748b !important;
+        font-size: 10.5px !important;
+    }
+
+    /* Status */
+    #section-workflow .admin-docs-table td:nth-child(4) {
+        position: absolute !important;
+        top: 14px !important;
+        right: 14px !important;
+        z-index: 20 !important;
+        max-width: 112px !important;
+    }
+
+    #section-workflow .admin-docs-table td:nth-child(4) .status-pill {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        max-width: 112px !important;
+        padding: 5px 9px !important;
+        border-radius: 999px !important;
+        font-size: 10.5px !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-left: 0 !important;
+    }
+
+    /* Hide progress bar on mobile */
+    #section-workflow .admin-docs-table td:nth-child(5) {
+        display: none !important;
+    }
+
+    /* Current signatory */
+   #section-workflow .admin-docs-table td:nth-child(6) {
+    position: static !important;
+    display: block !important;
+
+    margin-top: 5px !important;
+    margin-left: 30px !important;
+    margin-right: 100px !important;
+    max-width: calc(100% - 130px) !important;
+
+    color: #334155 !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+
+
+    #section-workflow .admin-docs-table td:nth-child(6)::before {
+    content: "Current Signatory:";
+    display: block !important;
+    margin-bottom: 2px !important;
+
+    color: #94a3b8 !important;
+    font-size: 9.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+}
+
+/* Keep the role on its own line */
+#section-workflow .admin-docs-table td:nth-child(6) br {
+    display: block !important;
+}
+
+
+      #section-workflow .admin-docs-table td:nth-child(6) small {
+    display: block !important;
+    margin-left: 0 !important;
+    margin-top: 1px !important;
+
+    color: #64748b !important;
+    font-size: 9.5px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+}
+
+
+    /* Action column */
+    #section-workflow .admin-docs-table td:nth-child(7) {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: absolute !important;
+        top: 45px !important;
+        right: 12px !important;
+        width: 34px !important;
+        height: 34px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        overflow: visible !important;
+        z-index: 99999 !important;
+    }
+
+    #section-workflow .admin-docs-table td:nth-child(7) .more-menu {
+        display: block !important;
+        position: relative !important;
+        width: 34px !important;
+        height: 34px !important;
+        overflow: visible !important;
+        z-index: 99999 !important;
+    }
+
+    /* Keep btn-clear */
+    #section-workflow .admin-docs-table td:nth-child(7) .table-action-btn.btn-clear {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    border-radius: 999px !important;
+
+    font-size: 16px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+
+    /* Do not depend on Bootstrap icon rendering */
+    #section-workflow .admin-docs-table td:nth-child(7) .table-action-btn.btn-clear i {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #64748b !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
+}
+
+#section-workflow .admin-docs-table td:nth-child(7) .table-action-btn.btn-clear::after {
+    content: none !important;
+    display: none !important;
+}
+
+    /* Dropdown */
+    #section-workflow .admin-docs-table td:nth-child(7) .more-menu-dropdown {
+        position: fixed !important;
+        right: auto !important;
+        min-width: 190px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18) !important;
+        display: none;
+        overflow: hidden !important;
+        z-index: 999999 !important;
+    }
+
+    #section-workflow .admin-docs-table td:nth-child(7) .more-menu.open .more-menu-dropdown {
+        display: block !important;
+    }
+
+    #section-workflow .admin-docs-table td:nth-child(7) .more-menu-dropdown button,
+    #section-workflow .admin-docs-table td:nth-child(7) .more-menu-dropdown a {
+        display: block !important;
+        width: 100% !important;
+        padding: 12px 14px !important;
+        border: none !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-size: 13px !important;
+        text-align: left !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        cursor: pointer !important;
+    }
 }
 
 @media (max-width: 640px) {
