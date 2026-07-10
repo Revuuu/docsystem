@@ -732,7 +732,7 @@
 
         <div class="table-wrapper">
 
-            <table class="modern-docs-table">
+            <table class="admin-user-table">
 
                 <thead>
 

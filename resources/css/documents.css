@@ -1179,6 +1179,420 @@ STATUS
         white-space: nowrap !important;
         cursor: pointer !important;
     }
+
+     #section-user-management {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    #section-user-management #userTableContainer .documents-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 0 !important;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    /* Header and filters */
+
+    #section-user-management .card-header {
+        width: 100%;
+        padding: 14px 16px;
+        background: #ffffff;
+        border-bottom: 1px solid #e7ecf1;
+    }
+
+    #section-user-management .user-filters-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    #section-user-management .search-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    #section-user-management .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+    }
+
+    #section-user-management .search-box i {
+        position: absolute;
+        left: 13px;
+        z-index: 2;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    #section-user-management .search-box input {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px 0 38px;
+        border: 1px solid #dfe5eb;
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    #section-user-management .clear-filters-btn {
+        width: auto;
+        min-width: 78px;
+        height: 40px;
+        margin: 0;
+        padding: 0 12px;
+        border: none;
+        border-radius: 10px;
+        background: #d4d4d4;
+        color: #334155;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    #section-user-management .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    #section-user-management .filter-grid select,
+    #section-user-management .filter-grid input {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+        padding: 0 10px;
+        border: 1px solid #dfe5eb;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 11px;
+    }
+
+    #section-user-management .filter-grid input[type="date"] {
+        grid-column: 1 / -1;
+    }
+
+    #section-user-management .results-info {
+        margin-top: 12px;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    /* Table wrapper */
+
+    #section-user-management .table-wrapper {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 14px 16px 28px;
+        background: #f5f8fa;
+        overflow: visible !important;
+    }
+
+    /* Convert admin user table into cards */
+
+    #section-user-management .admin-user-table {
+        display: block;
+        width: 100%;
+        min-width: 0 !important;
+        border: none;
+        background: transparent;
+        overflow: visible !important;
+    }
+
+    #section-user-management .admin-user-table thead {
+        display: none;
+    }
+
+    #section-user-management .admin-user-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        overflow: visible;
+    }
+
+    #section-user-management .admin-user-table tbody tr {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 150px;
+        padding: 15px;
+        background: #ffffff;
+        border: 1px solid #e7ecf1;
+        border-radius: 14px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+        overflow: visible;
+        z-index: 1;
+    }
+
+    #section-user-management .admin-user-table tbody tr:has(.more-menu.open) {
+        z-index: 99999;
+    }
+
+    #section-user-management .admin-user-table td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+
+    #section-user-management .admin-user-table td::before {
+        content: none;
+        display: none;
+    }
+
+    /* Name */
+
+    #section-user-management .admin-user-table td:nth-child(1) {
+        padding-right: 120px !important;
+        color: #172033;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    /* Email */
+
+    #section-user-management .admin-user-table td:nth-child(2) {
+        margin-top: 5px;
+        padding-right: 42px !important;
+        color: #475569;
+        font-size: 11px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    /* Role */
+
+    #section-user-management .admin-user-table td:nth-child(3) {
+        margin-top: 14px;
+        padding-top: 12px !important;
+        padding-right: 105px !important;
+        border-top: 1px solid #e7ecf1 !important;
+    }
+
+    #section-user-management .admin-user-table .role-badge {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Email status */
+
+    #section-user-management .admin-user-table td:nth-child(4) {
+        position: absolute;
+        top: 13px;
+        right: 10px;
+        width: auto;
+        max-width: 100px;
+        margin: 0;
+        z-index: 10;
+    }
+
+    #section-user-management
+        .admin-user-table
+        td:nth-child(4)
+        .status-pill {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        min-width: 0;
+        max-width: 100px;
+        margin: 0;
+        padding: 5px 8px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    #section-user-management
+        .admin-user-table
+        td:nth-child(4)
+        .status-pill::before {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+    }
+
+    /* Created date */
+
+    #section-user-management .admin-user-table td:nth-child(5) {
+        position: absolute;
+        right: 15px;
+        bottom: 16px;
+        display: block !important;
+        max-width: 95px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.3;
+        text-align: right;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(5)::before {
+        content: "Created";
+        display: block;
+        margin-bottom: 2px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    /* Actions */
+
+    #section-user-management .admin-user-table td:nth-child(6) .table-action-btn-clear {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
+        cursor: pointer !important;
+        padding: 0px !important;
+        margin: 0px !important;
+        border-width: medium !important;
+        border-style: none !important;
+        border-color: currentcolor !important;
+        border-image: none !important;
+        border-radius: 999px !important;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6)::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6) .more-menu {
+       display: block !important;
+        position: relative !important;
+        width: 34px !important;
+        height: 34px !important;
+        overflow: visible !important;
+        z-index: 99999 !important;
+        margin-bottom: 70px;
+    }
+
+      #section-user-management .admin-user-table td:nth-child(6) {
+        position: absolute !important;
+        top: 65px !important;
+        right: clamp(8px, 2.5vw, 14px) !important;
+
+        width: 34px !important;
+        height: 34px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+
+        background: transparent !important;
+        border: none !important;
+        overflow: visible !important;
+        z-index: 100 !important;
+    }
+
+    #section-user-management .admin-user-table .table-action-btn .btn-clear i {
+        display: inline-flex;
+        color: #64748b;
+        font-size: 16px;
+        line-height: 1;
+        pointer-events: none;
+     
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6) .more-dropdown {
+        position: fixed !important;
+        right: auto !important;
+        min-width: 190px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18) !important;
+        display: none;
+        overflow: hidden !important;
+        z-index: 999999 !important;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-menu.open
+        .more-dropdown {
+        display: block;
+    }
+
+    #section-user-management .admin-user-table .more-dropdown form {
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 11px 14px;
+        border: none;
+        background: #ffffff;
+        color: #1e293b;
+        font-size: 12px;
+        line-height: 1.3;
+        text-align: left;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item:hover {
+        background: #f8fafc;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item.danger {
+        color: #dc2626;
+    }
 }
 
 @media (max-width: 640px) {
@@ -1197,7 +1611,16 @@ STATUS
         padding: 7px 10px;
         font-size: 11px;
     }
+
+ 
 }
+@media (max-width: 480px) {
+    #section-user-management .admin-user-table td:nth-child(6) {
+        top: 104px !important;
+        right: 12px !important;
+    }
+}
+
 @media (max-width: 480px) {
     .upload-modal {
         padding: 14px;
@@ -1211,4 +1634,438 @@ STATUS
     .approver-row {
         flex-direction: row;
     }
+     #section-user-management {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    #section-user-management #userTableContainer .documents-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 0 !important;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    /* Header and filters */
+
+    #section-user-management .card-header {
+        width: 100%;
+        padding: 14px 16px;
+        background: #ffffff;
+        border-bottom: 1px solid #e7ecf1;
+    }
+
+    #section-user-management .user-filters-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    #section-user-management .search-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    #section-user-management .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+    }
+
+    #section-user-management .search-box i {
+        position: absolute;
+        left: 13px;
+        z-index: 2;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    #section-user-management .search-box input {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px 0 38px;
+        border: 1px solid #dfe5eb;
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    #section-user-management .clear-filters-btn {
+        width: auto;
+        min-width: 78px;
+        height: 40px;
+        margin: 0;
+        padding: 0 12px;
+        border: none;
+        border-radius: 10px;
+        background: #d4d4d4;
+        color: #334155;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    #section-user-management .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    #section-user-management .filter-grid select,
+    #section-user-management .filter-grid input {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+        padding: 0 10px;
+        border: 1px solid #dfe5eb;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 11px;
+    }
+
+    #section-user-management .filter-grid input[type="date"] {
+        grid-column: 1 / -1;
+    }
+
+    #section-user-management .results-info {
+        margin-top: 12px;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    /* Table wrapper */
+
+    #section-user-management .table-wrapper {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 14px 16px 28px;
+        background: #f5f8fa;
+        overflow: visible !important;
+    }
+
+    /* Convert admin user table into cards */
+
+    #section-user-management .admin-user-table {
+        display: block;
+        width: 100%;
+        min-width: 0 !important;
+        border: none;
+        background: transparent;
+        overflow: visible !important;
+    }
+
+    #section-user-management .admin-user-table thead {
+        display: none;
+    }
+
+    #section-user-management .admin-user-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        overflow: visible;
+    }
+
+    #section-user-management .admin-user-table tbody tr {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 150px;
+        padding: 15px;
+        background: #ffffff;
+        border: 1px solid #e7ecf1;
+        border-radius: 14px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+        overflow: visible;
+        z-index: 1;
+    }
+
+    #section-user-management .admin-user-table tbody tr:has(.more-menu.open) {
+        z-index: 99999;
+    }
+
+    #section-user-management .admin-user-table td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+
+    #section-user-management .admin-user-table td::before {
+        content: none;
+        display: none;
+    }
+
+    /* Name */
+
+    #section-user-management .admin-user-table td:nth-child(1) {
+        padding-right: 120px !important;
+        color: #172033;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    /* Email */
+
+    #section-user-management .admin-user-table td:nth-child(2) {
+        margin-top: 5px;
+        padding-right: 42px !important;
+        color: #475569;
+        font-size: 11px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    /* Role */
+
+    #section-user-management .admin-user-table td:nth-child(3) {
+        margin-top: 14px;
+        padding-top: 12px !important;
+        padding-right: 105px !important;
+        border-top: 1px solid #e7ecf1 !important;
+    }
+
+    #section-user-management .admin-user-table .role-badge {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Email status */
+
+    #section-user-management .admin-user-table td:nth-child(4) {
+        position: absolute;
+        top: 13px;
+        right: 10px;
+        width: auto;
+        max-width: 100px;
+        margin: 0;
+        z-index: 10;
+    }
+
+    #section-user-management
+        .admin-user-table
+        td:nth-child(4)
+        .status-pill {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        min-width: 0;
+        max-width: 100px;
+        margin: 0;
+        padding: 5px 8px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    #section-user-management
+        .admin-user-table
+        td:nth-child(4)
+        .status-pill::before {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+    }
+
+    /* Created date */
+
+    #section-user-management .admin-user-table td:nth-child(5) {
+        position: absolute;
+        right: 15px;
+        bottom: 16px;
+        display: block !important;
+        max-width: 95px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.3;
+        text-align: right;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(5)::before {
+        content: "Created";
+        display: block;
+        margin-bottom: 2px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    /* Actions */
+
+    #section-user-management .admin-user-table td:nth-child(6) .table-action-btn-clear {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
+        cursor: pointer !important;
+        padding: 0px !important;
+        margin: 0px !important;
+        border-width: medium !important;
+        border-style: none !important;
+        border-color: currentcolor !important;
+        border-image: none !important;
+        border-radius: 999px !important;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6)::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6) .more-menu {
+       display: block !important;
+        position: relative !important;
+        width: 34px !important;
+        height: 34px !important;
+        overflow: visible !important;
+        z-index: 99999 !important;
+        margin-bottom: 70px;
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        cursor: pointer;
+        margin-left:300px;
+    }
+
+    #section-user-management .admin-user-table .table-action-btn .btn-clear i {
+        display: inline-flex;
+        color: #64748b;
+        font-size: 16px;
+        line-height: 1;
+        pointer-events: none;
+     
+    }
+
+    #section-user-management .admin-user-table td:nth-child(6) .more-dropdown {
+        position: fixed !important;
+        right: auto !important;
+        min-width: 190px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18) !important;
+        display: none;
+        overflow: hidden !important;
+        z-index: 999999 !important;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-menu.open
+        .more-dropdown {
+        display: block;
+    }
+
+    #section-user-management .admin-user-table .more-dropdown form {
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 11px 14px;
+        border: none;
+        background: #ffffff;
+        color: #1e293b;
+        font-size: 12px;
+        line-height: 1.3;
+        text-align: left;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item:hover {
+        background: #f8fafc;
+    }
+
+    #section-user-management
+        .admin-user-table
+        .more-dropdown
+        .dropdown-item.danger {
+        color: #dc2626;
+    }
+}
+
+@media (max-width: 375px) {
+    #section-user-management .admin-user-table td:nth-child(6) {
+        position: absolute;
+        top: 105px;
+        right: 10px;
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 320px) {
+ #section-user-management .admin-user-table td:nth-child(6) {
+        position: absolute;
+        top: 105px;
+        right: 10px;
+        margin: 0 !important;
+    }
+
 }
