@@ -9,13 +9,9 @@ const Chat = {
     init() {
         console.log('CHAT INIT');
 
-        const socketUrl =
-            import.meta.env.VITE_SOCKET_URL ||
-            `${window.location.protocol}//${window.location.hostname}:3000`;
-
         console.log('Connecting to Socket.IO:', socketUrl);
 
-        this.socket = io(socketUrl, {
+        this.socket = io({
             transports: ['websocket', 'polling'],
             withCredentials: true,
         });
