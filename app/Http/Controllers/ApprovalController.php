@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
 use App\Mail\ApprovalPendingNotification;
 use App\Mail\ApprovalProgressNotification;
 use App\Mail\ApprovalCompletedNotification;
@@ -157,12 +159,27 @@ class ApprovalController extends Controller
                 ->route('dashboard', ['section' => 'documents'])
                 ->withErrors($e->errors(), 'approval')
                 ->with('approval_error', collect($e->errors())->flatten()->first());
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('dashboard')
-                ->with('approval_error', 'Something went wrong while approving the document.')
-                ->with('section', 'documents');
-        }
+                } catch (\Exception $e) {
+
+    Log::error('Approval Exception', [
+        'message' => $e->getMessage(),
+        'file'    => $e->getFile(),
+        'line'    => $e->getLine(),
+        'trace'   => $e->getTraceAsString(),
+    ]);
+
+    dd(
+        $e->getMessage(),
+        $e->getFile(),
+        $e->getLine()
+    );
+}
+        // } catch (\Exception $e) {
+        //     return redirect()
+        //         ->route('dashboard')
+        //         ->with('approval_error', 'Something went wrong while approving the document.')
+        //         ->with('section', 'documents');
+        // }
     }
 
     public function reject(Request $request, Approval $approval) {
