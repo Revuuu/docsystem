@@ -95,8 +95,8 @@ class ApprovalController extends Controller
 
                         'completed_at' => $completedAt,
                         'duration_seconds' => $approval->received_at
-                            ? $approval->received_at->diffInSeconds($completedAt)
-                            : null,
+                        ? (int) round($approval->received_at->diffInSeconds($completedAt))
+                        : null,
 
                         'sig_x'     => $request->sig_x,
                         'sig_y'     => $request->sig_y,
@@ -161,25 +161,26 @@ class ApprovalController extends Controller
                 ->with('approval_error', collect($e->errors())->flatten()->first());
                 } catch (\Exception $e) {
 
-    Log::error('Approval Exception', [
-        'message' => $e->getMessage(),
-        'file'    => $e->getFile(),
-        'line'    => $e->getLine(),
-        'trace'   => $e->getTraceAsString(),
-    ]);
+                // ======== Debugging for Approval Signing Issues ========
+                    //     Log::error('Approval Exception', [
+                    //         'message' => $e->getMessage(),
+                    //         'file'    => $e->getFile(),
+                    //         'line'    => $e->getLine(),
+                    //         'trace'   => $e->getTraceAsString(),
+                    //     ]);
 
-    dd(
-        $e->getMessage(),
-        $e->getFile(),
-        $e->getLine()
-    );
-}
-        // } catch (\Exception $e) {
-        //     return redirect()
-        //         ->route('dashboard')
-        //         ->with('approval_error', 'Something went wrong while approving the document.')
-        //         ->with('section', 'documents');
-        // }
+                    //     dd(
+                    //         $e->getMessage(),
+                    //         $e->getFile(),
+                    //         $e->getLine()
+                    //     );
+                    // }
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('dashboard')
+                ->with('approval_error', 'Something went wrong while approving the document.')
+                ->with('section', 'documents');
+        }
     }
 
     public function reject(Request $request, Approval $approval) {
@@ -215,8 +216,8 @@ class ApprovalController extends Controller
                 'completed_at' => $completedAt,
 
                 'duration_seconds' => $approval->received_at
-                    ? $approval->received_at->diffInSeconds($completedAt)
-                    : null,
+                ? (int) round($approval->received_at->diffInSeconds($completedAt))
+                : null,
             ]);
 
             // DOCUMENT = REJECTED
