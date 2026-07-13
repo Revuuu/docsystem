@@ -9,12 +9,24 @@ const Chat = {
     init() {
         console.log('CHAT INIT');
 
-        console.log('Connecting to Socket.IO:', socketUrl);
+const socketUrl = import.meta.env.VITE_SOCKET_URL;
 
-        this.socket = io({
-            transports: ['websocket', 'polling'],
-            withCredentials: true,
-        });
+this.socket = socketUrl
+    ? io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        withCredentials: true,
+    })
+    : io({
+        transports: ['websocket', 'polling'],
+        withCredentials: true,
+    });
+
+        // console.log('Connecting to Socket.IO:', socketUrl);
+
+        // this.socket = io({
+        //     transports: ['websocket', 'polling'],
+        //     withCredentials: true,
+        // });
 
         this.socket.on('connect', () => {
             console.log('Socket connected:', this.socket.id);
