@@ -366,7 +366,6 @@ body.modal-open {
 
 .chat-bubble {
     position: relative;
-    max-width: 70%;
     padding: 12px 14px 26px;
     border-radius: 18px;
     word-wrap: break-word;
@@ -444,7 +443,6 @@ body.modal-open {
 .chat-form {
     padding: 14px;
     border-top: 1px solid #e5e7eb;
-    display: flex;
     flex: 0 0 auto;
     gap: 10px;
     background: #ffffff;
@@ -473,6 +471,72 @@ body.modal-open {
     color: #ffffff;
     font-weight: 600;
     cursor: pointer;
+}
+
+.chat-message-attachment {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    max-width: 100%;
+    margin-top: 8px;
+}
+
+.chat-message-attachment a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    max-width: 100%;
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.chat-message-attachment img {
+    display: block;
+
+    width: auto;
+    max-width: 260px;
+    max-height: 260px;
+
+    object-fit: contain;
+
+    border-radius: 10px;
+    background: #ffffff;
+}
+.chat-bubble-right
+.chat-message-attachment img {
+    border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.chat-message-attachment a span {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-attachment-file-size {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 10px;
+    opacity: 0.75;
+}
+
+.chat-attachment-error {
+    margin-top: 8px;
+    padding: 7px 9px;
+
+    border-radius: 7px;
+
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+
+    font-size: 12px;
 }
 
 .messenger-widget {

@@ -7,17 +7,53 @@ const ChatService = {
                 `/documents/${documentId}/messages`
             );
 
-        return data;
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        if (Array.isArray(data?.data)) {
+            return data.data;
+        }
+
+        return [];
     },
 
-    async sendMessage(documentId, message) {
+    async sendMessage(
+        documentId,
+        message = '',
+        attachment = null
+    ) {
+        const formData = new FormData();
+
+        const cleanMessage =
+            String(message ?? '').trim();
+
+        if (cleanMessage !== '') {
+            formData.append(
+                'message',
+                cleanMessage
+            );
+        }
+
+        if (attachment instanceof File) {
+            formData.append(
+                'attachment',
+                attachment
+            );
+        }
+
         const { data } =
             await axios.post(
                 `/documents/${documentId}/messages`,
-                { message }
+                formData,
+                {
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                }
             );
 
-        return data;
+        return data?.data ?? data;
     },
 };
 

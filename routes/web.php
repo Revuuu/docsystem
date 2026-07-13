@@ -116,6 +116,9 @@ Route::post('/documents/{document}/messages', [DocumentMessageController::class,
     ->name('documents.messages.store');
 });
 
+Route::get('/document-messages/{documentMessage}/attachment',[DocumentMessageController::class,'attachment',])
+->name('document-messages.attachment');
+
 Route::get('/users/{user}/edit',
     [UserController::class, 'edit'])
     ->name('users.edit');

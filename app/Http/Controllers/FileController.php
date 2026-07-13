@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DocumentFile;
+use App\Models\DocumentMessage;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,4 +74,55 @@ class FileController extends Controller
 
         return response()->file($path);
     }
+    public function chatAttachment($id)
+{
+    $messageId = decrypt($id);
+
+    $message = DocumentMessage::with('document')
+        ->findOrFail($messageId);
+
+    $attachment = $message->attachment;
+
+    if (
+        !is_array($attachment) ||
+        empty($attachment['path'])
+    ) {
+        abort(404);
+    }
+
+    $path = storage_path(
+        'app/private/' .
+        $attachment['path']
+    );
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    $fileName = str_replace(
+        ['"', "\r", "\n"],
+        '',
+        basename(
+            $attachment['name'] ??
+            'attachment'
+        )
+    );
+
+    return response()->file(
+        $path,
+        [
+            'Content-Type' =>
+                $attachment['mime_type'] ??
+                'application/octet-stream',
+
+            'Content-Disposition' =>
+                'inline; filename="' .
+                $fileName .
+                '"',
+
+            'X-Content-Type-Options' =>
+                'nosniff',
+        ]
+    );
+}
 }
