@@ -91,9 +91,7 @@ Route::middleware(['auth', 'otp'])->group(function () {
         'success' => true
     ]);
 });
-Route::patch('/profile/update', [ProfileController::class, 'update'])
-    ->name('profile.update')
-    ->middleware('auth');
+
 Route::get(
     '/files/view/{id}',
     [FileController::class, 'view']
@@ -125,10 +123,6 @@ Route::get('/document-messages/{documentMessage}/attachments/{attachmentIndex}',
 Route::get('/users/{user}/edit',
     [UserController::class, 'edit'])
     ->name('users.edit');
-
-Route::patch('/users/{user}',
-    [UserController::class, 'update'])
-    ->name('users.update');
 
 Route::post('/users/{user}/reset-password',
     [UserController::class, 'resetPassword'])
