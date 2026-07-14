@@ -20,19 +20,47 @@ const Messenger = {
         window.openMessenger = 
             this.openMessenger.bind(this);
 
-        document.addEventListener('click', (event) => {
+        document.addEventListener('click', event => {
+
+            const clickedInsideViewer =
+                event.composedPath().some(node => {
+                    return (
+                        node instanceof Element &&
+                        (
+                            node.classList.contains(
+                                'viewer-container'
+                            ) ||
+                            node.closest(
+                                '.viewer-container'
+                            )
+                        )
+                    );
+                });
+
+            if (clickedInsideViewer) {
+                return;
+            }
+
             const panel =
-                document.getElementById('messengerRoomsPanel');
+                document.getElementById(
+                    'messengerRoomsPanel'
+                );
 
             const button =
-                document.querySelector('.messenger-float-btn');
+                document.querySelector(
+                    '.messenger-float-btn'
+                );
 
             const messengerSection =
-                document.getElementById('section-messenger');
+                document.getElementById(
+                    'section-messenger'
+                );
 
             const messengerActive =
                 messengerSection &&
-                getComputedStyle(messengerSection).display !== 'none';
+                getComputedStyle(
+                    messengerSection
+                ).display !== 'none';
 
             if (
                 messengerActive ||

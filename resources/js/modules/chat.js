@@ -1,5 +1,7 @@
 import { io } from 'socket.io-client';
 import ChatService from '../services/chat-service';
+import Viewer from 'viewerjs';
+import 'viewerjs/dist/viewer.css';
 
 const Chat = {
     socket: null,
@@ -8,15 +10,11 @@ const Chat = {
 
     selectedFile: null,
     previewObjectUrl: null,
-
+    imageViewers: [],
+    
     init() {
         console.log('CHAT INIT');
 
-        /*
-         * When VITE_CHAT_SOCKET_URL is empty, Socket.IO connects
-         * to the current domain. This is recommended when Nginx
-         * proxies /socket.io to the Node.js server.
-         */
         const socketUrl =
             import.meta.env.VITE_SOCKET_URL?.trim() ||
             undefined;
@@ -306,192 +304,192 @@ const Chat = {
     },
 
     bindEmbeddedForm(containerId) {
-    const form =
-        document.getElementById(
-            `${containerId}Form`
-        );
+        const form =
+            document.getElementById(
+                `${containerId}Form`
+            );
 
-    const input =
-        document.getElementById(
-            `${containerId}Input`
-        );
+        const input =
+            document.getElementById(
+                `${containerId}Input`
+            );
 
-    const fileInput =
-        document.getElementById(
-            `${containerId}File`
-        );
+        const fileInput =
+            document.getElementById(
+                `${containerId}File`
+            );
 
-    const attachButton =
-        document.getElementById(
-            `${containerId}AttachButton`
-        );
+        const attachButton =
+            document.getElementById(
+                `${containerId}AttachButton`
+            );
 
-    const removeButton =
-        document.getElementById(
-            `${containerId}RemoveAttachment`
-        );
+        const removeButton =
+            document.getElementById(
+                `${containerId}RemoveAttachment`
+            );
 
-    const preview =
-        document.getElementById(
-            `${containerId}AttachmentPreview`
-        );
+        const preview =
+            document.getElementById(
+                `${containerId}AttachmentPreview`
+            );
 
-    const attachmentName =
-        document.getElementById(
-            `${containerId}AttachmentName`
-        );
+        const attachmentName =
+            document.getElementById(
+                `${containerId}AttachmentName`
+            );
 
-    const status =
-        document.getElementById(
-            `${containerId}UploadStatus`
-        );
+        const status =
+            document.getElementById(
+                `${containerId}UploadStatus`
+            );
 
-    const sendButton =
-        document.getElementById(
-            `${containerId}SendButton`
-        );
+        const sendButton =
+            document.getElementById(
+                `${containerId}SendButton`
+            );
 
-    if (
-        !form ||
-        !input ||
-        !fileInput ||
-        !attachButton
-    ) {
-        return;
-    }
-
-    let selectedFile = null;
-
-    const clearAttachment = () => {
-        selectedFile = null;
-        fileInput.value = '';
-
-        if (preview) {
-            preview.hidden = true;
-        }
-
-        if (attachmentName) {
-            attachmentName.textContent = '';
-        }
-    };
-
-    const showStatus = (
-        message,
-        isError = false
-    ) => {
-        if (!status) {
+        if (
+            !form ||
+            !input ||
+            !fileInput ||
+            !attachButton
+        ) {
             return;
         }
 
-        status.textContent = message;
+        let selectedFile = null;
 
-        status.classList.toggle(
-            'error',
-            isError
-        );
-    };
-
-    attachButton.addEventListener(
-        'click',
-        () => {
-            fileInput.click();
-        }
-    );
-
-    fileInput.addEventListener(
-        'change',
-        () => {
-            const file =
-                fileInput.files?.[0] ?? null;
-
-            if (!file) {
-                clearAttachment();
-                return;
-            }
-
-            const maximumSize =
-                10 * 1024 * 1024;
-
-            if (file.size > maximumSize) {
-                showStatus(
-                    'The attachment must not exceed 10 MB.',
-                    true
-                );
-
-                clearAttachment();
-                return;
-            }
-
-            selectedFile = file;
-
-            if (attachmentName) {
-                attachmentName.textContent =
-                    file.name;
-            }
+        const clearAttachment = () => {
+            selectedFile = null;
+            fileInput.value = '';
 
             if (preview) {
-                preview.hidden = false;
+                preview.hidden = true;
             }
 
-            showStatus('');
-        }
-    );
+            if (attachmentName) {
+                attachmentName.textContent = '';
+            }
+        };
 
-    removeButton?.addEventListener(
-        'click',
-        () => {
-            clearAttachment();
-            showStatus('');
-        }
-    );
-
-    form.addEventListener(
-        'submit',
-        async event => {
-            event.preventDefault();
-
-            const cleanMessage =
-                input.value.trim();
-
-            if (!cleanMessage && !selectedFile) {
-                showStatus(
-                    'Enter a message or attach a file.',
-                    true
-                );
-
+        const showStatus = (
+            message,
+            isError = false
+        ) => {
+            if (!status) {
                 return;
             }
 
-            if (sendButton) {
-                sendButton.disabled = true;
+            status.textContent = message;
+
+            status.classList.toggle(
+                'error',
+                isError
+            );
+        };
+
+        attachButton.addEventListener(
+            'click',
+            () => {
+                fileInput.click();
             }
+        );
 
-            attachButton.disabled = true;
-            input.disabled = true;
+        fileInput.addEventListener(
+            'change',
+            () => {
+                const file =
+                    fileInput.files?.[0] ?? null;
 
-            try {
-                const sent = await this.send(
-                    cleanMessage,
-                    selectedFile
-                );
-
-                if (sent) {
-                    input.value = '';
+                if (!file) {
                     clearAttachment();
-                    showStatus('');
-                }
-            } finally {
-                if (sendButton) {
-                    sendButton.disabled = false;
+                    return;
                 }
 
-                attachButton.disabled = false;
-                input.disabled = false;
-                input.focus();
+                const maximumSize =
+                    10 * 1024 * 1024;
+
+                if (file.size > maximumSize) {
+                    showStatus(
+                        'The attachment must not exceed 10 MB.',
+                        true
+                    );
+
+                    clearAttachment();
+                    return;
+                }
+
+                selectedFile = file;
+
+                if (attachmentName) {
+                    attachmentName.textContent =
+                        file.name;
+                }
+
+                if (preview) {
+                    preview.hidden = false;
+                }
+
+                showStatus('');
             }
-        }
-    );
-},
+        );
+
+        removeButton?.addEventListener(
+            'click',
+            () => {
+                clearAttachment();
+                showStatus('');
+            }
+        );
+
+        form.addEventListener(
+            'submit',
+            async event => {
+                event.preventDefault();
+
+                const cleanMessage =
+                    input.value.trim();
+
+                if (!cleanMessage && !selectedFile) {
+                    showStatus(
+                        'Enter a message or attach a file.',
+                        true
+                    );
+
+                    return;
+                }
+
+                if (sendButton) {
+                    sendButton.disabled = true;
+                }
+
+                attachButton.disabled = true;
+                input.disabled = true;
+
+                try {
+                    const sent = await this.send(
+                        cleanMessage,
+                        selectedFile
+                    );
+
+                    if (sent) {
+                        input.value = '';
+                        clearAttachment();
+                        showStatus('');
+                    }
+                } finally {
+                    if (sendButton) {
+                        sendButton.disabled = false;
+                    }
+
+                    attachButton.disabled = false;
+                    input.disabled = false;
+                    input.focus();
+                }
+            }
+        );
+    },
 
     async open(
         documentId,
@@ -517,8 +515,8 @@ const Chat = {
             }
 
             container.classList.add(
-    'conversation-panel'
-);
+                'conversation-panel'
+            );
 
             container.innerHTML = `
                 <div class="chat-header mobile-chat-header">
@@ -662,40 +660,40 @@ const Chat = {
     },
 
     async loadMessages(documentId) {
-    try {
-        const messages =
-            await ChatService.getMessages(
-                documentId
-            );
+        try {
+            const messages =
+                await ChatService.getMessages(
+                    documentId
+                );
 
-        console.log(
-            'Loaded document messages:',
-            messages
-        );
-
-        if (this.messagesContainer) {
-            this.messagesContainer.innerHTML = '';
-        }
-
-        if (!Array.isArray(messages)) {
-            console.error(
-                'Chat history response is not an array:',
+            console.log(
+                'Loaded document messages:',
                 messages
             );
 
-            return;
-        }
+            if (this.messagesContainer) {
+                this.messagesContainer.innerHTML = '';
+            }
 
-        messages.forEach(message => {
-            this.appendMessage(message);
-        });
-    } catch (error) {
-        console.error(
-            'Failed to load chat messages.',
-            error
-        );
-    }
-},
+            if (!Array.isArray(messages)) {
+                console.error(
+                    'Chat history response is not an array:',
+                    messages
+                );
+
+                return;
+            }
+
+            messages.forEach(message => {
+                this.appendMessage(message);
+            });
+        } catch (error) {
+            console.error(
+                'Failed to load chat messages.',
+                error
+            );
+        }
+    },
     async send(message, file = null) {
         const cleanMessage =
             String(message ?? '').trim();
@@ -721,346 +719,454 @@ const Chat = {
         this.setSendingState(true);
 
         try {
-    const response =
-        await ChatService.sendMessage(
-            this.activeDocumentId,
-            cleanMessage,
-            file
-        );
+            const response =
+                await ChatService.sendMessage(
+                    this.activeDocumentId,
+                    cleanMessage,
+                    file
+                );
 
-    const savedMessage =
-        response?.data ?? response;
+            const savedMessage =
+                response?.data ?? response;
 
-    console.log(
-        'Saved chat message:',
-        savedMessage
-    );
+            console.log(
+                'Saved chat message:',
+                savedMessage
+            );
 
-    if (!savedMessage?.id) {
-        throw new Error(
-            'The server did not return the saved message.'
-        );
-    }
+            if (!savedMessage?.id) {
+                throw new Error(
+                    'The server did not return the saved message.'
+                );
+            }
 
-    console.log(
-        'Saved attachment:',
-        savedMessage.attachment
-    );
+            console.log(
+                'Saved attachment:',
+                savedMessage.attachment
+            );
 
-    /*
-     * Display immediately for the sender.
-     */
-    this.appendMessage(savedMessage);
+            this.appendMessage(savedMessage);
 
-    /*
-     * Broadcast to the other users.
-     */
-    this.socket.emit(
-        'send-document-message',
-        savedMessage
-    );
+            this.socket.emit(
+                'send-document-message',
+                savedMessage
+            );
 
-    this.showUploadStatus('');
+            this.showUploadStatus('');
 
-    return true;
-} catch (error) {
-    console.error(
-        'Failed to save chat message:',
-        error
-    );
+            return true;
+        } catch (error) {
+            console.error(
+                'Failed to save chat message:',
+                error
+            );
 
-    this.showUploadStatus(
-        error.response?.data?.message ??
-        error.message ??
-        'The message could not be sent.',
-        true
-    );
+            this.showUploadStatus(
+                error.response?.data?.message ??
+                error.message ??
+                'The message could not be sent.',
+                true
+            );
 
-    return false;
-} finally {
-    this.setSendingState(false);
-}
+            return false;
+
+        } finally {
+            this.setSendingState(false);
+        }
     },
 
     appendMessage(rawPayload) {
-    const payload =
-        rawPayload?.data ?? rawPayload;
+        const payload =
+            rawPayload?.data ?? rawPayload;
 
-    const messages =
-        this.messagesContainer;
+        const messages =
+            this.messagesContainer;
 
-    if (!messages || !payload) {
-        return;
-    }
+        if (!messages || !payload) {
+            return;
+        }
 
-    const messageId =
-        payload.id !== undefined &&
-        payload.id !== null
-            ? String(payload.id)
-            : null;
+        const messageId =
+            payload.id !== undefined &&
+            payload.id !== null
+                ? String(payload.id)
+                : null;
 
-    /*
-     * Prevent duplicate display when the message is
-     * appended locally and returned through Socket.IO.
-     */
-    if (
-        messageId &&
-        messages.querySelector(
-            `[data-message-id="${CSS.escape(messageId)}"]`
-        )
-    ) {
-        return;
-    }
+        if (
+            messageId &&
+            messages.querySelector(
+                `[data-message-id="${CSS.escape(messageId)}"]`
+            )
+        ) {
+            return;
+        }
 
-    const attachment =
-        this.normalizeAttachment(
-            payload.attachment
-        );
-
-    const messageText =
-        String(payload.message ?? '').trim();
-
-    if (!messageText && !attachment) {
-        return;
-    }
-
-    const isMine =
-        Number(payload.user_id) ===
-        Number(window.authUserId);
-
-    const row =
-        document.createElement('div');
-
-    row.className = [
-        'chat-row',
-        isMine
-            ? 'chat-row-right'
-            : 'chat-row-left',
-    ].join(' ');
-
-    if (messageId) {
-        row.dataset.messageId =
-            messageId;
-    }
-
-    const bubble =
-        document.createElement('div');
-
-    bubble.className = [
-        'chat-bubble',
-        isMine
-            ? 'chat-bubble-right'
-            : 'chat-bubble-left',
-    ].join(' ');
-
-    const meta =
-        document.createElement('div');
-
-    meta.className = 'chat-meta';
-
-    const userName =
-        document.createElement('strong');
-
-    userName.textContent =
-        payload.user_name ??
-        'Unknown user';
-
-    const sentAt =
-        document.createElement('small');
-
-    sentAt.textContent =
-        payload.sent_at ?? '';
-
-    meta.appendChild(userName);
-    meta.appendChild(sentAt);
-    bubble.appendChild(meta);
-
-    if (messageText !== '') {
-        const paragraph =
-            document.createElement('p');
-
-        paragraph.textContent =
-            messageText;
-
-        bubble.appendChild(paragraph);
-    }
-
-    if (attachment) {
-        this.appendAttachment(
-            bubble,
-            attachment
-        );
-    }
-
-    row.appendChild(bubble);
-    messages.appendChild(row);
-
-    messages.scrollTop =
-        messages.scrollHeight;
-},
-
-    appendAttachment(parent, rawAttachment) {
-    const attachment =
-        this.normalizeAttachment(
-            rawAttachment
-        );
-
-    console.log(
-        'Displaying attachment:',
-        attachment
-    );
-
-    if (!attachment) {
-        return;
-    }
-
-    if (!attachment.url) {
-        console.error(
-            'Attachment URL is missing:',
-            attachment
-        );
-
-        const unavailable =
-            document.createElement('div');
-
-        unavailable.className =
-            'chat-attachment-error';
-
-        unavailable.textContent =
-            attachment.name
-                ? `Attachment unavailable: ${attachment.name}`
-                : 'Attachment unavailable';
-
-        parent.appendChild(unavailable);
-
-        return;
-    }
-
-    const container =
-        document.createElement('div');
-
-    container.className =
-        'chat-message-attachment';
-
-    const mimeType =
-        String(
-            attachment.mime_type ?? ''
-        );
-
-    const isImage =
-        attachment.is_image === true ||
-        attachment.is_image === 1 ||
-        attachment.is_image === '1' ||
-        mimeType.startsWith('image/');
-
-    if (isImage) {
-        const link =
-            document.createElement('a');
-
-        link.href = attachment.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-
-        const image =
-            document.createElement('img');
-
-        image.src = attachment.url;
-
-        image.alt =
-            attachment.name ??
-            'Chat image';
-
-        image.loading = 'lazy';
-
-        image.addEventListener(
-            'error',
-            () => {
-                console.error(
-                    'Unable to load attachment image:',
-                    attachment.url
-                );
-
-                image.hidden = true;
-
-                const fallback =
-                    document.createElement('span');
-
-                fallback.textContent =
-                    `Open ${attachment.name ?? 'image'}`;
-
-                link.appendChild(fallback);
-            }
-        );
-
-        link.appendChild(image);
-        container.appendChild(link);
-    } else {
-        const link =
-            document.createElement('a');
-
-        link.href = attachment.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-
-        const icon =
-            document.createElement('i');
-
-        icon.className =
-            'bi bi-paperclip';
-
-        const fileName =
-            document.createElement('span');
-
-        fileName.textContent =
-            attachment.name ??
-            'Open attachment';
-
-        link.appendChild(icon);
-        link.appendChild(fileName);
-
-        container.appendChild(link);
-    }
-
-    if (attachment.size) {
-        const size =
-            document.createElement('small');
-
-        size.className =
-            'chat-attachment-file-size';
-
-        size.textContent =
-            this.formatFileSize(
-                Number(attachment.size)
+        const attachment =
+            this.normalizeAttachment(
+                payload.attachment
             );
 
-        container.appendChild(size);
-    }
+        const messageText =
+            String(payload.message ?? '').trim();
 
-    parent.appendChild(container);
-},
+        if (!messageText && !attachment) {
+            return;
+        }
+
+        const isMine =
+            Number(payload.user_id) ===
+            Number(window.authUserId);
+
+        const row =
+            document.createElement('div');
+
+        row.className = [
+            'chat-row',
+            isMine
+                ? 'chat-row-right'
+                : 'chat-row-left',
+        ].join(' ');
+
+        if (messageId) {
+            row.dataset.messageId =
+                messageId;
+        }
+
+        const bubble =
+            document.createElement('div');
+
+        bubble.className = [
+            'chat-bubble',
+            isMine
+                ? 'chat-bubble-right'
+                : 'chat-bubble-left',
+        ].join(' ');
+
+        const meta =
+            document.createElement('div');
+
+        meta.className = 'chat-meta';
+
+        const userName =
+            document.createElement('strong');
+
+        userName.textContent =
+            payload.user_name ??
+            'Unknown user';
+
+        const sentAt =
+            document.createElement('small');
+
+        sentAt.textContent =
+            payload.sent_at ?? '';
+
+        meta.appendChild(userName);
+        meta.appendChild(sentAt);
+        bubble.appendChild(meta);
+
+        if (messageText !== '') {
+            const paragraph =
+                document.createElement('p');
+
+            paragraph.textContent =
+                messageText;
+
+            bubble.appendChild(paragraph);
+        }
+
+        if (attachment) {
+            this.appendAttachment(
+                bubble,
+                attachment
+            );
+        }
+
+        row.appendChild(bubble);
+        messages.appendChild(row);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+    },
+
+    appendAttachment(parent, rawAttachment) {
+        const attachment =
+            this.normalizeAttachment(
+                rawAttachment
+            );
+
+        console.log(
+            'Displaying attachment:',
+            attachment
+        );
+
+        if (!attachment) {
+            return;
+        }
+
+        if (!attachment.url) {
+            console.error(
+                'Attachment URL is missing:',
+                attachment
+            );
+
+            const unavailable =
+                document.createElement('div');
+
+            unavailable.className =
+                'chat-attachment-error';
+
+            unavailable.textContent =
+                attachment.name
+                    ? `Attachment unavailable: ${attachment.name}`
+                    : 'Attachment unavailable';
+
+            parent.appendChild(unavailable);
+
+            return;
+        }
+
+        const container =
+            document.createElement('div');
+
+        container.className =
+            'chat-message-attachment';
+
+        const mimeType =
+            String(
+                attachment.mime_type ?? ''
+            );
+
+        const isImage =
+            attachment.is_image === true ||
+            attachment.is_image === 1 ||
+            attachment.is_image === '1' ||
+            mimeType.startsWith('image/');
+
+        let viewerImage = null;
+
+        if (isImage) {
+            const image =
+                document.createElement('img');
+
+            image.src = attachment.url;
+
+            image.dataset.original =
+                attachment.url;
+
+            image.alt =
+                attachment.name ??
+                'Chat image';
+
+            image.className =
+                'chat-attachment-image';
+
+            image.loading = 'lazy';
+
+            image.tabIndex = 0;
+
+            image.setAttribute(
+                'role',
+                'button'
+            );
+
+            image.setAttribute(
+                'aria-label',
+                `View ${attachment.name ?? 'chat image'}`
+            );
+
+            image.addEventListener(
+                'error',
+                () => {
+                    console.error(
+                        'Unable to load attachment image:',
+                        attachment.url
+                    );
+
+                    image.hidden = true;
+
+                    const fallback =
+                        document.createElement('span');
+
+                    fallback.className =
+                        'chat-attachment-error';
+
+                    fallback.textContent =
+                        attachment.name
+                            ? `Unable to load ${attachment.name}`
+                            : 'Unable to load image';
+
+                    container.appendChild(fallback);
+                }
+            );
+
+            container.appendChild(image);
+
+            viewerImage = image;
+        } else {
+            const link =
+                document.createElement('a');
+
+            link.href = attachment.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+
+            const icon =
+                document.createElement('i');
+
+            icon.className =
+                'bi bi-paperclip';
+
+            const fileName =
+                document.createElement('span');
+
+            fileName.textContent =
+                attachment.name ??
+                'Open attachment';
+
+            link.appendChild(icon);
+            link.appendChild(fileName);
+
+            container.appendChild(link);
+        }
+
+        if (attachment.size) {
+            const size =
+                document.createElement('small');
+
+            size.className =
+                'chat-attachment-file-size';
+
+            size.textContent =
+                this.formatFileSize(
+                    Number(attachment.size)
+                );
+
+            container.appendChild(size);
+        }
+
+        parent.appendChild(container);
+
+        if (viewerImage) {
+            const viewerContainer =
+                viewerImage.closest(
+                    '#documentChatModal'
+                ) ?? document.body;
+            const viewer =
+                new Viewer(
+                    viewerImage,
+                    {
+                        inline: false,
+
+                        container: viewerContainer,
+
+                        backdrop: true,
+                        button: true,
+                        keyboard:true,
+                        focus:true,
+                        fullscreen:true,
+                        movable:false,
+
+                        navbar:true,
+                        scalable:true,
+                        transition: true,
+
+                        zoomable: true,
+                        zoomOnTouch: true,
+                        zoomOnWheel: true,
+
+                        title: [
+                            2,
+                            image =>
+                                image.alt ||
+                                'Chat image',
+                        ],
+
+                        toolbar: {
+                            zoomIn: true,
+                            zoomOut: true,
+                            reset: true,
+                            rotateLeft: true,
+                            rotateRight: true,
+                            flipHorizontal: true,
+                            flipVertical: true,
+                        },
+
+                        url(image) {
+                            return (
+                                image.dataset.original ||
+                                image.src
+                            );
+                        },
+
+                        zIndex: 999999,
+                    }
+                );
+
+            this.imageViewers.push(viewer);
+
+            /*
+            * Viewer.js handles mouse clicks automatically.
+            * This adds keyboard accessibility.
+            */
+            viewerImage.addEventListener(
+                'keydown',
+                event => {
+                    if (
+                        event.key !== 'Enter' &&
+                        event.key !== ' '
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    viewer.show();
+                }
+            );
+        }
+    },
 
     normalizeAttachment(attachment) {
         if (!attachment) {
             return null;
         }
 
-        if (typeof attachment === 'object') {
-            return attachment;
+        if (typeof attachment === 'string') {
+            try {
+                return this.normalizeAttachment(
+                    JSON.parse(attachment)
+                );
+            } catch (error) {
+                console.error(
+                    'Invalid attachment JSON:',
+                    attachment,
+                    error
+                );
+
+                return null;
+            }
         }
 
-        try {
-            return JSON.parse(attachment);
-        } catch (error) {
-            console.error(
-                'Invalid attachment JSON:',
-                attachment,
-                error
-            );
-
+        if (
+            Array.isArray(attachment) ||
+            typeof attachment !== 'object'
+        ) {
             return null;
         }
-    },
 
+        if (Object.keys(attachment).length === 0) {
+            return null;
+        }
+
+        if (
+            !attachment.path &&
+            !attachment.url
+        ) {
+            return null;
+        }
+
+        return attachment;
+    },
+    
     setSendingState(isSending) {
         const sendButton =
             document.getElementById(

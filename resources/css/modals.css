@@ -23,10 +23,6 @@
     display: block;
 }
 
-.more-menu.open .more-menu-dropdown {
-    display: block;
-}
-
 .more-menu-dropdown a,
 .more-menu-dropdown button {
     width: 100%;
@@ -473,6 +469,13 @@ body.modal-open {
     cursor: pointer;
 }
 
+.chat-form .remove-chat-attachment{
+    height: 20px;
+    width:20px;
+    padding: 0;
+    background:red;
+}
+
 .chat-message-attachment {
     display: flex;
     flex-direction: column;
@@ -506,8 +509,8 @@ body.modal-open {
     border-radius: 10px;
     background: #ffffff;
 }
-.chat-bubble-right
-.chat-message-attachment img {
+
+.chat-bubble-right .chat-message-attachment img {
     border: 2px solid rgba(255, 255, 255, 0.35);
 }
 
@@ -838,6 +841,30 @@ body.modal-open {
     transform: translate(-50%, -50%);
 }
 
+.chat-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+}
+
+.chat-input-row input[type="text"] {
+    flex: 1 1 auto;
+
+    width: 0;
+    min-width: 0;
+}
+
+.chat-input-row .chat-attach-btn,
+.chat-input-row .chat-send-btn {
+    flex-shrink: 0;
+}
+
 @keyframes modalPop {
     from {
         opacity: 0;
@@ -953,10 +980,6 @@ body.modal-open {
         align-items: flex-end;
     }
 
-    .chat-form {
-        padding: 12px;
-        gap: 8px;
-    }
 
     .chat-form input {
         min-width: 0;
@@ -967,6 +990,57 @@ body.modal-open {
         width: 44px;
         padding: 0;
         flex: 0 0 44px;
+    }
+
+    .chat-form {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .chat-input-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        box-sizing: border-box;
+    }
+
+    .chat-input-row input[type="text"] {
+        flex: 1 1 auto;
+        width: 0;
+        min-width: 0;
+        height: 40px;
+
+        padding: 0 12px;
+        font-size: 13px;
+    }
+
+    .chat-input-row .chat-attach-btn {
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+    }
+
+    .chat-input-row .chat-send-btn {
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+    }
+
+    .chat-input-row button i {
+        font-size: 15px;
+    }
+    
+    .chat-message-attachment img {
+        max-width: 150px;
+        max-height: 150px;
     }
 }
 

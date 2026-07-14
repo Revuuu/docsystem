@@ -24,6 +24,7 @@
         "express": "^4.22.2",
         "pdfjs-dist": "^4.10.38",
         "socket.io": "^4.8.3",
-        "socket.io-client": "^4.8.3"
+        "socket.io-client": "^4.8.3",
+        "viewerjs": "^1.11.7"
     }
 }
