@@ -865,6 +865,22 @@ body.modal-open {
     flex-shrink: 0;
 }
 
+.chat-attachments-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 8px;
+}
+
+.chat-attachments-gallery
+.chat-message-attachment {
+    margin-top: 0;
+}
+
 @keyframes modalPop {
     from {
         opacity: 0;

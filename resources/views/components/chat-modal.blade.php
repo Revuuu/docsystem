@@ -39,39 +39,25 @@
                  class="chat-attachment-preview"
                  hidden>
 
-                <img id="chatAttachmentImagePreview"
-                     class="chat-attachment-image-preview"
-                     alt="Selected attachment preview"
-                     hidden>
-
-                <div class="chat-attachment-details">
-                    <span id="chatAttachmentName"></span>
-                    <small id="chatAttachmentSize"></small>
+                <div id="chatAttachmentList"
+                     class="chat-attachment-list">
                 </div>
-
-                <button type="button"
-                        id="removeChatAttachment"
-                        class="remove-chat-attachment"
-                        title="Remove attachment"
-                        aria-label="Remove attachment">
-
-                    <i class="bi bi-x-lg"></i>
-                </button>
             </div>
 
             <div class="chat-input-row">
 
                 <input type="file"
                        id="chatFile"
-                       name="file"
+                       name="attachments[]"
                        accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+                       multiple
                        hidden>
 
                 <button type="button"
                         id="chatAttachButton"
                         class="chat-attach-btn"
-                        title="Attach a file"
-                        aria-label="Attach a file">
+                        title="Attach up to 3 files"
+                        aria-label="Attach up to 3 files">
 
                     <i class="bi bi-paperclip"></i>
                 </button>

@@ -21,7 +21,7 @@ const ChatService = {
     async sendMessage(
         documentId,
         message = '',
-        attachment = null
+        attachments = []
     ) {
         const formData = new FormData();
 
@@ -35,12 +35,17 @@ const ChatService = {
             );
         }
 
-        if (attachment instanceof File) {
-            formData.append(
-                'attachment',
-                attachment
-            );
-        }
+        Array.from(attachments ?? [])
+            .filter(
+                attachment =>
+                    attachment instanceof File
+            )
+            .forEach(attachment => {
+                formData.append(
+                    'attachments[]',
+                    attachment
+                );
+            });
 
         const { data } =
             await axios.post(

@@ -119,6 +119,9 @@ Route::post('/documents/{document}/messages', [DocumentMessageController::class,
 Route::get('/document-messages/{documentMessage}/attachment',[DocumentMessageController::class,'attachment',])
 ->name('document-messages.attachment');
 
+Route::get('/document-messages/{documentMessage}/attachments/{attachmentIndex}',[DocumentMessageController::class, 'attachment']
+)->whereNumber('attachmentIndex')->name('document-messages.attachments.show');
+
 Route::get('/users/{user}/edit',
     [UserController::class, 'edit'])
     ->name('users.edit');
