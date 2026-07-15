@@ -142,7 +142,7 @@ STATUS
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    min-width: 130px;
+    min-width: 100px;
     max-width: 220px;
     padding: 8px 12px;
     border-radius: 999px;
@@ -572,10 +572,7 @@ STATUS
     }
 
     .documents-footer {
-        padding: 14px 16px;
-        background: #f5f8fa;
-        border-top: none;
-        border-radius: 0;
+       display:none;
     }
 
     .modern-docs-table {
@@ -909,8 +906,9 @@ STATUS
     }
 
     #section-workflow .admin-docs-table tr.document-row:has(.more-menu.open) {
-    z-index: 999999 !important;
-}
+        z-index: 999999 !important;
+    }
+    
     #section-workflow .admin-docs-table td {
         display: block !important;
         width: auto !important;

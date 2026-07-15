@@ -63,11 +63,6 @@
                     <i class="bi bi-plus"></i> UPLOAD NEW DOCUMENT
                 </button>
             </div>
-            <div class="results-info"
-                id="docCountResultsInfo"
-                data-total="{{ $myDocuments->total() }}">
-                Showing {{ $filteredDocumentCount ?? $myDocuments->count() }} of {{ $myDocuments->total() }} documents
-            </div>
         </div>
 
         <div id="documentsTableContainer">
@@ -297,9 +292,14 @@
                     </tbody>
                 </table>
 
-                <div id="noResultsMessage" style="display:none; text-align:center; padding:20px; color:#777;">
-                    No results found.
-                </div>
+                @if ($myDocuments->isEmpty())
+                    <div
+                        id="noResultsMessage"
+                        class="text-center py-4 text-muted"
+                    >
+                        No results found.
+                    </div>
+                @endif
             </div>
 
             <div class="documents-footer">
