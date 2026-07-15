@@ -342,7 +342,10 @@ const Chat = {
 
             removeButton.addEventListener(
                 'click',
-                () => {
+                event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
                     onRemove(index);
                 }
             );
