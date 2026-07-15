@@ -626,6 +626,10 @@ const Chat = {
                         </div>
                     </div>
 
+                    <small id="${containerId}UploadStatus"
+                        class="chat-upload-status">
+                    </small>
+                    
                     <div class="chat-input-row">
                         <input type="file"
                             id="${containerId}File"
@@ -652,9 +656,6 @@ const Chat = {
                             <i class="bi bi-send-fill"></i>
                         </button>
                     </div>
-                    <small id="${containerId}UploadStatus"
-                        class="chat-upload-status">
-                    </small>
                 </form>
             `;
 
@@ -1204,23 +1205,6 @@ const Chat = {
         link.appendChild(fileName);
 
         container.appendChild(link);
-    }
-
-    if (attachment.size) {
-        const size =
-            document.createElement('small');
-
-        size.className =
-            'chat-attachment-file-size';
-
-        size.textContent =
-            this.formatFileSize(
-                Number(
-                    attachment.size
-                )
-            );
-
-        container.appendChild(size);
     }
 
     parent.appendChild(container);

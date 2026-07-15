@@ -993,6 +993,10 @@ body.modal-open {
     margin-top: 0;
 }
 
+.chat-upload-status {
+    color:red;
+}
+
 @keyframes modalPop {
     from {
         opacity: 0;

@@ -43,7 +43,11 @@
                      class="chat-attachment-list">
                 </div>
             </div>
-
+            
+            <small id="chatUploadStatus"
+                class="chat-upload-status">
+            </small>
+            
             <div class="chat-input-row">
 
                 <input type="file"
@@ -75,10 +79,6 @@
                     Send
                 </button>
             </div>
-
-            <small id="chatUploadStatus"
-                   class="chat-upload-status">
-            </small>
 
         </form>
 
