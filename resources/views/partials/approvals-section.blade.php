@@ -117,6 +117,7 @@
                                         data-approval-id="{{ $approval->id }}"
                                         data-pdf-url='@json($approval->document->current_file_url)'
                                         data-approve-url='@json(route('approvals.approve', $approval->id))'
+                                        data-template-key="{{ $approval->document->latestVersion()?->template_key ?? '' }}"
                                         onclick="handleApproveButton(this)">
 
                                         ✔ Approve & Sign
@@ -238,7 +239,8 @@ window.handleApproveButton = function(button)
         button.dataset.hasSignature === 'true',
         button.dataset.approvalId,
         JSON.parse(button.dataset.pdfUrl),
-        JSON.parse(button.dataset.approveUrl)
+        JSON.parse(button.dataset.approveUrl),
+        button.dataset.templateKey || null
     );
 };
 

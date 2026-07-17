@@ -11,7 +11,8 @@ const Signature = {
         placed: false,
         currentPdf: null,
         currentPdfUrl: null,
-        currentPage: 1
+        currentPage: 1,
+        isFixedTemplate: false,
     },
 
     init() {
@@ -106,6 +107,9 @@ const Signature = {
             this.layer.addEventListener(
                 'click',
                 (e) => {
+                    if (this.state.isFixedTemplate) {
+                        return;
+                    }
 
                     const rect =
                         this.canvas
@@ -151,88 +155,153 @@ const Signature = {
     },
 
     checkSignature(
-        hasSignature,
-        docId,
-        pdfUrl,
-        signUrl
-    ) {
-
-        if (!hasSignature) {
-
-            alert(
-                'You do not have a signature uploaded yet. Please upload or draw your signature first.'
-            );
-
-            return;
-        }
-
-        this.open(
-            docId,
-            pdfUrl,
-            signUrl
+    hasSignature,
+    docId,
+    pdfUrl,
+    signUrl,
+    templateKey = null
+) {
+    if (!hasSignature) {
+        alert(
+            'You do not have a signature uploaded yet. Please upload or draw your signature first.'
         );
-    },
 
-    async open(
+        return;
+    }
+
+    this.open(
         docId,
         pdfUrl,
-        signUrl
-    ) {
-        console.log('DOC ID:', docId);
-    console.log('PDF URL:', pdfUrl);
-    console.log('SIGN URL:', signUrl);
-        this.state.currentPdfUrl =
-            pdfUrl;
+        signUrl,
+        templateKey
+    );
+},
 
-        this.state.currentPage =
-            1;
+async open(
+    docId,
+    pdfUrl,
+    signUrl,
+    templateKey = null
+) {
 
-        const form =
-            document.getElementById(
-                'signatureForm'
-            );
+    console.log('SIGNATURE OPEN DEBUG', {
+        docId,
+        templateKey,
+        isPurchaseOrder:
+            templateKey === 'purchase_order',
+    });
+    this.state.isFixedTemplate =
+        templateKey === 'purchase_order';
 
-        if (form) {
-            form.action = signUrl;
+    this.state.currentPdfUrl =
+        pdfUrl;
+
+    this.state.currentPage =
+        1;
+
+    const form =
+        document.getElementById(
+            'signatureForm'
+        );
+
+    if (form) {
+        form.action = signUrl;
+    }
+
+    const modal =
+        document.getElementById(
+            'signModal'
+        );
+
+    const modalTitle =
+        modal?.querySelector(
+            '.modal-header h3'
+        );
+
+    const pageSelector =
+        modal?.querySelector(
+            '.page-selector'
+        );
+
+    if (this.pageInput) {
+        this.pageInput.value = 1;
+
+        this.pageInput.disabled =
+            this.state.isFixedTemplate;
+    }
+
+    if (this.ghost) {
+        this.ghost.style.display =
+            'none';
+    }
+
+    if (this.layer) {
+        this.layer.style.pointerEvents =
+            this.state.isFixedTemplate
+                ? 'none'
+                : 'auto';
+
+        this.layer.style.cursor =
+            this.state.isFixedTemplate
+                ? 'default'
+                : 'crosshair';
+    }
+
+    if (this.state.isFixedTemplate) {
+        this.state.placed = true;
+
+        if (this.btn) {
+            this.btn.disabled = false;
         }
 
-        if (this.pageInput) {
-            this.pageInput.value = 1;
+        if (modalTitle) {
+            modalTitle.textContent =
+                'Review and Confirm Signature';
         }
 
-        if (this.ghost) {
-            this.ghost.style.display =
+        if (pageSelector) {
+            pageSelector.style.display =
                 'none';
         }
 
-        this.state.placed =
-            false;
+        if (this.hint) {
+            this.hint.textContent =
+                'Your signature will be placed automatically in your assigned Purchase Order signature field.';
+        }
+    } else {
+        this.state.placed = false;
 
         if (this.btn) {
             this.btn.disabled = true;
         }
 
-        if (this.hint) {
-
-            this.hint.textContent =
-                'Click anywhere on the document to place your signature';
-
+        if (modalTitle) {
+            modalTitle.textContent =
+                'Place Signature';
         }
 
-        document
-            .getElementById(
-                'signModal'
-            )
-            ?.classList
-            .add('active');
+        if (pageSelector) {
+            pageSelector.style.display =
+                '';
+        }
 
-        this.state.currentPdf =
-            await pdfjsLib
-                .getDocument(pdfUrl)
-                .promise;
+        if (this.hint) {
+            this.hint.textContent =
+                'Click anywhere on the document to place your signature';
+        }
+    }
 
-        await this.renderPage(1);
-    },
+    modal?.classList.add('active');
+
+    this.state.currentPdf =
+        await pdfjsLib
+            .getDocument(pdfUrl)
+            .promise;
+
+    await this.renderPage(1);
+},
+
+    
 
     async renderPage(pageNumber) {
 
@@ -317,66 +386,100 @@ const Signature = {
     },
 
     submit() {
-
-        if (
-            !this.state.placed ||
-            !this.canvas
-        ) {
-            return;
-        }
-
-        const canvasW =
-            this.canvas.clientWidth;
-
-        const canvasH =
-            this.canvas.clientHeight;
-
-        const actualSigW = 300;
-        const actualSigH = 180;
-
+    const form =
         document.getElementById(
-            'formSigX'
-        ).value =
-            (
-                this.state.sigX /
-                canvasW
-            ).toFixed(6);
+            'signatureForm'
+        );
 
-        document.getElementById(
-            'formSigY'
-        ).value =
-            (
-                this.state.sigY /
-                canvasH
-            ).toFixed(6);
-
-        document.getElementById(
-            'formSigW'
-        ).value =
-            (
-                actualSigW /
-                canvasW
-            ).toFixed(6);
-
-        document.getElementById(
-            'formSigH'
-        ).value =
-            (
-                actualSigH /
-                canvasH
-            ).toFixed(6);
-
-        document.getElementById(
-            'formSigPage'
-        ).value =
-            this.state.currentPage;
-
-        document
-            .getElementById(
-                'signatureForm'
-            )
-            ?.submit();
+    if (!form) {
+        return;
     }
+
+    /*
+     * Purchase Order:
+     * coordinates are resolved by the backend
+     * from the assigned fixed signature block.
+     */
+    if (this.state.isFixedTemplate) {
+        [
+            'formSigX',
+            'formSigY',
+            'formSigW',
+            'formSigH',
+            'formSigPage',
+        ].forEach((id) => {
+            const input =
+                document.getElementById(id);
+
+            if (input) {
+                input.value = '';
+            }
+        });
+
+        form.submit();
+
+        return;
+    }
+
+    /*
+     * Ordinary PDF:
+     * keep manual signature placement.
+     */
+    if (
+        !this.state.placed ||
+        !this.canvas
+    ) {
+        return;
+    }
+
+    const canvasW =
+        this.canvas.clientWidth;
+
+    const canvasH =
+        this.canvas.clientHeight;
+
+    const actualSigW = 300;
+    const actualSigH = 180;
+
+    document.getElementById(
+        'formSigX'
+    ).value =
+        (
+            this.state.sigX /
+            canvasW
+        ).toFixed(6);
+
+    document.getElementById(
+        'formSigY'
+    ).value =
+        (
+            this.state.sigY /
+            canvasH
+        ).toFixed(6);
+
+    document.getElementById(
+        'formSigW'
+    ).value =
+        (
+            actualSigW /
+            canvasW
+        ).toFixed(6);
+
+    document.getElementById(
+        'formSigH'
+    ).value =
+        (
+            actualSigH /
+            canvasH
+        ).toFixed(6);
+
+    document.getElementById(
+        'formSigPage'
+    ).value =
+        this.state.currentPage;
+
+    form.submit();
+}
 
 };
 

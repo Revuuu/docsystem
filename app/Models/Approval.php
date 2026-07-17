@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\User;
@@ -47,5 +48,12 @@ class Approval extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    public function signatureBlock(): HasOne
+    {
+        return $this->hasOne(
+            DocumentSignatureBlock::class,
+            'approval_id'
+        );
     }
 }

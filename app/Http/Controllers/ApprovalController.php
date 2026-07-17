@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Models\DocumentSignatureBlock;
+use App\Services\DocumentSignatureBlockService;
+use Illuminate\Validation\ValidationException;
 
 use App\Mail\ApprovalPendingNotification;
 use App\Mail\ApprovalProgressNotification;
@@ -16,6 +19,11 @@ use App\Mail\ApprovalRejectedNotification;
 
 class ApprovalController extends Controller
 {
+     public function __construct(
+        private readonly DocumentSignatureBlockService $signatureBlockService
+    ) {
+    }
+
     public function index() {
         return redirect()->route('dashboard');
     }
@@ -33,21 +41,190 @@ class ApprovalController extends Controller
         try {
             \DB::transaction(function () use ($request, $approval, &$signedPath) {
 
-                // Generate signed PDF
-                $currentFile = $approval->document->latestVersion();
+                // Retrieve the latest document version.
+$currentFile = $approval->document
+    ->latestVersion();
 
-                $latestPath = storage_path(
-                    'app/private/' . $currentFile->generated_storage_path
-                );
+if (!$currentFile) {
+    throw ValidationException::withMessages([
+        'document' =>
+            'The document file could not be found.',
+    ]);
+}
 
-            
-                $this->validateSignatureOverlap($approval, $request);
+$latestPath = storage_path(
+    'app/private/' .
+    $currentFile->generated_storage_path
+);
 
-                $signedPath = $this->signPdf(
-                    $approval,
-                    $request,
-                    $latestPath
-                );
+/*
+ * Purchase Orders use fixed backend-controlled
+ * signature blocks.
+ *
+ * Other PDFs continue using manual coordinates
+ * submitted by the browser.
+ */
+$usesFixedSignatureBlock =
+    $currentFile->template_key ===
+    'purchase_order';
+
+$signatureBlock = null;
+
+if ($usesFixedSignatureBlock) {
+    /*
+     * Lock the assigned block while signing to prevent
+     * two simultaneous approval requests.
+     */
+    $signatureBlock = $approval
+        ->signatureBlock()
+        ->lockForUpdate()
+        ->first();
+
+    if (!$signatureBlock) {
+        throw ValidationException::withMessages([
+            'signature_block' =>
+                'No fixed signature block is assigned to this approval.',
+        ]);
+    }
+
+    if (
+        (int) $signatureBlock->assigned_user_id !==
+        (int) auth()->id()
+    ) {
+        throw ValidationException::withMessages([
+            'signature_block' =>
+                'This signature block is assigned to another user.',
+        ]);
+    }
+
+    if (
+        $signatureBlock->status !==
+        DocumentSignatureBlock::STATUS_AVAILABLE
+    ) {
+        throw ValidationException::withMessages([
+            'signature_block' =>
+                'This fixed signature block is not currently available.',
+        ]);
+    }
+
+    /*
+     * Ignore any browser-submitted coordinates.
+     */
+    $signatureCoordinates = [
+        'x' =>
+            (float) $signatureBlock->x,
+
+        'y' =>
+            (float) $signatureBlock->y,
+
+        'width' =>
+            (float) $signatureBlock->width,
+
+        'height' =>
+            (float) $signatureBlock->height,
+
+        'page' =>
+            (int) $signatureBlock->page_number,
+    ];
+} else {
+    /*
+     * Normal PDF: continue accepting manually selected
+     * browser coordinates.
+     */
+    $validatedCoordinates = $request->validate([
+        'sig_x' => [
+            'required',
+            'numeric',
+            'between:0,1',
+        ],
+
+        'sig_y' => [
+            'required',
+            'numeric',
+            'between:0,1',
+        ],
+
+        'sig_w' => [
+            'required',
+            'numeric',
+            'between:0.001,1',
+        ],
+
+        'sig_h' => [
+            'required',
+            'numeric',
+            'between:0.001,1',
+        ],
+
+        'sig_page' => [
+            'required',
+            'integer',
+            'min:1',
+        ],
+    ]);
+
+    $signatureCoordinates = [
+        'x' =>
+            (float) $validatedCoordinates['sig_x'],
+
+        'y' =>
+            (float) $validatedCoordinates['sig_y'],
+
+        'width' =>
+            (float) $validatedCoordinates['sig_w'],
+
+        'height' =>
+            (float) $validatedCoordinates['sig_h'],
+
+        'page' =>
+            (int) $validatedCoordinates['sig_page'],
+    ];
+
+    /*
+     * Prevent the manual signature rectangle from
+     * extending beyond the PDF page.
+     */
+    if (
+        $signatureCoordinates['x'] +
+        $signatureCoordinates['width'] > 1
+    ) {
+        throw ValidationException::withMessages([
+            'signature' =>
+                'The selected signature position extends beyond the page width.',
+        ]);
+    }
+
+    if (
+        $signatureCoordinates['y'] +
+        $signatureCoordinates['height'] > 1
+    ) {
+        throw ValidationException::withMessages([
+            'signature' =>
+                'The selected signature position extends beyond the page height.',
+        ]);
+    }
+
+    /*
+     * Overlap checking remains active for normal PDFs.
+     */
+    $this->validateSignatureOverlap(
+        $approval,
+        $signatureCoordinates
+    );
+}
+
+$signedPath = $this->signPdf(
+    $approval,
+    $signatureCoordinates,
+    $latestPath
+);
+
+if (!$signedPath) {
+    throw ValidationException::withMessages([
+        'document' =>
+            'The signed PDF could not be generated.',
+    ]);
+}
 
                 $currentVersion = $approval->document
                     ->latestVersion();
@@ -84,6 +261,11 @@ class ApprovalController extends Controller
                         'is_current' => true,
 
                         'uploaded_by' => auth()->id(),
+                        'template_key' =>
+                            $currentFile->template_key,
+
+                        'template_hash' =>
+                            $currentFile->template_hash,
 
                     ]);
 
@@ -98,14 +280,43 @@ class ApprovalController extends Controller
                         ? (int) round($approval->received_at->diffInSeconds($completedAt))
                         : null,
 
-                        'sig_x'     => $request->sig_x,
-                        'sig_y'     => $request->sig_y,
+                        'sig_x' =>
+                            $signatureCoordinates['x'],
 
-                        'sig_w'     => $request->sig_w,
-                        'sig_h'     => $request->sig_h,
+                        'sig_y' =>
+                            $signatureCoordinates['y'],
 
-                        'sig_page'  => $request->sig_page,
+                        'sig_w' =>
+                            $signatureCoordinates['width'],
+
+                        'sig_h' =>
+                            $signatureCoordinates['height'],
+
+                        'sig_page' =>
+                            $signatureCoordinates['page'],
                     ]);
+
+                    /*
+ * Mark the fixed Purchase Order block as signed.
+ *
+ * For normal PDFs, $signatureBlock remains null and
+ * no block update is performed.
+ */
+if ($signatureBlock) {
+    $signatureBlock->update([
+        'status' =>
+            DocumentSignatureBlock::STATUS_SIGNED,
+
+        'signed_by_user_id' =>
+            auth()->id(),
+
+        'signed_document_file_id' =>
+            $newFile->id,
+
+        'signed_at' =>
+            $completedAt,
+    ]);
+}
 
                     $document = $approval->document;
 
@@ -127,6 +338,17 @@ class ApprovalController extends Controller
                             'status' => 'pending',
                             'received_at' => now(),
                         ]);
+
+                        /*
+                        * Purchase Order only:
+                        * unlock the fixed block assigned to the next approver.
+                        */
+                        if ($usesFixedSignatureBlock) {
+                            $this->signatureBlockService
+                                ->activateForApproval(
+                                    $nextApproval->id
+                                );
+                        }
 
                         Mail::to($nextApproval->user->email)->queue(new ApprovalPendingNotification($nextApproval));
 
@@ -154,33 +376,49 @@ class ApprovalController extends Controller
                 ->route('dashboard', ['section' => 'documents'])
                 ->with('approval_success', 'Document approved successfully.');
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()
-                ->route('dashboard', ['section' => 'documents'])
-                ->withErrors($e->errors(), 'approval')
-                ->with('approval_error', collect($e->errors())->flatten()->first());
-                } catch (\Exception $e) {
+        } catch (
+    \Illuminate\Validation\ValidationException $e
+) {
+    return redirect()
+        ->route('dashboard', [
+            'section' => 'documents',
+        ])
+        ->withErrors(
+            $e->errors(),
+            'approval'
+        )
+        ->with(
+            'approval_error',
+            collect($e->errors())
+                ->flatten()
+                ->first()
+        );
+} catch (\Throwable $e) {
+    Log::error(
+        'Approval signing failed',
+        [
+            'approval_id' => $approval->id,
+            'document_id' => $approval->document_id,
+            'user_id' => auth()->id(),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]
+    );
 
-                // ======== Debugging for Approval Signing Issues ========
-                    //     Log::error('Approval Exception', [
-                    //         'message' => $e->getMessage(),
-                    //         'file'    => $e->getFile(),
-                    //         'line'    => $e->getLine(),
-                    //         'trace'   => $e->getTraceAsString(),
-                    //     ]);
-
-                    //     dd(
-                    //         $e->getMessage(),
-                    //         $e->getFile(),
-                    //         $e->getLine()
-                    //     );
-                    // }
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('dashboard')
-                ->with('approval_error', 'Something went wrong while approving the document.')
-                ->with('section', 'documents');
-        }
+    return redirect()
+        ->route('dashboard', [
+            'section' => 'documents',
+        ])
+        ->with(
+            'approval_error',
+            app()->isLocal()
+                ? 'Approval failed: ' .
+                    $e->getMessage()
+                : 'Something went wrong while approving the document.'
+        );
+}
     }
 
     public function reject(Request $request, Approval $approval) {
@@ -234,6 +472,18 @@ class ApprovalController extends Controller
                 ->update([
                     'status' => 'cancelled'
                 ]);
+
+                /*
+ * Cancel every unsigned fixed signature block.
+ *
+ * Signed blocks remain signed.
+ * Normal PDFs have no signature blocks, so this
+ * safely updates zero records.
+ */
+$this->signatureBlockService
+    ->cancelRemaining(
+        $approval->document
+    );
         });
 
         // Send rejection notification
@@ -245,23 +495,42 @@ class ApprovalController extends Controller
     
     }
 
-    protected function signPdf(Approval $approval, Request $request, string $inputPath): ?string {
+    protected function signPdf(
+    Approval $approval,
+    array $coordinates,
+    string $inputPath
+): ?string {
+    if (!file_exists($inputPath)) {
+        return null;
+    }
 
-        if (!file_exists($inputPath)) {
-            return null;
-        }
+    $pdf = new Fpdi();
+    $pdf->SetAutoPageBreak(false);
 
-        $pdf = new Fpdi();
-        $pdf->SetAutoPageBreak(false);
+    $pageCount = $pdf->setSourceFile(
+        $inputPath
+    );
 
-        $pageCount = $pdf->setSourceFile($inputPath);
+    $sigX = (float) $coordinates['x'];
+    $sigY = (float) $coordinates['y'];
+    $sigW = (float) $coordinates['width'];
+    $sigH = (float) $coordinates['height'];
+    $sigPage = (int) $coordinates['page'];
 
-        $sigX    = (float) ($request->sig_x    ?? 0.1);
-        $sigY    = (float) ($request->sig_y    ?? 0.8);
-        $sigW    = (float) ($request->sig_w    ?? 0.2);
-        $sigH    = (float) ($request->sig_h    ?? 0.05);
-        $sigPage = (int)   ($request->sig_page ?? 1);
+    if (
+        $sigPage < 1 ||
+        $sigPage > $pageCount
+    ) {
+        throw ValidationException::withMessages([
+            'signature' =>
+                'The selected signature page does not exist in the PDF.',
+        ]);
+    }
+$sourceFile = $approval->document->latestVersion();
 
+$isFixedTemplate =
+    is_string($sourceFile?->template_key) &&
+    trim($sourceFile->template_key) !== '';
         for ($i = 1; $i <= $pageCount; $i++) {
             $tpl  = $pdf->importPage($i);
             $size = $pdf->getTemplateSize($tpl);
@@ -273,39 +542,147 @@ class ApprovalController extends Controller
             $pdf->useTemplate($tpl);
 
             if ($i === $sigPage) {
-                $x = $sigX * $size['width'];
-                $y = $sigY * $size['height'];
+    $x = $sigX * $size['width'];
+    $y = $sigY * $size['height'];
 
-                $sigImgPath = auth()->user()->signature_path
-                    ? storage_path('app/private/' . auth()->user()->signature_path)
-                    : null;
+    $blockW = $sigW * $size['width'];
+    $blockH = $sigH * $size['height'];
 
-                // Signature image above the line
-                $blockW = $sigW * $size['width'];
+    $sigImgPath = auth()->user()->signature_path
+        ? storage_path(
+            'app/private/' .
+            auth()->user()->signature_path
+        )
+        : null;
 
-                $imgW = $blockW * 0.65;
-                $imgH = 18;
+    if (
+        !$sigImgPath ||
+        !file_exists($sigImgPath)
+    ) {
+        throw ValidationException::withMessages([
+            'signature' =>
+                'Your saved signature image could not be found.',
+        ]);
+    }
 
-                if ($sigImgPath && file_exists($sigImgPath)) {
-                    $pdf->Image($sigImgPath, $x, $y, $imgW, $imgH, 'PNG');
-                }
+    /*
+     * Fixed PDF template:
+     * render only the signature image inside the
+     * exact Sejda signature-field rectangle.
+     */
+    if ($isFixedTemplate) {
+        $imageSize = getimagesize($sigImgPath);
 
-                $lineY = $y + $imgH + 4;
+        if ($imageSize === false) {
+            throw ValidationException::withMessages([
+                'signature' =>
+                    'The saved signature image is invalid.',
+            ]);
+        }
 
-                $pdf->SetDrawColor(0, 0, 128);
-                $pdf->SetLineWidth(0.4);
-                $pdf->Line($x, $lineY, $x + $blockW, $lineY);
+        $imagePixelWidth = (float) $imageSize[0];
+        $imagePixelHeight = (float) $imageSize[1];
 
-                $pdf->SetFont('helvetica', 'B', 10);
-                $pdf->SetTextColor(0, 0, 128);
-                $pdf->SetXY($x, $lineY + 2);
-                $pdf->Write(0, auth()->user()->name);
+        /*
+         * Small internal padding prevents the signature
+         * from touching the field boundary.
+         */
+        $padding = min($blockW, $blockH) * 0.08;
 
-                $pdf->SetFont('helvetica', '', 8);
-                $pdf->SetTextColor(80, 80, 80);
-                $pdf->SetXY($x, $lineY + 7);
-                $pdf->Write(0, Carbon::now()->format('Y-m-d H:i:s'));
-            }
+        $availableW = max(
+            $blockW - ($padding * 2),
+            0.1
+        );
+
+        $availableH = max(
+            $blockH - ($padding * 2),
+            0.1
+        );
+
+        $scale = min(
+            $availableW / $imagePixelWidth,
+            $availableH / $imagePixelHeight
+        );
+
+        $imgW = $imagePixelWidth * $scale;
+        $imgH = $imagePixelHeight * $scale;
+
+        $imgX =
+            $x +
+            (($blockW - $imgW) / 2);
+
+        $imgY =
+            $y +
+            (($blockH - $imgH) / 2);
+
+        $pdf->Image(
+            $sigImgPath,
+            $imgX,
+            $imgY,
+            $imgW,
+            $imgH,
+            'PNG'
+        );
+
+        continue;
+    }
+
+    /*
+     * Ordinary PDFs retain the existing display:
+     * signature, line, name, and timestamp.
+     */
+    $imgW = $blockW * 0.65;
+    $imgH = 18;
+
+    $pdf->Image(
+        $sigImgPath,
+        $x,
+        $y,
+        $imgW,
+        $imgH,
+        'PNG'
+    );
+
+    $lineY = $y + $imgH + 4;
+
+    $pdf->SetDrawColor(0, 0, 128);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line(
+        $x,
+        $lineY,
+        $x + $blockW,
+        $lineY
+    );
+
+    $pdf->SetFont(
+        'helvetica',
+        'B',
+        10
+    );
+
+    $pdf->SetTextColor(0, 0, 128);
+    $pdf->SetXY($x, $lineY + 2);
+    $pdf->Write(
+        0,
+        auth()->user()->name
+    );
+
+    $pdf->SetFont(
+        'helvetica',
+        '',
+        8
+    );
+
+    $pdf->SetTextColor(80, 80, 80);
+    $pdf->SetXY($x, $lineY + 7);
+
+    $pdf->Write(
+        0,
+        Carbon::now()->format(
+            'Y-m-d H:i:s'
+        )
+    );
+}
         }
 
         // Save as a NEW signed file — never overwrite the original
@@ -339,14 +716,25 @@ class ApprovalController extends Controller
         return $signedRelativePath;
     }
 
-    protected function validateSignatureOverlap(Approval $approval, Request $request) {
+    protected function validateSignatureOverlap(
+    Approval $approval,
+    array $coordinates
+): void {
 
-        $x = (float) $request->sig_x;
-        $y = (float) $request->sig_y;
-        $w = (float) $request->sig_w;
-        $h = (float) $request->sig_h;
-        $page = (int) $request->sig_page;
+        $x =
+    (float) $coordinates['x'];
 
+$y =
+    (float) $coordinates['y'];
+
+$w =
+    (float) $coordinates['width'];
+
+$h =
+    (float) $coordinates['height'];
+
+$page =
+    (int) $coordinates['page'];
         $existingSignatures = Approval::where('document_id', $approval->document_id)
             ->where('status', 'approved')
             ->whereNotNull('sig_x')

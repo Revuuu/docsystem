@@ -261,7 +261,8 @@
                                                             {{ auth()->user()->signature_path ? 'true' : 'false' }},
                                                             {{ $myPendingApproval->id }},
                                                             '{{ route('files.view', encrypt($signingFileId)) }}',
-                                                            '{{ route('approvals.approve', $myPendingApproval->id) }}'
+                                                            '{{ route('approvals.approve', $myPendingApproval->id) }}',
+                                                            '{{ $latestVersion?->template_key ?? '' }}'
                                                         )">
                                                     ✔ Approve & Sign
                                                 </button>
