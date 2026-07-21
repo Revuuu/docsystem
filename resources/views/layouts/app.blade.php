@@ -50,16 +50,78 @@
                     @include('partials.header-section')
                 </div>
 
-                <div class="topbar-account">
-                    <div class="topbar-avatar">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+              <div class="topbar-user-dropdown" id="topbarUserDropdown">
+
+                    <button
+                        type="button"
+                        class="topbar-user-trigger"
+                        id="topbarUserTrigger"
+                        aria-expanded="false"
+                        aria-controls="topbarUserMenu"
+                    >
+                        <div class="user-avatar">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                        </div>
+
+                        <div class="topbar-user-info">
+                            <strong>{{ auth()->user()->name }}</strong>
+                            <small>{{ ucfirst(auth()->user()->role) }}</small>
+                        </div>
+
+                        <i class="bi bi-chevron-down topbar-user-chevron"></i>
+                    </button>
+
+                    <div
+                        class="topbar-user-menu"
+                        id="topbarUserMenu"
+                        role="menu"
+                    >
+                        <div class="topbar-user-menu-header">
+                            <strong>{{ auth()->user()->name }}</strong>
+                            <span>{{ auth()->user()->email }}</span>
+                        </div>
+
+                        <div class="topbar-user-menu-divider"></div>
+
+                        <a
+                            href="{{ route('dashboard', ['section' => 'profile']) }}"
+                            class="topbar-user-menu-item"
+                            role="menuitem"
+                        >
+                            <i class="bi bi-person"></i>
+                            <span>My Profile</span>
+                        </a>
+
+                        <a
+                            href="{{ route('dashboard') }}"
+                            class="topbar-user-menu-item"
+                            role="menuitem"
+                        >
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+
+                        <div class="topbar-user-menu-divider"></div>
+
+                        <form
+                            method="POST"
+                            action="{{ route('logout') }}"
+                        >
+                            @csrf
+
+                            <button
+                                type="submit"
+                                class="topbar-user-menu-item topbar-user-logout"
+                                role="menuitem"
+                            >
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
 
-                    <div class="topbar-user-text">
-                        <strong>{{ auth()->user()->name }}</strong>
-                        <small>{{ ucfirst(auth()->user()->role) }}</small>
-                    </div>
                 </div>
+                
 
             </header>
 

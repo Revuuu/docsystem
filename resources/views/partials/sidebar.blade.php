@@ -34,20 +34,7 @@
         @endforeach
 
     </nav>
-
-    <div class="sidebar-user-card">
-
-        <div class="user-avatar">
-            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-        </div>
-
-        <div class="sidebar-user-info">
-            <strong>{{ auth()->user()->name }}</strong>
-            <small>{{ ucfirst(auth()->user()->role) }}</small>
-        </div>
-
-    </div>
-
+    
     <form method="POST" action="{{ route('logout') }}" class="logout-wrap">
         @csrf
 

@@ -4,13 +4,15 @@ const Dashboard = {
     {
         console.log('DASHBOARD INIT');
         window.editUser =
-    this.editUser.bind(this);
+            this.editUser.bind(this);
 
-window.closeEditUserModal =
-    this.closeEditUserModal.bind(this);
+        window.closeEditUserModal =
+            this.closeEditUserModal.bind(this);
 
         window.showSection =
             this.showSection.bind(this);
+
+        this.initTopbarUserDropdown();
 
          const urlSection = new URLSearchParams(
                 window.location.search
@@ -110,7 +112,92 @@ closeEditUserModal()
     document.getElementById(
         'editUserModal'
     ).style.display = 'none';
-}
+},
+
+initTopbarUserDropdown()
+{
+    this.topbarUserDropdown =
+        document.getElementById(
+            'topbarUserDropdown'
+        );
+
+    this.topbarUserTrigger =
+        document.getElementById(
+            'topbarUserTrigger'
+        );
+
+    this.topbarUserMenu =
+        document.getElementById(
+            'topbarUserMenu'
+        );
+
+    if (
+        !this.topbarUserDropdown ||
+        !this.topbarUserTrigger ||
+        !this.topbarUserMenu
+    ) {
+        return;
+    }
+
+    this.topbarUserTrigger.addEventListener(
+        'click',
+        (event) => {
+            event.stopPropagation();
+
+            const isOpen =
+                this.topbarUserDropdown
+                    .classList
+                    .toggle('is-open');
+
+            this.topbarUserTrigger.setAttribute(
+                'aria-expanded',
+                String(isOpen)
+            );
+        }
+    );
+
+    this.topbarUserMenu.addEventListener(
+        'click',
+        (event) => {
+            event.stopPropagation();
+        }
+    );
+
+    document.addEventListener(
+        'click',
+        () => {
+            this.closeTopbarUserDropdown();
+        }
+    );
+
+    document.addEventListener(
+        'keydown',
+        (event) => {
+            if (event.key === 'Escape') {
+                this.closeTopbarUserDropdown();
+            }
+        }
+    );
+},
+
+closeTopbarUserDropdown()
+{
+    if (
+        !this.topbarUserDropdown ||
+        !this.topbarUserTrigger
+    ) {
+        return;
+    }
+
+    this.topbarUserDropdown.classList.remove(
+        'is-open'
+    );
+
+    this.topbarUserTrigger.setAttribute(
+        'aria-expanded',
+        'false'
+    );
+},
 };
 
 export default Dashboard;

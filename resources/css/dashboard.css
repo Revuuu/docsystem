@@ -45,11 +45,201 @@
     flex: 1;
 }
 
-.topbar-account {
+.topbar-user-dropdown {
+    position: relative;
+    z-index: 1100;
+    margin-left: auto;
+    flex-shrink: 0;
+
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.topbar-user-trigger {
+    min-width: auto;
+    padding: 6px;
+
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    gap: 10px;
+
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.topbar-user-trigger:hover,
+.topbar-user-trigger:focus,
+.topbar-user-trigger:focus-visible,
+.topbar-user-dropdown.is-open .topbar-user-trigger {
+    border: none;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.topbar-user-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.topbar-user-info strong {
+    max-width: 145px;
+
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-user-info small {
+    margin-top: 3px;
+
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 500;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-user-chevron {
+    color: #64748b;
+    font-size: 12px;
+
+    transition: transform 0.2s ease;
+}
+
+.topbar-user-dropdown.is-open .topbar-user-chevron {
+    transform: rotate(180deg);
+}
+
+.topbar-user-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 240px;
+    padding: 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow:
+        0 10px 15px -3px rgb(15 23 42 / 10%),
+        0 4px 6px -4px rgb(15 23 42 / 10%);
+
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    transform: translateY(-6px);
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+}
+
+.topbar-user-dropdown.is-open .topbar-user-menu {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+
+    transform: translateY(0);
+}
+
+.topbar-user-menu-header {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar-user-menu-header strong {
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.topbar-user-menu-header span {
+    margin-top: 3px;
+
+    color: #64748b;
+    font-size: 11px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-user-menu-divider {
+    height: 1px;
+    margin: 6px 0;
+    background: #e2e8f0;
+}
+
+.topbar-user-menu-item {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #334155;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.topbar-user-menu-item i {
+    width: 18px;
+    color: #64748b;
+    font-size: 15px;
+    text-align: center;
+}
+
+.topbar-user-menu-item:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.topbar-user-logout {
+    color: #dc2626;
+}
+
+.topbar-user-logout i {
+    color: #dc2626;
+}
+
+.topbar-user-logout:hover {
+    background: #fef2f2;
+    color: #b91c1c;
 }
 
 .topbar-avatar {
@@ -165,7 +355,6 @@
 
 .sidebar.collapsed .nav-btn,
 .sidebar.collapsed .sidebar-brand,
-.sidebar.collapsed .sidebar-user-card,
 .sidebar.collapsed .btn-logout {
     justify-content: center;
     padding-left: 0;
@@ -207,17 +396,8 @@
     align-items: center;
 }
 
-.sidebar-user,
-.sidebar-user-card {
-    width: 100%;
-    padding: 14px;
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-lg);
+.sidebar-user {
     background: #fafafa;
-    display: flex;
-    align-items: center;
-    text-align: left;
-    gap: 12px;
     margin-top: auto;
     order: 3;
 }
@@ -343,7 +523,8 @@
 
 .logout-wrap {
     width: 100%;
-    margin-top: 12px;
+    margin-top: auto;
+    padding-top: 12px;
     order: 4;
 }
 
@@ -1402,7 +1583,7 @@
     .stats-grid{
         grid-template-columns:1fr;
     }
-    .topbar-account .topbar-user-text {
+    .topbar-right .topbar-user-text {
         display: none;
     }
 
@@ -1471,14 +1652,68 @@
 @media (max-width: 540px) {
     .login-card {
         width: 100%;
-        margin-left: auto;
         margin-right: auto;
         margin-bottom: 30px;
+        margin-left: auto;
     }
-    .branding-header img{
+
+    .branding-header img {
         width: 20%;
-        height: 20%;
+        height: auto;
         margin-top: 30px;
+    }
+
+    .topbar-user-dropdown {
+        position: relative;
+        z-index: 1100;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .topbar-user-trigger {
+        min-width: auto;
+        width: auto;
+        padding: 5px;
+        gap: 0;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .topbar-user-trigger:hover,
+    .topbar-user-dropdown.is-open .topbar-user-trigger {
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .topbar-user-info,
+    .topbar-user-chevron {
+        display: none;
+    }
+
+    .topbar-user-trigger .user-avatar {
+        width: 38px;
+        height: 38px;
+        margin: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .topbar-user-menu {
+        position: fixed;
+        top: 65px;
+        right: 12px;
+        left: auto;
+
+        width: min(260px, calc(100vw - 24px));
+        max-width: none;
     }
 }
 
