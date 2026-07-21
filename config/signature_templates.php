@@ -22,25 +22,6 @@ return [
 
         'name' => 'Purchase Order',
 
-        /*
-         * Optional identifying code printed on the document.
-         */
-        'document_code' => 'FM-PUR-004-1/5',
-
-        /*
-         * A template may support more than one valid PDF hash.
-         *
-         * The environment variable will be populated in the
-         * next implementation step.
-         */
-        'hashes' => [
-            env('PHMC_PO_TEMPLATE_SHA256'),
-        ],
-
-        /*
-         * Signature blocks must follow the same sequence as
-         * the generated approval records.
-         */
         'blocks' => [
             [
                 'sequence' => 1,
@@ -105,6 +86,53 @@ return [
                 'y' => 0.827020,
                 'width' => 0.158497,
                 'height' => 0.031566,
+            ],
+        ],
+    ],
+
+    'mrf' => [
+        'key' => 'mrf',
+
+        'name' => 'Material Requesition Form Order',
+
+        'blocks' => [
+            [
+                'sequence' => 1,
+                'role' => 'staff',
+                'label' => 'Staff',
+                'field_name' => 'mrf_1',
+                'page_number' => 1,
+
+                'x' => 0.202614,
+                'y' => 0.441919,
+                'width' => 0.179739,
+                'height' => 0.020202,
+            ],
+
+            [
+                'sequence' => 2,
+                'role' => 'supervisor',
+                'label' => 'Supervisor',
+                'field_name' => 'mrf_2',
+                'page_number' => 1,
+
+                'x' => 0.202614,
+                'y' => 0.474747,
+                'width' => 0.179739,
+                'height' => 0.020202,
+            ],
+
+            [
+                'sequence' => 3,
+                'role' => 'depthead',
+                'label' => 'Department Head',
+                'field_name' => 'mrf_3',
+                'page_number' => 1,
+
+                'x' => 0.738562,
+                'y' => 0.443182,
+                'width' => 0.179739,
+                'height' => 0.020202,
             ],
         ],
     ],

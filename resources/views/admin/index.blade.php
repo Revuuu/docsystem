@@ -910,6 +910,290 @@
         </div>
     </div>
 </div>
+
+<div
+    id="section-document-templates"
+    class="dashboard-section"
+>
+    <div class="container-fluid px-0">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">Document Templates</h2>
+
+                <p class="text-muted mb-0">
+                    Upload, version, and activate document templates.
+                </p>
+            </div>
+        </div>
+
+        {{-- Upload form --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <strong>Upload New Template Version</strong>
+            </div>
+
+            <div class="card-body">
+                <form
+                    method="POST"
+                    action="{{ route('document-templates.store') }}"
+                    enctype="multipart/form-data"
+                >
+                    @csrf
+
+                    <div class="row g-3">
+
+                        {{-- Template type --}}
+                        <div class="col-md-6">
+                            <label
+                                for="templateKey"
+                                class="form-label"
+                            >
+                                Template Type
+                            </label>
+
+                            <select
+                                id="templateKey"
+                                name="template_key"
+                                class="form-select
+                                    @error('template_key') is-invalid @enderror"
+                                required
+                            >
+                                <option value="" disabled
+                                    @selected(!old('template_key'))
+                                >
+                                    Select template type
+                                </option>
+
+                                @foreach (
+                                    $signatureTemplates
+                                    as $key => $definition
+                                )
+                                    <option
+                                        value="{{ $key }}"
+                                        @selected(
+                                            old('template_key') === $key
+                                        )
+                                    >
+                                        {{ $definition['name']
+                                            ?? ucwords(
+                                                str_replace('_', ' ', $key)
+                                            )
+                                        }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('template_key')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                            <small class="text-muted">
+                                Template types are configured in
+                                <code>config/signature_templates.php</code>.
+                            </small>
+                        </div>
+
+                        {{-- PDF file --}}
+                        <div class="col-md-6">
+                            <label
+                                for="templateFile"
+                                class="form-label"
+                            >
+                                PDF Template
+                            </label>
+
+                            <input
+                                type="file"
+                                id="templateFile"
+                                name="template_file"
+                                class="form-control
+                                    @error('template_file') is-invalid @enderror"
+                                accept="application/pdf,.pdf"
+                                required
+                            >
+
+                            @error('template_file')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                            <small class="text-muted">
+                                Maximum file size: 20 MB.
+                            </small>
+                        </div>
+
+                        {{-- Activate immediately --}}
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input
+                                    type="checkbox"
+                                    id="activateNow"
+                                    name="activate_now"
+                                    class="form-check-input"
+                                    value="1"
+                                    @checked(old('activate_now'))
+                                >
+
+                                <label
+                                    for="activateNow"
+                                    class="form-check-label"
+                                >
+                                    Activate this version immediately
+                                </label>
+                            </div>
+
+                            <small class="text-muted">
+                                The currently active version of the selected
+                                template type will be deactivated.
+                            </small>
+                        </div>
+
+                        <div class="col-12">
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                <i class="bi bi-upload me-1"></i>
+                                Upload Template
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- All template versions --}}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>Template Versions</strong>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Template Type</th>
+                                <th>Version</th>
+                                <th>File Path</th>
+                                <th>Status</th>
+                                <th>Created By</th>
+                                <th>Last Modified By</th>
+                                <th>Updated</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($documentTemplates as $template)
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ $template->name }}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            {{ $template->template_key }}
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        Version {{ $template->version }}
+                                    </td>
+
+                                    <td>
+                                        <code>
+                                            {{ $template->file_path }}
+                                        </code>
+                                    </td>
+
+                                    <td>
+                                        @if ($template->is_active)
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                Inactive
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        {{ $template->createdBy?->name
+                                            ?? 'System'
+                                        }}
+                                    </td>
+
+                                    <td>
+                                        {{ $template->updatedBy?->name
+                                            ?? 'System'
+                                        }}
+                                    </td>
+
+                                    <td>
+                                        {{ $template->updated_at?->format(
+                                            'M d, Y h:i A'
+                                        ) }}
+                                    </td>
+
+                                    <td class="text-end">
+                                        @if (!$template->is_active)
+                                            <form
+                                                method="POST"
+                                                action="{{ route(
+                                                    'document-templates.activate',
+                                                    $template
+                                                ) }}"
+                                                class="d-inline"
+                                            >
+                                                @csrf
+                                                @method('PATCH')
+
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    onclick="return confirm(
+                                                        'Activate {{ addslashes($template->name) }} version {{ $template->version }}?'
+                                                    )"
+                                                >
+                                                    Activate
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-success"
+                                                disabled
+                                            >
+                                                Current
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td
+                                        colspan="8"
+                                        class="text-center text-muted py-4"
+                                    >
+                                        No document templates uploaded.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 {{-- Audit Trail Section --}}
 <div id="section-audit"
     class="dashboard-section">

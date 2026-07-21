@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\DocumentMessageController;
+use App\Http\Controllers\Admin\DocumentTemplateController;
 
 Route::redirect('/', '/dashboard');
 
@@ -60,7 +61,17 @@ Route::middleware(['auth', 'otp'])->group(function () {
             '/users/{user}',
             [UserController::class, 'update']
         )->name('users.update');
-            });
+
+        Route::post(
+            '/document-templates',
+            [DocumentTemplateController::class, 'store']
+        )->name('document-templates.store');
+
+        Route::patch(
+            '/document-templates/{documentTemplate}/activate',
+            [DocumentTemplateController::class, 'activate']
+        )->name('document-templates.activate');
+    });
 
     Route::get('/signature', [SignatureController::class, 'index'])
     ->name('signature.index');

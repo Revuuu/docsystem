@@ -184,14 +184,20 @@ async open(
     templateKey = null
 ) {
 
+    const normalizedTemplateKey =
+    typeof templateKey === 'string'
+        ? templateKey.trim()
+        : '';
+
+    this.state.isFixedTemplate =
+        normalizedTemplateKey !== '';
+
     console.log('SIGNATURE OPEN DEBUG', {
         docId,
-        templateKey,
-        isPurchaseOrder:
-            templateKey === 'purchase_order',
+        templateKey: normalizedTemplateKey,
+        isFixedTemplate:
+            this.state.isFixedTemplate,
     });
-    this.state.isFixedTemplate =
-        templateKey === 'purchase_order';
 
     this.state.currentPdfUrl =
         pdfUrl;
@@ -265,8 +271,8 @@ async open(
         }
 
         if (this.hint) {
-            this.hint.textContent =
-                'Your signature will be placed automatically in your assigned Purchase Order signature field.';
+         this.hint.textContent =
+            'Your signature will be placed automatically in your assigned signature field.';
         }
     } else {
         this.state.placed = false;

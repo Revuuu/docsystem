@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\DocumentSignatureBlock;
 use App\Services\DocumentSignatureBlockService;
 use Illuminate\Validation\ValidationException;
-
+use App\Services\PdfNormalizationService;
 use App\Mail\ApprovalPendingNotification;
 use App\Mail\ApprovalProgressNotification;
 use App\Mail\ApprovalCompletedNotification;
@@ -20,9 +20,10 @@ use App\Mail\ApprovalRejectedNotification;
 class ApprovalController extends Controller
 {
      public function __construct(
-        private readonly DocumentSignatureBlockService $signatureBlockService
-    ) {
-    }
+    private readonly DocumentSignatureBlockService $signatureBlockService,
+    private readonly PdfNormalizationService $pdfNormalizationService
+) {
+}
 
     public function index() {
         return redirect()->route('dashboard');
@@ -65,8 +66,8 @@ $latestPath = storage_path(
  * submitted by the browser.
  */
 $usesFixedSignatureBlock =
-    $currentFile->template_key ===
-    'purchase_order';
+    is_string($currentFile->template_key) &&
+    trim($currentFile->template_key) !== '';
 
 $signatureBlock = null;
 
@@ -504,12 +505,18 @@ $this->signatureBlockService
         return null;
     }
 
+    $normalizedInputPath =
+    $this->pdfNormalizationService
+        ->normalizeForFpdi($inputPath);
+
+try {
+
     $pdf = new Fpdi();
     $pdf->SetAutoPageBreak(false);
 
-    $pageCount = $pdf->setSourceFile(
-        $inputPath
-    );
+  $pageCount = $pdf->setSourceFile(
+    $normalizedInputPath
+);
 
     $sigX = (float) $coordinates['x'];
     $sigY = (float) $coordinates['y'];
@@ -714,6 +721,12 @@ $isFixedTemplate =
         $pdf->Output($signedAbsolutePath, 'F');
 
         return $signedRelativePath;
+
+} finally {
+    if (is_file($normalizedInputPath)) {
+        @unlink($normalizedInputPath);
+    }
+}
     }
 
     protected function validateSignatureOverlap(

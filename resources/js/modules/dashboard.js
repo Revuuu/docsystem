@@ -36,6 +36,7 @@ window.closeEditUserModal =
             audit: 'Audit Trail',
             signature: 'My Signature',
             messenger: 'Messenger',
+            templates: 'Templates',
             'admin-dashboard': 'Admin Dashboard',
             'user-management': 'User Management',
         };

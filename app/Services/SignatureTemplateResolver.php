@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\DocumentTemplate;
 use Illuminate\Http\UploadedFile;
 
 class SignatureTemplateResolver
 {
+    public function __construct(
+        private readonly PdfFormFieldService $pdfFormFieldService
+    ) {
+    }
+
     /**
-     * Resolve the uploaded PDF against the supported templates.
+     * Resolve an uploaded PDF using active database templates
+     * and their configured PDF signature fields.
      */
     public function resolve(UploadedFile $uploadedFile): ?array
     {
@@ -21,69 +28,102 @@ class SignatureTemplateResolver
             return null;
         }
 
-        $uploadedHash = hash_file(
-            'sha256',
-            $realPath
-        );
-
-        if ($uploadedHash === false) {
+        /*
+         * Read the uploaded PDF fields once.
+         */
+        try {
+            $uploadedFields = $this->pdfFormFieldService
+                ->getFields($realPath);
+        } catch (\Throwable) {
+            /*
+             * PDFs without readable form fields are treated
+             * as ordinary documents.
+             */
             return null;
         }
 
-        $uploadedHash = strtolower($uploadedHash);
+        /*
+         * Only database templates marked active may classify
+         * newly uploaded documents.
+         */
+        $activeTemplates = DocumentTemplate::query()
+            ->where('is_active', true)
+            ->orderBy('template_key')
+            ->get();
 
-        foreach (config('signature_templates', []) as $key => $template) {
-            $configuredHashes = $this->normalizeHashes(
-                $template['hashes'] ?? []
+        foreach ($activeTemplates as $databaseTemplate) {
+            $templateKey = $databaseTemplate->template_key;
+
+            $definition = config(
+                "signature_templates.{$templateKey}"
             );
 
-            foreach ($configuredHashes as $configuredHash) {
-                if (!hash_equals($configuredHash, $uploadedHash)) {
-                    continue;
-                }
-
-                return array_merge(
-                    $template,
-                    [
-                        'key' => $template['key'] ?? $key,
-                        'uploaded_hash' => $uploadedHash,
-                    ]
-                );
+            if (!is_array($definition)) {
+                continue;
             }
+
+            $requiredFields = collect(
+                $definition['blocks'] ?? []
+            )
+                ->pluck('field_name')
+                ->filter(
+                    fn ($fieldName): bool =>
+                        is_string($fieldName) &&
+                        trim($fieldName) !== ''
+                )
+                ->map(
+                    fn (string $fieldName): string =>
+                        trim($fieldName)
+                )
+                ->unique()
+                ->values();
+
+            if ($requiredFields->isEmpty()) {
+                continue;
+            }
+
+            $matchesTemplate = $requiredFields->every(
+                function (string $fieldName) use (
+                    $uploadedFields
+                ): bool {
+                    if (!isset($uploadedFields[$fieldName])) {
+                        return false;
+                    }
+
+                    return (
+                        $uploadedFields[$fieldName]['FieldType']
+                        ?? null
+                    ) === 'Signature';
+                }
+            );
+
+            if (!$matchesTemplate) {
+                continue;
+            }
+
+            return array_merge(
+                $definition,
+                [
+                    'key' => $templateKey,
+
+                    /*
+                     * Metadata from the active database record.
+                     */
+                    'document_template_id' =>
+                        $databaseTemplate->id,
+
+                    'template_version' =>
+                        $databaseTemplate->version,
+
+                    'template_file_path' =>
+                        $databaseTemplate->file_path,
+                ]
+            );
         }
 
+        /*
+         * No active template structure matched.
+         */
         return null;
-    }
-
-    /**
-     * Remove blank or invalid hashes and normalize them to lowercase.
-     */
-    private function normalizeHashes(array $hashes): array
-    {
-        return array_values(
-            array_filter(
-                array_map(
-                    static function ($hash): ?string {
-                        if (!is_string($hash)) {
-                            return null;
-                        }
-
-                        $hash = strtolower(trim($hash));
-
-                        if (
-                            !preg_match(
-                                '/^[a-f0-9]{64}$/',
-                                $hash
-                            )
-                        ) {
-                            return null;
-                        }
-
-                        return $hash;
-                    },
-                    $hashes
-                )
-            )
-        );
     }
 }

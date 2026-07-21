@@ -29,6 +29,11 @@ class SidebarService
                     'section' => 'users',
                 ],
                 [
+                    'label' => 'Document Templates',
+                    'icon' => 'document-templates',
+                    'section' => 'document-templates',
+                ],
+                [
                     'label' => 'Audit Trail',
                     'icon' => 'file-text',
                     'section' => 'audit',

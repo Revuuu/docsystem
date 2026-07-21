@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Models\Approval;
 use App\Models\User;
 use App\Models\AuditLog;
+use App\Models\DocumentTemplate;
 
 class DashboardController extends Controller
 {
@@ -63,6 +64,15 @@ class DashboardController extends Controller
         ->get();
 
         $pendingDocuments = $approvals->map(fn ($approval) => $approval->document);
+
+        $documentTemplates = DocumentTemplate::query()
+                ->with([
+                    'createdBy:id,name',
+                    'updatedBy:id,name',
+                ])
+                ->orderBy('template_key')
+                ->orderByDesc('version')
+                ->get();
 
         if ($userRole === 'admin') {
             $search = request('search');
@@ -144,6 +154,11 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(10)
                 ->get();
+            
+            $signatureTemplates = config(
+                'signature_templates',
+                []
+            );
                 
             return view('admin.index', compact(
                 'users',
@@ -152,6 +167,8 @@ class DashboardController extends Controller
                 'signedDocuments',
                 'approvals',
                 'pendingDocuments',
+                'documentTemplates',
+                'signatureTemplates',
                 'approvers',
                 'auditLogs',
                 'section',
@@ -169,6 +186,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'documents',
             'signedDocuments',
+            'documentTemplates',
             'approvals',
             'pendingDocuments',
             'approvers',

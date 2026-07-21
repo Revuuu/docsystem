@@ -28,6 +28,10 @@
         <i class="bi bi-grid sidebar-icon"></i>
         @break
 
+    @case('document-templates')
+        <i class="bi bi-file-earmark-binary"></i>
+        @break
+
     @case('folder')
         <i class="bi bi-folder2-open sidebar-icon"></i>
         @break
