@@ -10,9 +10,10 @@ use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\DocumentMessageController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
+use App\Http\Controllers\Admin\DocumentApprovalWorkflowController;
+use App\Http\Controllers\Admin\TemporaryDocumentExtractionController;
 
 Route::redirect('/', '/dashboard');
-
 
 Route::middleware(['auth', 'otp'])->group(function () {
 
@@ -71,6 +72,16 @@ Route::middleware(['auth', 'otp'])->group(function () {
             '/document-templates/{documentTemplate}/activate',
             [DocumentTemplateController::class, 'activate']
         )->name('document-templates.activate');
+
+        Route::post(
+            '/document-approval-workflows',
+            [DocumentApprovalWorkflowController::class, 'store']
+        )->name('document-approval-workflows.store');
+
+        Route::post(
+            '/admin/documents/temporary-po',
+            [TemporaryDocumentExtractionController::class, 'store']
+        )->name('admin.documents.temporary-po.store');
     });
 
     Route::get('/signature', [SignatureController::class, 'index'])

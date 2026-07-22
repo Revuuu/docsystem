@@ -7,6 +7,7 @@ use App\Models\Approval;
 use App\Models\User;
 use App\Models\AuditLog;
 use App\Models\DocumentTemplate;
+use App\Models\DocumentApprovalWorkflow;
 
 class DashboardController extends Controller
 {
@@ -159,6 +160,89 @@ class DashboardController extends Controller
                 'signature_templates',
                 []
             );
+
+            $documentApprovalWorkflows =
+                DocumentApprovalWorkflow::query()
+                    ->with([
+                        'steps.user.roles',
+                    ])
+                    ->orderBy('template_key')
+                    ->get()
+                    ->keyBy('template_key');
+
+            $roleOrder = [
+                'staff' => 1,
+                'supervisor' => 2,
+                'depthead' => 3,
+                'division' => 4,
+                'executive' => 5,
+            ];
+
+            $workflowUsers = User::query()
+                ->with('roles')
+                ->whereNotNull('email_verified_at')
+                ->orderBy('name')
+                ->get()
+                ->filter(function (User $user) use (
+                    $roleOrder
+                ): bool {
+                    $role =
+                        is_string($user->role) &&
+                        trim($user->role) !== ''
+                            ? trim($user->role)
+                            : $user->roles
+                                ->pluck('name')
+                                ->first();
+
+                    return is_string($role)
+                        && isset($roleOrder[$role]);
+                })
+                ->sortBy(function (User $user) use (
+                    $roleOrder
+                ): array {
+                    $role =
+                        is_string($user->role) &&
+                        trim($user->role) !== ''
+                            ? trim($user->role)
+                            : $user->roles
+                                ->pluck('name')
+                                ->first();
+
+                    return [
+                        $roleOrder[$role] ?? 999,
+                        strtolower($user->name),
+                    ];
+                })
+                ->values();
+
+            $temporaryPoConfiguration = config(
+                'document_extraction.document_types.purchase_order',
+                []
+            );
+
+            $temporaryPoSourcePath =
+                $temporaryPoConfiguration['source_path']
+                ?? null;
+
+            $temporaryPoReferencePath =
+                $temporaryPoConfiguration[
+                    'reference_template_path'
+                ] ?? null;
+
+            $purchaseOrderWorkflow =
+                $documentApprovalWorkflows->get(
+                    'purchase_order'
+                );
+
+            $temporaryPoReady =
+                $purchaseOrderWorkflow?->is_active === true
+                && $purchaseOrderWorkflow
+                    ->steps
+                    ->isNotEmpty()
+                && is_string($temporaryPoSourcePath)
+                && is_file($temporaryPoSourcePath)
+                && is_string($temporaryPoReferencePath)
+                && is_file($temporaryPoReferencePath);
                 
             return view('admin.index', compact(
                 'users',
@@ -169,6 +253,9 @@ class DashboardController extends Controller
                 'pendingDocuments',
                 'documentTemplates',
                 'signatureTemplates',
+                'documentApprovalWorkflows',
+                'workflowUsers',
+                'temporaryPoReady',
                 'approvers',
                 'auditLogs',
                 'section',

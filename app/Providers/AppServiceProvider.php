@@ -16,6 +16,9 @@ use App\Observers\DocumentObserver;
 use App\Observers\ApprovalObserver;
 use App\Observers\UserObserver;
 
+use App\Contracts\DocumentSourceProvider;
+use App\Services\Documents\DirectoryDocumentSourceProvider;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -23,7 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            DocumentSourceProvider::class,
+            DirectoryDocumentSourceProvider::class
+        );
     }
 
     /**

@@ -85,53 +85,80 @@ class PdfNormalizationService
     /**
      * Find QPDF on Windows, Linux, or macOS.
      */
-    private function resolveQpdfBinary(): string
-    {
-        $candidates = [
+    /**
+ * Find QPDF using the configured path first,
+ * followed by common operating-system locations.
+ */
+private function resolveQpdfBinary(): string
+{
+    $configuredBinary = config(
+        'qpdf.binary',
+        'qpdf'
+    );
+
+    $candidates = [];
+
+    if (
+        is_string($configuredBinary)
+        && trim($configuredBinary) !== ''
+    ) {
+        $candidates[] = trim(
+            $configuredBinary
+        );
+    }
+
+    $candidates = array_merge(
+        $candidates,
+        [
             'qpdf',
 
             '/opt/homebrew/bin/qpdf',
             '/usr/local/bin/qpdf',
             '/usr/bin/qpdf',
-        ];
+        ]
+    );
 
-        if (PHP_OS_FAMILY === 'Windows') {
-            $windowsPaths = array_merge(
-                glob(
-                    'C:/Program Files/qpdf*/bin/qpdf.exe'
-                ) ?: [],
-                glob(
-                    'C:/Program Files (x86)/qpdf*/bin/qpdf.exe'
-                ) ?: []
-            );
+    if (PHP_OS_FAMILY === 'Windows') {
+        $windowsPaths = array_merge(
+            glob(
+                'C:/Program Files/qpdf*/bin/qpdf.exe'
+            ) ?: [],
 
-            $candidates = array_merge(
-                $windowsPaths,
-                $candidates
-            );
-        }
+            glob(
+                'C:/Program Files (x86)/qpdf*/bin/qpdf.exe'
+            ) ?: []
+        );
 
-        foreach (array_unique($candidates) as $candidate) {
-            try {
-                $process = new Process([
-                    $candidate,
-                    '--version',
-                ]);
-
-                $process->setTimeout(10);
-                $process->run();
-
-                if ($process->isSuccessful()) {
-                    return $candidate;
-                }
-            } catch (Throwable) {
-                continue;
-            }
-        }
-
-        throw new RuntimeException(
-            'QPDF executable could not be found. ' .
-            'Install QPDF or add it to the system PATH.'
+        $candidates = array_merge(
+            $candidates,
+            $windowsPaths
         );
     }
+
+    foreach (
+        array_unique($candidates)
+        as $candidate
+    ) {
+        try {
+            $process = new Process([
+                $candidate,
+                '--version',
+            ]);
+
+            $process->setTimeout(10);
+            $process->run();
+
+            if ($process->isSuccessful()) {
+                return $candidate;
+            }
+        } catch (Throwable) {
+            continue;
+        }
+    }
+
+    throw new RuntimeException(
+        'QPDF executable could not be found. ' .
+        'Check QPDF_BINARY in .env or add QPDF to the system PATH.'
+    );
+}
 }

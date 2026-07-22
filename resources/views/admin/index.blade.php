@@ -151,6 +151,162 @@
 {{-- Document Workflow Monitor --}}
 <div id="section-workflow" class="dashboard-section">
 
+    {{-- Temporary Purchase Order import --}}
+    @if (session('document_success'))
+        <div
+            class="alert alert-success"
+            role="alert"
+        >
+            {{ session('document_success') }}
+        </div>
+    @endif
+
+    @if (session('document_error'))
+        <div
+            class="alert alert-danger"
+            role="alert"
+        >
+            {{ session('document_error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div
+            class="alert alert-danger"
+            role="alert"
+        >
+            <div class="fw-semibold mb-1">
+                Purchase Order import could not continue
+            </div>
+
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="card shadow-sm mb-4">
+
+        <div
+            class="card-header d-flex
+                justify-content-between
+                align-items-center
+                flex-wrap gap-2"
+        >
+            <div>
+                <strong>
+                    Temporary Purchase Order Extraction
+                </strong>
+
+                <div class="small text-muted">
+                    Imports po_temp.pdf and automatically
+                    assigns the configured Purchase Order approvers.
+                </div>
+            </div>
+
+            @if ($temporaryPoReady ?? false)
+                <span class="badge bg-success">
+                    Ready
+                </span>
+            @else
+                <span class="badge bg-warning text-dark">
+                    Not Ready
+                </span>
+            @endif
+        </div>
+
+        <div class="card-body">
+
+            <div class="row align-items-center g-3">
+
+                <div class="col-md">
+
+                    <div class="mb-2">
+                        <strong>Source document:</strong>
+
+                        <code>
+                            resources/templates/temp_file/po_temp.pdf
+                        </code>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Reference template:</strong>
+
+                        <code>
+                            resources/templates/overlays/po_overlay.pdf
+                        </code>
+                    </div>
+
+                    <div>
+                        <strong>Document type:</strong>
+
+                        <span>
+                            Purchase Order
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="col-md-auto">
+
+                    <form
+                        method="POST"
+                        action="{{ route(
+                            'admin.documents.temporary-po.store'
+                        ) }}"
+                        onsubmit="return confirm(
+                            'Import the temporary Purchase Order and assign its configured approvers?'
+                        );"
+                    >
+                        @csrf
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            @disabled(
+                                !($temporaryPoReady ?? false)
+                            )
+                        >
+                            <i
+                                class="bi bi-file-earmark-arrow-up me-1"
+                            ></i>
+
+                            Import Temporary PO
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+
+            @unless ($temporaryPoReady ?? false)
+                <div
+                    class="alert alert-warning mt-3 mb-0"
+                    role="alert"
+                >
+                    The import button is disabled. Confirm that:
+
+                    <ul class="mb-0 mt-2">
+                        <li>
+                            The Purchase Order workflow is active.
+                        </li>
+
+                        <li>
+                            At least one approver is configured.
+                        </li>
+
+                        <li>
+                            Both Purchase Order PDF files exist.
+                        </li>
+                    </ul>
+                </div>
+            @endunless
+
+        </div>
+    </div>
+
     <div class="documents-card">
 
         @php
@@ -927,6 +1083,431 @@
             </div>
         </div>
 
+        {{-- Default approvers by document type --}}
+@if (session('workflow_success'))
+    <div class="alert alert-success" role="alert">
+        {{ session('workflow_success') }}
+    </div>
+@endif
+
+@if (
+    old('workflow_form') === '1'
+    && $errors->any()
+)
+    <div class="alert alert-danger" role="alert">
+        <div class="fw-semibold mb-1">
+            Default approvers could not be saved
+        </div>
+
+        <ul class="mb-0 ps-3">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+@php
+    $workflowRoleLabels = [
+        'staff' => 'Staff',
+        'supervisor' => 'Supervisor',
+        'depthead' => 'Department Head',
+        'division' => 'Division Head',
+        'executive' => 'Executive',
+    ];
+@endphp
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <strong>
+            Default Approvers by Document Type
+        </strong>
+    </div>
+
+    <div class="card-body">
+        <p class="text-muted">
+            Select the specific users who will approve documents
+            imported automatically. Roles that are left empty will
+            not be included in that document type's workflow.
+        </p>
+
+        <div class="accordion" id="approvalWorkflowAccordion">
+
+            @foreach (
+                $signatureTemplates
+                as $templateKey => $definition
+            )
+                @php
+                    $workflow =
+                        $documentApprovalWorkflows->get(
+                            $templateKey
+                        );
+
+                    $templateBlocks = collect(
+                        $definition['blocks'] ?? []
+                    )
+                        ->filter(
+                            fn (mixed $block): bool =>
+                                is_array($block)
+                                && is_string(
+                                    $block['role'] ?? null
+                                )
+                                && trim(
+                                    $block['role']
+                                ) !== ''
+                                && is_numeric(
+                                    $block['sequence'] ?? null
+                                )
+                        )
+                        ->sortBy(
+                            fn (array $block): int =>
+                                (int) $block['sequence']
+                        )
+                        ->unique(
+                            fn (array $block): string =>
+                                trim($block['role'])
+                        )
+                        ->values();
+
+                    $useWorkflowOldInput =
+                        old('workflow_form') === '1'
+                        && old('template_key') ===
+                            $templateKey;
+
+                    $accordionId =
+                        'workflow-' .
+                        str_replace(
+                            '_',
+                            '-',
+                            $templateKey
+                        );
+                @endphp
+
+                <div class="accordion-item">
+
+                    <h2
+                        class="accordion-header"
+                        id="{{ $accordionId }}-heading"
+                    >
+                        <button
+                            type="button"
+                            class="accordion-button
+                                {{ $templateKey !== 'purchase_order'
+                                    ? 'collapsed'
+                                    : ''
+                                }}"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#{{ $accordionId }}-body"
+                            aria-expanded="{{ $templateKey === 'purchase_order'
+                                ? 'true'
+                                : 'false'
+                            }}"
+                            aria-controls="{{ $accordionId }}-body"
+                        >
+                            <span>
+                                {{ $definition['name']
+                                    ?? ucwords(
+                                        str_replace(
+                                            '_',
+                                            ' ',
+                                            $templateKey
+                                        )
+                                    )
+                                }}
+
+                                @if ($workflow?->is_active)
+                                    <span
+                                        class="badge bg-success ms-2"
+                                    >
+                                        Active
+                                    </span>
+                                @elseif ($workflow)
+                                    <span
+                                        class="badge bg-secondary ms-2"
+                                    >
+                                        Inactive
+                                    </span>
+                                @else
+                                    <span
+                                        class="badge bg-warning text-dark ms-2"
+                                    >
+                                        Not Configured
+                                    </span>
+                                @endif
+                            </span>
+                        </button>
+                    </h2>
+
+                    <div
+                        id="{{ $accordionId }}-body"
+                        class="accordion-collapse collapse
+                            {{ $templateKey === 'purchase_order'
+                                ? 'show'
+                                : ''
+                            }}"
+                        aria-labelledby="{{ $accordionId }}-heading"
+                        data-bs-parent="#approvalWorkflowAccordion"
+                    >
+                        <div class="accordion-body">
+
+                            <form
+                                method="POST"
+                                action="{{ route(
+                                    'document-approval-workflows.store'
+                                ) }}"
+                            >
+                                @csrf
+
+                                <input
+                                    type="hidden"
+                                    name="workflow_form"
+                                    value="1"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="template_key"
+                                    value="{{ $templateKey }}"
+                                >
+
+                                <div class="row g-3">
+
+                                    @forelse (
+                                        $templateBlocks
+                                        as $block
+                                    )
+                                        @php
+                                            $requiredRole = trim(
+                                                $block['role']
+                                            );
+
+                                            $roleLabel =
+                                                $block['label']
+                                                ?? $workflowRoleLabels[
+                                                    $requiredRole
+                                                ]
+                                                ?? ucwords(
+                                                    str_replace(
+                                                        '_',
+                                                        ' ',
+                                                        $requiredRole
+                                                    )
+                                                );
+
+                                            $savedStep =
+                                                $workflow?->steps
+                                                    ->firstWhere(
+                                                        'required_role',
+                                                        $requiredRole
+                                                    );
+
+                                            $selectedUserId =
+                                                $useWorkflowOldInput
+                                                    ? old(
+                                                        "approvers.{$requiredRole}"
+                                                    )
+                                                    : $savedStep?->user_id;
+
+                                            $eligibleRoleUsers =
+                                                $workflowUsers->filter(
+                                                    function (
+                                                        $user
+                                                    ) use (
+                                                        $requiredRole
+                                                    ): bool {
+                                                        $userRole =
+                                                            is_string(
+                                                                $user->role
+                                                            )
+                                                            && trim(
+                                                                $user->role
+                                                            ) !== ''
+                                                                ? trim(
+                                                                    $user->role
+                                                                )
+                                                                : $user
+                                                                    ->roles
+                                                                    ->pluck(
+                                                                        'name'
+                                                                    )
+                                                                    ->first();
+
+                                                        return $userRole ===
+                                                            $requiredRole;
+                                                    }
+                                                );
+                                        @endphp
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="{{ $accordionId }}-{{ $requiredRole }}"
+                                                class="form-label"
+                                            >
+                                                Step
+                                                {{ $block['sequence'] }}:
+                                                {{ $roleLabel }}
+                                            </label>
+
+                                            <select
+                                                id="{{ $accordionId }}-{{ $requiredRole }}"
+                                                name="approvers[{{ $requiredRole }}]"
+                                                class="form-select
+                                                    @error(
+                                                        "approvers.{$requiredRole}"
+                                                    )
+                                                        is-invalid
+                                                    @enderror"
+                                            >
+                                                <option value="">
+                                                    Not included
+                                                </option>
+
+                                                @foreach (
+                                                    $eligibleRoleUsers
+                                                    as $workflowUser
+                                                )
+                                                    <option
+                                                        value="{{ $workflowUser->id }}"
+                                                        @selected(
+                                                            (string) $selectedUserId
+                                                            ===
+                                                            (string) $workflowUser->id
+                                                        )
+                                                    >
+                                                        {{ $workflowUser->name }}
+                                                        —
+                                                        {{ $workflowUser->email }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            @error(
+                                                "approvers.{$requiredRole}"
+                                            )
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+
+                                            @if (
+                                                $eligibleRoleUsers->isEmpty()
+                                            )
+                                                <small
+                                                    class="text-danger"
+                                                >
+                                                    No verified
+                                                    {{ strtolower(
+                                                        $roleLabel
+                                                    ) }}
+                                                    user is available.
+                                                </small>
+                                            @endif
+
+                                        </div>
+
+                                    @empty
+                                        <div class="col-12">
+                                            <div
+                                                class="alert alert-warning mb-0"
+                                            >
+                                                This document type has no
+                                                configured signature blocks.
+                                            </div>
+                                        </div>
+                                    @endforelse
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+
+                                            <input
+                                                type="checkbox"
+                                                id="{{ $accordionId }}-active"
+                                                name="is_active"
+                                                value="1"
+                                                class="form-check-input"
+                                                @checked(
+                                                    $useWorkflowOldInput
+                                                        ? old('is_active')
+                                                        : ($workflow?->is_active
+                                                            ?? true)
+                                                )
+                                            >
+
+                                            <label
+                                                for="{{ $accordionId }}-active"
+                                                class="form-check-label"
+                                            >
+                                                Enable automatic approver
+                                                assignment
+                                            </label>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary"
+                                            @disabled(
+                                                $templateBlocks->isEmpty()
+                                            )
+                                        >
+                                            <i
+                                                class="bi bi-save me-1"
+                                            ></i>
+
+                                            Save Default Approvers
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </form>
+
+                            @if (
+                                $workflow
+                                && $workflow->steps->isNotEmpty()
+                            )
+                                <hr>
+
+                                <div class="fw-semibold mb-2">
+                                    Current approval sequence
+                                </div>
+
+                                <ol class="mb-0">
+                                    @foreach (
+                                        $workflow->steps
+                                        as $workflowStep
+                                    )
+                                        <li>
+                                            {{ $workflowRoleLabels[
+                                                $workflowStep->required_role
+                                            ]
+                                                ?? ucfirst(
+                                                    $workflowStep
+                                                        ->required_role
+                                                )
+                                            }}
+
+                                            —
+
+                                            {{ $workflowStep->user?->name
+                                                ?? 'Assigned user missing'
+                                            }}
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            @endif
+
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
+        </div>
+    </div>
+</div>
+
         {{-- Upload form --}}
         <div class="card shadow-sm mb-4">
             <div class="card-header">
@@ -935,7 +1516,7 @@
 
             <div class="card-body">
 
-                @if ($errors->any())
+                @if (old('workflow_form') !== '1' && $errors->any())
                     <div class="alert alert-danger" role="alert">
                         <div class="fw-semibold mb-1">
                             Template upload failed
