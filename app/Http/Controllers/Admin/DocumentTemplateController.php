@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DocumentTemplate;
+use App\Services\PdfFormFieldService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,12 +13,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Throwable;
 
-
 class DocumentTemplateController extends Controller
 {
-    /**
-     * Upload a new template version.
-     */
+    public function __construct(
+        private readonly PdfFormFieldService $pdfFormFieldService
+    ) {
+    }
+
     public function store(Request $request): RedirectResponse
     {
 
@@ -35,6 +38,7 @@ class DocumentTemplateController extends Controller
                 'string',
                 'max:100',
                 'regex:/^[a-z0-9_]+$/',
+                Rule::in($allowedTemplateKeys),
             ],
             
             'template_file' => [
@@ -51,8 +55,59 @@ class DocumentTemplateController extends Controller
         ]);
 
         $templateKey = $validated['template_key'];
-        $templateName = $templateDefinitions[$templateKey]['name']
-        ?? ucwords(str_replace('_', ' ', $templateKey));
+
+        $templateDefinition =
+            $templateDefinitions[$templateKey] ?? null;
+
+        if (!is_array($templateDefinition)) {
+            throw ValidationException::withMessages([
+                'template_key' =>
+                    'The selected document template is not configured.',
+            ]);
+        }
+
+        $requiredFieldNames = collect(
+            $templateDefinition['blocks'] ?? []
+        )
+            ->pluck('field_name')
+            ->filter(
+                fn ($fieldName): bool =>
+                    is_string($fieldName) &&
+                    trim($fieldName) !== ''
+            )
+            ->map(
+                fn (string $fieldName): string =>
+                    trim($fieldName)
+            )
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($requiredFieldNames)) {
+            throw ValidationException::withMessages([
+                'template_file' =>
+                    "No signature fields are configured for [{$templateKey}].",
+            ]);
+        }
+
+        $uploadedTemplate = $request->file('template_file');
+        $templatePath = $uploadedTemplate?->getRealPath();
+
+        if (!$templatePath || !is_file($templatePath)) {
+            throw ValidationException::withMessages([
+                'template_file' =>
+                    'The uploaded template PDF could not be read.',
+            ]);
+        }
+
+        $this->pdfFormFieldService->validateSignatureFields(
+            pdfPath: $templatePath,
+            requiredFieldNames: $requiredFieldNames
+        );
+
+        $templateName =
+            $templateDefinition['name']
+            ?? ucwords(str_replace('_', ' ', $templateKey));
 
         $activateNow = $request->boolean('activate_now');
 
@@ -130,7 +185,33 @@ class DocumentTemplateController extends Controller
                     'updated_by' => auth()->id(),
                 ]);
             });
+        } catch (ValidationException $exception) {
+            return redirect()
+                ->route('dashboard', [
+                    'section' => 'document-templates',
+                ])
+                ->withErrors($exception->errors())
+                ->withInput();
         } catch (Throwable $exception) {
+            if ($storedPath !== null) {
+                Storage::disk('local')->delete($storedPath);
+            }
+
+            report($exception);
+
+            return redirect()
+                ->route('dashboard', [
+                    'section' => 'document-templates',
+                ])
+                ->withInput()
+                ->withErrors([
+                    'template_file' =>
+                        'The template could not be uploaded: ' .
+                        $exception->getMessage(),
+                ]);
+        }
+        
+        catch (Throwable $exception) {
             /*
              * Remove the uploaded file when the database
              * transaction fails.
@@ -150,12 +231,16 @@ class DocumentTemplateController extends Controller
                 ]);
         }
 
-        return back()->with(
-            'success',
-            $activateNow
-                ? 'Template uploaded and activated successfully.'
-                : 'Template version uploaded successfully.'
-        );
+        return redirect()
+            ->route('dashboard', [
+                'section' => 'document-templates',
+            ])
+            ->with(
+                'success',
+                $activateNow
+                    ? 'Template uploaded and activated successfully.'
+                    : 'Template version uploaded successfully.'
+            );
     }
 
     /**

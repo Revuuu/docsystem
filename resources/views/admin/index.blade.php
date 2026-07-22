@@ -934,6 +934,21 @@
             </div>
 
             <div class="card-body">
+
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        <div class="fw-semibold mb-1">
+                            Template upload failed
+                        </div>
+
+                        <ul class="mb-0 ps-3">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
                 <form
                     method="POST"
                     action="{{ route('document-templates.store') }}"
