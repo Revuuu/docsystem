@@ -13,8 +13,8 @@ const Signature = {
         currentPdfUrl: null,
         currentPage: 1,
         isFixedTemplate: false,
+        renderTask: null,
     },
-
     init() {
 
         this.ghost =
@@ -38,62 +38,74 @@ const Signature = {
         this.pageInput =
             document.getElementById('sigPageInput');
 
+        this.pageLabel =
+            document.querySelector(
+                'label[for="sigPageInput"]'
+            );
+
         this.bindEvents();
     },
 
     bindEvents() {
 
         if (this.pageInput) {
-
             this.pageInput.addEventListener(
                 'change',
                 async () => {
-
                     if (!this.state.currentPdf) {
                         return;
                     }
 
-                    let page =
-                        parseInt(
-                            this.pageInput.value
-                        );
+                    let page = Number.parseInt(
+                        this.pageInput.value,
+                        10
+                    );
 
-                    if (page < 1) {
+                    if (!Number.isFinite(page)) {
                         page = 1;
                     }
 
-                    if (
-                        page >
+                    page = Math.min(
+                        Math.max(page, 1),
                         this.state.currentPdf.numPages
-                    ) {
-                        page =
-                            this.state.currentPdf
-                                .numPages;
-                    }
-
-                    this.state.currentPage =
-                        page;
-
-                    this.pageInput.value =
-                        page;
-
-                    if (this.ghost) {
-                        this.ghost.style.display =
-                            'none';
-                    }
-
-                    this.state.placed =
-                        false;
-
-                    if (this.btn) {
-                        this.btn.disabled =
-                            true;
-                    }
-
-                    await this.renderPage(
-                        page
                     );
 
+                    this.state.currentPage = page;
+                    this.pageInput.value = page;
+
+                    /*
+                    * Ordinary PDFs require the user to place
+                    * the signature again after changing pages.
+                    */
+                    if (!this.state.isFixedTemplate) {
+                        if (this.ghost) {
+                            this.ghost.style.display =
+                                'none';
+                        }
+
+                        this.state.placed = false;
+
+                        if (this.btn) {
+                            this.btn.disabled = true;
+                        }
+
+                        if (this.hint) {
+                            this.hint.textContent =
+                                'Click anywhere on the document to place your signature';
+                        }
+                    } else {
+                        /*
+                        * Purchase Orders use automatic placement,
+                        * so changing pages must not disable approval.
+                        */
+                        this.state.placed = true;
+
+                        if (this.btn) {
+                            this.btn.disabled = false;
+                        }
+                    }
+
+                    await this.renderPage(page);
                 }
             );
         }
@@ -192,12 +204,14 @@ async open(
     this.state.isFixedTemplate =
         normalizedTemplateKey !== '';
 
-    console.log('SIGNATURE OPEN DEBUG', {
-        docId,
-        templateKey: normalizedTemplateKey,
-        isFixedTemplate:
-            this.state.isFixedTemplate,
-    });
+   console.log('SIGNATURE OPEN DEBUG', {
+    docId,
+    pdfUrl,
+    signUrl,
+    templateKey: normalizedTemplateKey,
+    isFixedTemplate:
+        this.state.isFixedTemplate,
+});
 
     this.state.currentPdfUrl =
         pdfUrl;
@@ -231,9 +245,8 @@ async open(
 
     if (this.pageInput) {
         this.pageInput.value = 1;
-
-        this.pageInput.disabled =
-            this.state.isFixedTemplate;
+        this.pageInput.min = 1;
+        this.pageInput.disabled = false;
     }
 
     if (this.ghost) {
@@ -266,8 +279,7 @@ async open(
         }
 
         if (pageSelector) {
-            pageSelector.style.display =
-                'none';
+            pageSelector.style.display = '';
         }
 
         if (this.hint) {
@@ -300,74 +312,180 @@ async open(
     modal?.classList.add('active');
 
     this.state.currentPdf =
-        await pdfjsLib
-            .getDocument(pdfUrl)
-            .promise;
+    await pdfjsLib
+        .getDocument(pdfUrl)
+        .promise;
+
+        console.log('SIGNATURE PDF LOADED', {
+    pdfUrl,
+    numPages: this.state.currentPdf.numPages,
+});
+    if (this.pageInput) {
+        this.pageInput.min = 1;
+        this.pageInput.max =
+            this.state.currentPdf.numPages;
+        this.pageInput.value = 1;
+    }
+
+    if (pageSelector) {
+        pageSelector.style.display =
+            this.state.currentPdf.numPages > 1
+                ? ''
+                : 'none';
+    }
+
+    this.updatePageIndicator();
 
     await this.renderPage(1);
 },
 
-    
+updatePageIndicator() {
+    if (
+        !this.pageLabel ||
+        !this.state.currentPdf
+    ) {
+        return;
+    }
 
+    this.pageLabel.textContent =
+        `Page ${this.state.currentPage} ` +
+        `of ${this.state.currentPdf.numPages}:`;
+},
     async renderPage(pageNumber) {
+    if (
+        !this.state.currentPdf ||
+        !this.canvas
+    ) {
+        return;
+    }
 
+    const totalPages =
+        this.state.currentPdf.numPages;
+
+    const safePage = Math.min(
+        Math.max(Number(pageNumber) || 1, 1),
+        totalPages
+    );
+
+    this.state.currentPage = safePage;
+
+    if (this.pageInput) {
+        this.pageInput.value = safePage;
+        this.pageInput.disabled = true;
+    }
+
+    this.updatePageIndicator();
+
+    /*
+     * Cancel the active render before accessing
+     * the same canvas for another page.
+     */
+    if (this.state.renderTask) {
+        this.state.renderTask.cancel();
+
+        try {
+            await this.state.renderTask.promise;
+        } catch (error) {
+            if (
+                error?.name !==
+                'RenderingCancelledException'
+            ) {
+                throw error;
+            }
+        }
+
+        this.state.renderTask = null;
+    }
+
+    const page =
+        await this.state.currentPdf.getPage(
+            safePage
+        );
+
+    const baseViewport =
+        page.getViewport({
+            scale: 1
+        });
+
+    const modalBox =
+        document.querySelector(
+            '#signModal .modal-box'
+        );
+
+    const availableWidth = Math.max(
+        (modalBox?.clientWidth ?? 900) - 32,
+        320
+    );
+
+    const scale = Math.min(
+        1.5,
+        availableWidth / baseViewport.width
+    );
+
+    const viewport =
+        page.getViewport({
+            scale
+        });
+
+    const context =
+        this.canvas.getContext('2d');
+
+    this.canvas.width =
+        Math.ceil(viewport.width);
+
+    this.canvas.height =
+        Math.ceil(viewport.height);
+
+    this.canvas.style.width =
+        `${viewport.width}px`;
+
+    this.canvas.style.height =
+        `${viewport.height}px`;
+
+    if (this.wrapper) {
+        this.wrapper.style.width =
+            `${viewport.width}px`;
+
+        this.wrapper.style.height =
+            `${viewport.height}px`;
+    }
+
+    if (this.layer) {
+        this.layer.style.width =
+            `${viewport.width}px`;
+
+        this.layer.style.height =
+            `${viewport.height}px`;
+    }
+
+    this.state.renderTask = page.render({
+        canvasContext: context,
+        viewport
+    });
+
+    try {
+        await this.state.renderTask.promise;
+    } catch (error) {
         if (
-            !this.state.currentPdf ||
-            !this.canvas
+            error?.name !==
+            'RenderingCancelledException'
         ) {
-            return;
+            throw error;
         }
+    } finally {
+        this.state.renderTask = null;
 
-        const page =
-            await this.state.currentPdf
-                .getPage(pageNumber);
-
-        const viewport =
-            page.getViewport({
-                scale: 1.5
-            });
-
-        const context =
-            this.canvas.getContext('2d');
-
-        this.canvas.width =
-            viewport.width;
-
-        this.canvas.height =
-            viewport.height;
-
-        this.canvas.style.width =
-            viewport.width + 'px';
-
-        this.canvas.style.height =
-            viewport.height + 'px';
-
-        if (this.wrapper) {
-
-            this.wrapper.style.width =
-                viewport.width + 'px';
-
-            this.wrapper.style.height =
-                viewport.height + 'px';
+        if (this.pageInput) {
+            this.pageInput.disabled = false;
         }
-
-        if (this.layer) {
-
-            this.layer.style.width =
-                viewport.width + 'px';
-
-            this.layer.style.height =
-                viewport.height + 'px';
-        }
-
-        await page.render({
-            canvasContext: context,
-            viewport
-        }).promise;
-    },
+    }
+},
 
     close() {
-
+if (this.state.renderTask) {
+    this.state.renderTask.cancel();
+    this.state.renderTask = null;
+}
         document
             .getElementById(
                 'signModal'
@@ -388,6 +506,15 @@ async open(
                 this.canvas.width,
                 this.canvas.height
             );
+        }
+        this.state.currentPdf = null;
+        this.state.currentPdfUrl = null;
+        this.state.currentPage = 1;
+        this.state.placed = false;
+
+        if (this.pageInput) {
+            this.pageInput.value = 1;
+            this.pageInput.max = 1;
         }
     },
 

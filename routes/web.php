@@ -12,6 +12,7 @@ use App\Http\Controllers\DocumentMessageController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\DocumentApprovalWorkflowController;
 use App\Http\Controllers\Admin\TemporaryDocumentExtractionController;
+use App\Http\Controllers\PurchaseOrderController;
 
 Route::redirect('/', '/dashboard');
 
@@ -98,42 +99,47 @@ Route::middleware(['auth', 'otp'])->group(function () {
 
     Route::post('/verify-password', function (\Illuminate\Http\Request $request) {
 
-    if (!\Illuminate\Support\Facades\Hash::check(
-        $request->password,
-        auth()->user()->password
-    )) {
+        if (!\Illuminate\Support\Facades\Hash::check(
+            $request->password,
+            auth()->user()->password
+        )) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect account password.'
+            ], 422);
+        }
 
         return response()->json([
-            'success' => false,
-            'message' => 'Incorrect account password.'
-        ], 422);
-    }
+            'success' => true
+        ]);
+    });
 
-    return response()->json([
-        'success' => true
-    ]);
-});
+    Route::get(
+        '/files/view/{id}',
+        [FileController::class, 'view']
+    )->name('files.view');
 
-Route::get(
-    '/files/view/{id}',
-    [FileController::class, 'view']
-)->name('files.view');
+    Route::get(
+        '/files/download/{id}',
+        [FileController::class, 'download']
+    )->name('files.download');
 
-Route::get(
-    '/files/download/{id}',
-    [FileController::class, 'download']
-)->name('files.download');
+    Route::get(
+        '/signatures/view/{id}',
+        [FileController::class, 'signature']
+    )->name('signatures.view');
 
-Route::get(
-    '/signatures/view/{id}',
-    [FileController::class, 'signature']
-)->name('signatures.view');
+    Route::get('/documents/{document}/messages', [DocumentMessageController::class, 'index'])
+    ->name('documents.messages.index');
 
-Route::get('/documents/{document}/messages', [DocumentMessageController::class, 'index'])
-->name('documents.messages.index');
+    Route::post('/documents/{document}/messages', [DocumentMessageController::class, 'store'])
+        ->name('documents.messages.store');
 
-Route::post('/documents/{document}/messages', [DocumentMessageController::class, 'store'])
-    ->name('documents.messages.store');
+    Route::post(
+        '/admin/documents/temporary-po',
+        [TemporaryDocumentExtractionController::class, 'store']
+    )->name('admin.documents.temporary-po.store');
 });
 
 Route::get('/document-messages/{documentMessage}/attachment',[DocumentMessageController::class,'attachment',])
@@ -149,6 +155,13 @@ Route::get('/users/{user}/edit',
 Route::post('/users/{user}/reset-password',
     [UserController::class, 'resetPassword'])
     ->name('users.resetPassword');
+
+Route::get(
+'/purchase-orders/{poNo}/index',
+[PurchaseOrderController::class, 'show']
+)
+->whereNumber('poNo')
+->name('purchase-orders.index');
 
 Route::get('/test-mail', function () {
 
