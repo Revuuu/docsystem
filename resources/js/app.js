@@ -28,6 +28,8 @@ import * as bootstrap from 'bootstrap';
 import Chat from './modules/chat';
 import Messenger from './modules/messenger';
 
+import './modules/purchase-order-queue';
+
 window.bootstrap = bootstrap;
 window.Chat = Chat;
 window.Messenger = Messenger;

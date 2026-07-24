@@ -11,7 +11,9 @@ use App\Services\Pdf\ChromePdfRenderer;
 use App\Services\PurchaseOrders\PurchaseOrderDocumentService;
 use App\Services\PurchaseOrders\PurchaseOrderSignatureBlockService;
 use App\Services\PurchaseOrders\PurchaseOrderSignatureLayout;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -22,8 +24,6 @@ use Throwable;
 
 class TemporaryDocumentExtractionController extends Controller
 {
-    private const TEST_PO_NUMBER = 90029;
-
     public function __construct(
         private readonly PurchaseOrderDocumentService $purchaseOrders,
         private readonly DefaultApprovalWorkflowResolver $workflowResolver,
@@ -33,19 +33,36 @@ class TemporaryDocumentExtractionController extends Controller
     ) {
     }
 
-    public function store(): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        int $poNo
+    ): JsonResponse|RedirectResponse {
         $temporaryPdfPath = null;
         $storedPath = null;
+        $documentTitle = "Purchase Order {$poNo}";
+
+        $existingDocument = Document::query()
+            ->where('title', $documentTitle)
+            ->first();
+
+        if ($existingDocument) {
+            return $this->failureResponse(
+                request: $request,
+                message: "Purchase Order {$poNo} has already been forwarded for approval.",
+                status: 409,
+                documentId: $existingDocument->id
+            );
+        }
 
         try {
-            $viewData = $this->purchaseOrders->build(
-                self::TEST_PO_NUMBER
-            );
+            $viewData = $this->purchaseOrders->build($poNo);
+
             $workflow = $this->workflowResolver->resolve(
                 PurchaseOrderSignatureLayout::TEMPLATE_KEY
             );
+
             $workflow->loadMissing('steps.user');
+
             $steps = $workflow->steps
                 ->sortBy('step_order')
                 ->values();
@@ -65,13 +82,15 @@ class TemporaryDocumentExtractionController extends Controller
                 }
             }
 
-            $signatureSlots = $steps->map(
-                static function ($step): array {
+            $signatureSlots = $steps
+                ->map(static function ($step): array {
                     $role = strtolower(trim((string) (
-                        $step->role
+                        $step->required_role
+                        ?? $step->role
                         ?? $step->user->role
                         ?? 'approver'
                     )));
+
                     $title = match ($role) {
                         'depthead' => 'Department Head',
                         'division' => 'Division Head',
@@ -85,8 +104,8 @@ class TemporaryDocumentExtractionController extends Controller
                         'name' => trim((string) $step->user->name),
                         'title' => $title,
                     ];
-                }
-            )->all();
+                })
+                ->all();
 
             $html = view('purchase-orders.index', [
                 ...$viewData,
@@ -96,26 +115,38 @@ class TemporaryDocumentExtractionController extends Controller
 
             $temporaryPdfPath = $this->pdfRenderer->render(
                 $html,
-                'purchase-order-' . self::TEST_PO_NUMBER . '.pdf'
+                "purchase-order-{$poNo}.pdf"
             );
+
             $templateHash = hash_file(
                 'sha256',
                 $temporaryPdfPath
             );
+
             $finalPageNumber = count($viewData['pages']);
 
             $result = DB::transaction(function () use (
+                $poNo,
+                $documentTitle,
                 $steps,
                 $temporaryPdfPath,
                 $templateHash,
                 $finalPageNumber,
                 &$storedPath
             ): array {
+                if (
+                    Document::query()
+                        ->where('title', $documentTitle)
+                        ->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'purchase_order' =>
+                            "Purchase Order {$poNo} has already been forwarded for approval.",
+                    ]);
+                }
+
                 $document = Document::query()->create([
-                    'title' => sprintf(
-                        'Purchase Order %d',
-                        self::TEST_PO_NUMBER
-                    ),
+                    'title' => $documentTitle,
                     'uploaded_by' => auth()->id(),
                     'status' => 'pending',
                 ]);
@@ -124,6 +155,7 @@ class TemporaryDocumentExtractionController extends Controller
                     'document/document_%d_v1.pdf',
                     $document->id
                 );
+
                 $stream = fopen($temporaryPdfPath, 'rb');
 
                 if ($stream === false) {
@@ -151,10 +183,7 @@ class TemporaryDocumentExtractionController extends Controller
 
                 $documentFile = $document->files()->create([
                     'parent_file_id' => null,
-                    'file_name' => sprintf(
-                        'purchase-order-%d.pdf',
-                        self::TEST_PO_NUMBER
-                    ),
+                    'file_name' => "purchase-order-{$poNo}.pdf",
                     'file_path' => $storedPath,
                     'mime_type' => 'application/pdf',
                     'file_size' => Storage::disk('local')->size(
@@ -173,6 +202,7 @@ class TemporaryDocumentExtractionController extends Controller
 
                 foreach ($steps as $index => $step) {
                     $isFirst = $index === 0;
+
                     $approvals->push(
                         Approval::query()->create([
                             'document_id' => $document->id,
@@ -201,7 +231,10 @@ class TemporaryDocumentExtractionController extends Controller
                 ];
             });
 
-            if (is_file($temporaryPdfPath)) {
+            if (
+                is_string($temporaryPdfPath)
+                && is_file($temporaryPdfPath)
+            ) {
                 @unlink($temporaryPdfPath);
                 $temporaryPdfPath = null;
             }
@@ -211,82 +244,120 @@ class TemporaryDocumentExtractionController extends Controller
             if ($firstApproval instanceof Approval) {
                 $firstApproval->loadMissing('user');
 
-                try {
-                    Mail::to($firstApproval->user->email)
-                        ->queue(
-                            new ApprovalPendingNotification(
-                                $firstApproval
-                            )
+                if ($firstApproval->user?->email) {
+                    try {
+                        Mail::to($firstApproval->user->email)
+                            ->queue(
+                                new ApprovalPendingNotification(
+                                    $firstApproval
+                                )
+                            );
+                    } catch (Throwable $mailException) {
+                        Log::warning(
+                            'Purchase Order created, but the first approval notification could not be queued.',
+                            [
+                                'po_number' => $poNo,
+                                'document_id' => $result['document']->id,
+                                'approval_id' => $firstApproval->id,
+                                'message' => $mailException->getMessage(),
+                            ]
                         );
-                } catch (Throwable $mailException) {
-                    Log::warning(
-                        'Temporary Purchase Order created, but the first approval notification could not be queued.',
-                        [
-                            'document_id' => $result['document']->id,
-                            'approval_id' => $firstApproval->id,
-                            'message' => $mailException->getMessage(),
-                        ]
-                    );
+                    }
                 }
+            }
+
+            $message =
+                "Purchase Order {$poNo} was forwarded to its configured approvers.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'document_id' => $result['document']->id,
+                ]);
             }
 
             return redirect()
                 ->route('dashboard', ['section' => 'workflow'])
-                ->with(
-                    'temporary_extraction_success',
-                    sprintf(
-                        'Purchase Order %d was generated from the database and assigned to the configured approvers.',
-                        self::TEST_PO_NUMBER
-                    )
-                );
+                ->with('document_success', $message);
         } catch (ValidationException $exception) {
-            if (
-                is_string($storedPath) &&
-                Storage::disk('local')->exists($storedPath)
-            ) {
-                Storage::disk('local')->delete($storedPath);
+            $this->deleteStoredFile($storedPath);
+
+            $message = collect($exception->errors())
+                ->flatten()
+                ->first()
+                ?? 'The Purchase Order could not be generated.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'errors' => $exception->errors(),
+                ], 422);
             }
 
             return redirect()
                 ->route('dashboard', ['section' => 'workflow'])
                 ->withErrors($exception->errors())
-                ->with(
-                    'temporary_extraction_error',
-                    collect($exception->errors())
-                        ->flatten()
-                        ->first()
-                        ?? 'The Purchase Order could not be generated.'
-                );
+                ->with('document_error', $message);
         } catch (Throwable $exception) {
-            if (
-                is_string($storedPath) &&
-                Storage::disk('local')->exists($storedPath)
-            ) {
-                Storage::disk('local')->delete($storedPath);
-            }
+            $this->deleteStoredFile($storedPath);
 
-            Log::error(
-                'Temporary Purchase Order generation failed.',
-                [
-                    'po_number' => self::TEST_PO_NUMBER,
-                    'message' => $exception->getMessage(),
-                    'exception' => $exception,
-                ]
-            );
+            Log::error('Purchase Order forwarding failed.', [
+                'po_number' => $poNo,
+                'message' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+
+            $message =
+                'The Purchase Order could not be generated. Check the application log for details.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 500);
+            }
 
             return redirect()
                 ->route('dashboard', ['section' => 'workflow'])
-                ->with(
-                    'temporary_extraction_error',
-                    'The Purchase Order could not be generated. Check the application log for details.'
-                );
+                ->with('document_error', $message);
         } finally {
             if (
-                is_string($temporaryPdfPath) &&
-                is_file($temporaryPdfPath)
+                is_string($temporaryPdfPath)
+                && is_file($temporaryPdfPath)
             ) {
                 @unlink($temporaryPdfPath);
             }
+        }
+    }
+
+    private function failureResponse(
+        Request $request,
+        string $message,
+        int $status,
+        ?int $documentId = null
+    ): JsonResponse|RedirectResponse {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'document_id' => $documentId,
+            ], $status);
+        }
+
+        return redirect()
+            ->route('dashboard', ['section' => 'workflow'])
+            ->with('document_error', $message);
+    }
+
+    private function deleteStoredFile(?string $storedPath): void
+    {
+        if (
+            is_string($storedPath)
+            && Storage::disk('local')->exists($storedPath)
+        ) {
+            Storage::disk('local')->delete($storedPath);
         }
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\DocumentApprovalWorkflowController;
 use App\Http\Controllers\Admin\TemporaryDocumentExtractionController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\Admin\PurchaseOrderQueueController;
 
 Route::redirect('/', '/dashboard');
 
@@ -140,6 +141,18 @@ Route::middleware(['auth', 'otp'])->group(function () {
         '/admin/documents/temporary-po',
         [TemporaryDocumentExtractionController::class, 'store']
     )->name('admin.documents.temporary-po.store');
+
+    Route::get(
+    '/admin/purchase-orders',
+    [PurchaseOrderQueueController::class, 'index']
+)->name('admin.purchase-orders.index');
+
+Route::post(
+    '/admin/purchase-orders/{poNo}/forward',
+    [TemporaryDocumentExtractionController::class, 'store']
+)
+    ->whereNumber('poNo')
+    ->name('admin.purchase-orders.forward');
 });
 
 Route::get('/document-messages/{documentMessage}/attachment',[DocumentMessageController::class,'attachment',])

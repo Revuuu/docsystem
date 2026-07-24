@@ -71,112 +71,159 @@ class PurchaseOrderDocumentService
             'deliveryDate' => $this->formatDate(
                 $purchaseOrder->deliverdate ?? null
             ),
+            'purchaseRequestText' => trim(
+                (string) (
+                    $purchaseOrder->remarks
+                    ?? $purchaseOrder->ReqNo
+                    ?? ''
+                )
+            ),
         ];
     }
 
-    /**
-     * Split line items into fixed Letter-size pages while preserving order.
-     *
-     * @param Collection<int, object> $items
-     * @return array<int, Collection<int, object>>
-     */
-    /**
- * Split items across Letter-size PO pages.
+   /**
+ * Split items across Purchase Order pages.
  *
- * Regular pages can contain more rows. The last page reserves enough
- * vertical space for totals, conditions, and five signature blocks.
+ * Continuation pages are filled as much as possible.
+ * The remaining items are placed on the final page,
+ * which also contains the summary and signature footer.
  *
  * @param Collection<int, object> $items
  * @return array<int, Collection<int, object>>
  */
-public function paginateItems(Collection $items): array
-{
+public function paginateItems(
+    Collection $items
+): array {
     if ($items->isEmpty()) {
         return [];
     }
 
     /*
-     * These are visual line capacities, not strictly row counts.
+     * Visual line capacities, not raw item counts.
      *
-     * Normal page:
-     *     header + item table only
+     * Continuation pages have no signature footer,
+     * so they can contain more item lines.
      *
-     * Final page:
-     *     header + remaining items + totals + signatures
-     *
-     * For PO 90029, these values should produce two logical pages.
+     * The final page reserves space for:
+     * - Expected delivery date
+     * - Nothing follows
+     * - Discount and total
+     * - Signature footer
      */
-    $normalPageCapacity = 42;
+    $regularPageCapacity = 46;
     $finalPageCapacity = 30;
 
-    $weightedItems = $items
+    $queue = $items
         ->values()
         ->map(function (object $item): array {
             return [
                 'item' => $item,
-                'weight' => $this->itemLineWeight($item),
+                'weight' =>
+                    $this->itemLineWeight($item),
             ];
         });
 
-    /*
-     * Reserve items for the last page first so the final page always
-     * has room for the totals and signature section.
-     */
-    $finalPageItems = collect();
-    $finalPageUsedLines = 0;
-
-    for ($index = $weightedItems->count() - 1; $index >= 0; $index--) {
-        $entry = $weightedItems[$index];
-
-        if (
-            $finalPageItems->isNotEmpty()
-            && ($finalPageUsedLines + $entry['weight'])
-                > $finalPageCapacity
-        ) {
-            break;
-        }
-
-        $finalPageItems->prepend($entry['item']);
-        $finalPageUsedLines += $entry['weight'];
-    }
-
-    $remainingCount = $items->count() - $finalPageItems->count();
-
-    if ($remainingCount <= 0) {
-        return [
-            $items->values(),
-        ];
-    }
-
-    $remainingItems = $items
-        ->take($remainingCount)
-        ->values();
+    $remainingWeight = (int) $queue->sum(
+        'weight'
+    );
 
     $pages = [];
-    $currentPage = collect();
-    $usedLines = 0;
 
-    foreach ($remainingItems as $item) {
-        $weight = $this->itemLineWeight($item);
+    /*
+     * Fill continuation pages from the beginning.
+     *
+     * Keep at least one item for the final page so the
+     * footer does not appear on a separate itemless page.
+     */
+    while (
+        $queue->count() > 1 &&
+        $remainingWeight >
+            $finalPageCapacity
+    ) {
+        $pageEntries = collect();
+        $usedLines = 0;
 
-        if (
-            $currentPage->isNotEmpty()
-            && ($usedLines + $weight) > $normalPageCapacity
-        ) {
-            $pages[] = $currentPage->values();
-            $currentPage = collect();
-            $usedLines = 0;
+        while ($queue->count() > 1) {
+            $entry = $queue->first();
+
+            if (!is_array($entry)) {
+                $queue->shift();
+                continue;
+            }
+
+            $weight = (int) $entry['weight'];
+
+            /*
+             * Stop when the next item would exceed the
+             * continuation-page capacity.
+             */
+            if (
+                $pageEntries->isNotEmpty() &&
+                $usedLines + $weight >
+                    $regularPageCapacity
+            ) {
+                break;
+            }
+
+            $queue->shift();
+
+            $pageEntries->push($entry);
+
+            $usedLines += $weight;
+            $remainingWeight -= $weight;
+
+            /*
+             * This page is full enough. Continue the
+             * remaining items on the next page.
+             */
+            if (
+                $usedLines >=
+                $regularPageCapacity
+            ) {
+                break;
+            }
+
+            /*
+             * The remaining items now fit on the final
+             * page with its summary and signature footer.
+             */
+            if (
+                $remainingWeight <=
+                $finalPageCapacity
+            ) {
+                break;
+            }
         }
 
-        $currentPage->push($item);
-        $usedLines += $weight;
+        /*
+         * Safety fallback to prevent an infinite loop.
+         */
+        if ($pageEntries->isEmpty()) {
+            $entry = $queue->shift();
+
+            if (is_array($entry)) {
+                $pageEntries->push($entry);
+
+                $remainingWeight -=
+                    (int) $entry['weight'];
+            }
+        }
+
+        if ($pageEntries->isNotEmpty()) {
+            $pages[] = $pageEntries
+                ->pluck('item')
+                ->values();
+        }
     }
 
-    if ($currentPage->isNotEmpty()) {
-        $pages[] = $currentPage->values();
+    /*
+     * Everything left becomes the final page.
+     */
+    if ($queue->isNotEmpty()) {
+        $pages[] = $queue
+            ->pluck('item')
+            ->values();
     }
-
-    $pages[] = $finalPageItems->values();
 
     return $pages;
 }
@@ -184,23 +231,35 @@ public function paginateItems(Collection $items): array
 /**
  * Estimate the rendered line count of one item row.
  */
-private function itemLineWeight(object $item): int
-{
-    $description = trim((string) ($item->itemdesc ?? ''));
+/**
+ * Estimate the number of rendered text lines
+ * occupied by a Purchase Order item.
+ */
+private function itemLineWeight(
+    object $item
+): int {
+    $description = trim(
+        (string) (
+            $item->itemdesc ?? ''
+        )
+    );
 
     $length = function_exists('mb_strlen')
         ? mb_strlen($description)
         : strlen($description);
 
     /*
-     * The description column is approximately 30% of the page.
-     * Around 45 characters fit on one rendered line.
+     * With the current Letter layout, 30% description
+     * column and Tahoma 8pt font, approximately
+     * 45 characters fit on one line.
      */
     return max(
         1,
         min(
             3,
-            (int) ceil(max(1, $length) / 45)
+            (int) ceil(
+                max(1, $length) / 45
+            )
         )
     );
 }

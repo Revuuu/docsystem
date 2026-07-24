@@ -29,7 +29,7 @@
             margin: 0;
             padding: 0;
             color: var(--ink);
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Verdana;
             background: #e8e8e8;
         }
 
@@ -143,7 +143,6 @@
             min-height: 4mm;
             padding: 0 1.5mm .55mm;
             border-bottom: .7px solid var(--line);
-            font-size: 7.2pt;
             font-weight: 700;
             line-height: 1.15;
             overflow-wrap: anywhere;
@@ -181,10 +180,39 @@
             display: block;
         }
 
+        /*
+         * Owns the Purchase Order table's outer border.
+         *
+         * A wrapper is more reliable than collapsed borders on colspan cells
+         * when Chromium generates the stored PDF.
+         */
+        .item-table-frame {
+            position: relative;
+
+            width: 100%;
+
+            border-left:
+                .45px solid
+                #4a4a4a;
+
+            border-right:
+                .45px solid
+                #4a4a4a;
+
+            border-bottom:
+                1px solid
+                var(--line);
+
+            overflow: hidden;
+        }
+
         .item-table {
             width: 100%;
-            border-collapse: collapse;
+
+            border-collapse: separate;
+            border-spacing: 0;
             table-layout: fixed;
+
             font-size: 7pt;
         }
 
@@ -206,9 +234,14 @@
             text-align: center;
         }
 
-        .item-table th:first-child {
-            border-left: .55px solid var(--line);
-        }
+        .item-table th:first-child,
+.item-table td:first-child {
+    border-left: 0;
+}
+.item-table th:last-child,
+.item-table td:last-child {
+    border-right: 0;
+}
 
         .item-table td {
             min-height: 4.1mm;
@@ -220,9 +253,8 @@
             overflow-wrap: anywhere;
         }
 
-        .item-table td:first-child {
-            border-left: .45px solid #4a4a4a;
-        }
+
+
 
         .item-table tbody tr {
             break-inside: avoid;
@@ -242,39 +274,137 @@
             padding-left: 1.2mm;
         }
 
-        .items-bottom-line {
-            border-bottom: .75px solid var(--line);
+        /*
+         * The final summary is rendered inside the same table as the items.
+         * This keeps every outer and internal border physically connected.
+         */
+        /*
+         * Only the final summary row reserves vertical space.
+         * The zero-height closing row must remain zero-height.
+         */
+        .item-table tfoot .summary-row {
+            height: 22mm;
         }
 
-        .final-summary {
-            display: grid;
-            grid-template-columns: 60% 40%;
-            min-height: 22mm;
-            border-bottom: .75px solid var(--line);
-        }
+    .item-table tfoot td {
+    height: 22mm;
+    padding: 0;
 
-        .final-summary-left {
-            padding: 3mm 1.2mm 1.5mm 30%;
-            border-left: .45px solid #4a4a4a;
+    border-bottom: 0;
+
+    vertical-align: top;
+}
+
+        /*
+         * Keep the summary inside the same table so the outer left edge,
+         * Description/Unit Cost divider and outer right edge remain continuous.
+         */
+        .item-table tfoot .final-summary-left-cell {
+            position: relative;
+            padding: 0;
+
+            border-left: 0;
             border-right: .45px solid #4a4a4a;
+
             font-size: 7pt;
+            overflow: hidden;
         }
 
-        .delivery-line {
-            margin-bottom: 6mm;
+        /*
+         * The cell spans the first four columns (59% of the table).
+         * The Description column starts after 29% of the whole table:
+         *
+         * 29 / 59 = 49.152542%
+         *
+         * Positioning a child is more reliable in PDF output than applying
+         * percentage padding directly to a table cell.
+         */
+        .final-summary-description {
+    position: absolute;
+
+    top: 0;
+    right: 1.2mm;
+    bottom: 0;
+    left: 49.152542%;
+
+    display: grid;
+
+    /*
+     * Row 1 matches Discount.
+     * Row 2 matches Total Amount.
+     * Remaining rows contain reference information.
+     */
+    grid-template-rows:
+        6mm
+        6mm
+        3.3mm
+        3.3mm
+        3.3mm;
+
+    align-content: start;
+
+    min-width: 0;
+    overflow: hidden;
+}
+
+.pr-remarks-line,
+.request-reference-line,
+.delivery-line,
+.nothing-follows {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pr-remarks-line, .request-reference-line {
+    font-size:7pt;
+}
+
+.delivery-line, .nothing-follows{
+    font-size:7pt;
+}
+/*
+ * Align PRremarks with the Total Amount row.
+ */
+.pr-remarks-line {
+    grid-row: 2;
+}
+
+.request-reference-line {
+    grid-row: 3;
+}
+
+.delivery-line {
+    grid-row: 4;
+}
+
+.nothing-follows {
+    grid-row: 5;
+}
+
+        .item-table tfoot .final-summary-right-cell {
+            padding: 0;
+            border-right: 0;
         }
 
         .nothing-follows {
+            margin: 0;
             font-style: italic;
             white-space: nowrap;
         }
 
         .final-summary-right {
             display: grid;
-            grid-template-columns: 44% 56%;
+            grid-template-columns:
+                45.37%
+                54.63%;
             align-content: start;
-            border-right: .45px solid #4a4a4a;
-            font-size: 7.2pt;
+            width: 100%;
+            margin-right:150px;
         }
 
         .summary-label,
@@ -286,6 +416,10 @@
         .summary-label {
             text-align: right;
             font-weight: 700;
+            margin-left:45px;
+            text-align:center;
+            font-family:Verdana;
+            font-size:8pt;
         }
 
         .summary-value {
@@ -294,36 +428,71 @@
             font-weight: 700;
         }
 
-        .final-footer {
-            position: absolute;
-            right: 7.5mm;
-            bottom: 4.5mm;
-            left: 7.5mm;
-            padding-top: 2mm;
-            background: #fff;
-        }
+        .po-page-final {
+    display: flex;
+    flex-direction: column;
+}
 
-        .endorsement-heading {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            align-items: end;
-            min-height: 5mm;
-            padding: 0 2.5mm;
-            border-top: .75px solid var(--line);
-            font-size: 6.7pt;
-        }
+.po-page-final .po-header {
+    flex: 0 0 auto;
+}
+
+.po-page-final .items-region {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.po-page-final .item-table-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    /*
+     * The footer's top border will close the table.
+     */
+    border-bottom: 0;
+}
+    .final-footer {
+    position: static;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    background: #fff;
+}
+
+     .endorsement-heading {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    align-items: end;
+
+    width: 100%;
+    min-height: 5mm;
+
+    margin: 0;
+    padding: 0 2.5mm;
+
+    border-top: .75px solid var(--line);
+
+    font-size: 6.7pt;
+}
 
         .endorsement-heading .hospital-name {
             text-align: right;
         }
 
-        .signatures-top {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1.5fr;
-            gap: 6mm;
-            margin-top: 3.5mm;
-            padding: 0 3mm;
-        }
+      .signatures-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.5fr;
+    gap: 6mm;
+
+    margin-top: 2mm;
+
+    padding: 0 3mm;
+}
 
         .signature-block {
             text-align: center;
@@ -345,16 +514,36 @@
         }
 
         .signature-name {
-            min-height: 5mm;
-            padding: 0 1mm .9mm;
-            border-bottom: .7px solid var(--line);
-            font-size: 7.4pt;
-            line-height: 1.05;
-        }
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 3.8mm;
+
+    margin: 0;
+    padding:
+        0
+        1mm
+        .25mm;
+
+    border-bottom:
+        .7px solid
+        var(--line);
+
+    font-size: 8pt;
+    font-family:Tahoma;
+    line-height: 1;
+
+    text-align: center;
+}
 
         .signature-title {
             padding-top: 1mm;
             line-height: 1.15;
+            font-size:8pt;
+            font-family:Verdana;
+            text-transform: uppercase;
         }
 
         .footer-lower {
@@ -374,10 +563,12 @@
             margin-bottom: .6mm;
             text-align: center;
             font-weight: 700;
+            font-size:7pt;
         }
 
         .conditions p {
             margin: 0;
+            font-size:6pt;
         }
 
         .approvals {
@@ -406,7 +597,7 @@
         .privacy-note {
             margin-top: 2.2mm;
             text-align: center;
-            font-size: 5.8pt;
+            font-size: 7pt;
             line-height: 1.13;
         }
 
@@ -414,6 +605,60 @@
             font-weight: 700;
         }
 
+        /* =========================================================
+   FONT OVERRIDES ONLY
+   ========================================================= */
+
+.document-title {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+}
+
+.form-code {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 8pt;
+}
+
+/* Header titles only */
+.field-row .label {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 8pt;
+}
+
+/* PO number textbox */
+.po-number-value {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 12pt;
+    font-weight: 700;
+}
+
+/* Date textbox */
+.po-date-value {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 8pt;
+    font-weight: 400;
+}
+
+/* Table headings */
+.item-table th {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 8pt;
+}
+
+/* Quantity, Unit and Item Code values */
+.item-table tbody td:nth-child(1),
+.item-table tbody td:nth-child(2),
+.item-table tbody td:nth-child(3) {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 8pt;
+
+    /*
+     * Keeps the line box close to the original
+     * 6.8pt × 1.18 rendering height.
+     */
+    line-height: 1;
+}
         @media print {
     @page {
         size: Letter portrait;
@@ -467,6 +712,26 @@
     $supplierName = trim((string) ($purchaseOrder->fullname ?: $purchaseOrder->GuarantorName));
     $telephone = trim((string) ($purchaseOrder->prtelno ?: $purchaseOrder->mobilephone));
     $terms = trim((string) ($purchaseOrder->Terms ?? ''));
+    $prRemarks = trim(
+    (string) (
+        $purchaseOrder->PRremarks
+        ?? ''
+    )
+);
+
+/*
+ * Prefer remarks because it contains values such as:
+ * PRC#48466
+ *
+ * Use ReqNo when remarks is empty.
+ */
+$requestReference = trim(
+    (string) (
+        $purchaseOrder->remarks
+        ?: $purchaseOrder->ReqNo
+        ?: ''
+    )
+);
 
     $formatMoney = static fn ($value) => number_format((float) ($value ?? 0), 2, '.', ',');
 
@@ -541,7 +806,12 @@
 @endunless
 
 @foreach ($pages as $pageItems)
-    <section class="po-page">
+    <section
+    class="
+        po-page
+        {{ $loop->last ? 'po-page-final' : '' }}
+    "
+>
         <header class="po-header">
             <div class="brand">
                 @if ($logoSource)
@@ -570,12 +840,16 @@
                 <div class="po-meta">
                     <div class="field-row">
                         <span class="label">No. :</span>
-                        <span class="value">{{ $purchaseOrder->PONo }}</span>
+                        <span class="value po-number-value">
+    {{ $purchaseOrder->PONo }}
+</span>
                     </div>
 
                     <div class="field-row">
                         <span class="label">DATE :</span>
-                        <span class="value normal">{{ $poDate }}</span>
+                        <span class="value normal po-date-value">
+    {{ $poDate }}
+</span>
                     </div>
                 </div>
             </div>
@@ -601,7 +875,8 @@
         </header>
 
         <main class="items-region">
-            <table class="item-table">
+            <div class="item-table-frame">
+                <table class="item-table">
                 <colgroup>
                     <col class="qty">
                     <col class="unit">
@@ -611,16 +886,18 @@
                     <col class="amount">
                 </colgroup>
 
-                <thead>
-                    <tr>
-                        <th>Quantity</th>
-                        <th>Unit</th>
-                        <th>Item Code</th>
-                        <th>Description</th>
-                        <th>Unit Cost</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
+                @if ($loop->first)
+                    <thead>
+                        <tr>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Item Code</th>
+                            <th>Description</th>
+                            <th>Unit Cost</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                @endif
 
                 <tbody>
                     @foreach ($pageItems as $item)
@@ -634,29 +911,62 @@
                         </tr>
                     @endforeach
                 </tbody>
-            </table>
 
-            @if ($loop->last)
-                <div class="final-summary">
-                    <div class="final-summary-left">
-                        <div class="delivery-line">
-                            EXPECTED DELIVERY DATE:
-                            <strong>{{ $deliveryDate }}</strong>
-                        </div>
-                        <div class="nothing-follows">*** NOTHING FOLLOWS ***</div>
-                    </div>
+                @if ($loop->last)
+                    <tfoot>
+                        <tr class="summary-row">
+                            <td
+                                colspan="4"
+                                class="final-summary-left-cell"
+                            >
+                               <div class="final-summary-description">
+    @if ($prRemarks !== '')
+        <div class="pr-remarks-line">
+            {{ $prRemarks }}
+        </div>
+    @endif
 
-                    <div class="final-summary-right">
-                        <div class="summary-label">Discount</div>
-                        <div class="summary-value">{{ $formatMoney($discount) }}</div>
+    @if ($requestReference !== '')
+        <div class="request-reference-line">
+            {{ $requestReference }}
+        </div>
+    @endif
 
-                        <div class="summary-label">Total Amount</div>
-                        <div class="summary-value">{{ $formatMoney($totalAmount) }}</div>
-                    </div>
-                </div>
-            @else
-                <div class="items-bottom-line"></div>
-            @endif
+    <div class="delivery-line">
+        EXPECTED DELIVERY DATE:
+
+        @if (!empty($deliveryDate))
+            <strong>{{ $deliveryDate }}</strong>
+        @endif
+    </div>
+
+    <div class="nothing-follows">
+        *** NOTHING FOLLOWS ***
+    </div>
+</div>
+                            </td>
+
+                            <td
+                                colspan="2"
+                                class="final-summary-right-cell"
+                            >
+                                <div class="final-summary-right">
+                                    <div class="summary-label">Discount</div>
+                                    <div class="summary-value">
+                                        {{ $formatMoney($discount) }}
+                                    </div>
+
+                                    <div class="summary-label">Total Amount</div>
+                                    <div class="summary-value">
+                                        {{ $formatMoney($totalAmount) }}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                @endif
+                </table>
+            </div>
         </main>
 
         @if ($loop->last)

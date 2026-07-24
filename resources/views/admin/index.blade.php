@@ -151,425 +151,104 @@
 {{-- Document Workflow Monitor --}}
 <div id="section-workflow" class="dashboard-section">
 
-    {{-- Temporary Purchase Order import --}}
     @if (session('document_success'))
-        <div
-            class="alert alert-success"
-            role="alert"
-        >
+        <div class="alert alert-success" role="alert">
             {{ session('document_success') }}
         </div>
     @endif
 
     @if (session('document_error'))
-        <div
-            class="alert alert-danger"
-            role="alert"
-        >
+        <div class="alert alert-danger" role="alert">
             {{ session('document_error') }}
         </div>
     @endif
 
-    @if ($errors->any())
+    <div
+        id="purchaseOrderQueue"
+        class="documents-card"
+        data-index-url="{{ route('admin.purchase-orders.index') }}"
+        data-forward-url-template="{{
+            route(
+                'admin.purchase-orders.forward',
+                ['poNo' => '__PO_NUMBER__']
+            )
+        }}"
+        data-csrf-token="{{ csrf_token() }}"
+    >
         <div
-            class="alert alert-danger"
+            id="purchaseOrderQueueAlert"
+            class="alert"
             role="alert"
-        >
-            <div class="fw-semibold mb-1">
-                Purchase Order import could not continue
-            </div>
+            hidden
+        ></div>
 
-            <ul class="mb-0 ps-3">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        <div class="card-header">
+            <div class="user-filters-card">
+                <div class="workflow-filters-card">
+                    <div class="workflow-search-row">
 
-    <div class="card shadow-sm mb-4">
+                        <div class="workflow-search-box">
+                            <i class="bi bi-search"></i>
 
-        <div
-            class="card-header d-flex
-                justify-content-between
-                align-items-center
-                flex-wrap gap-2"
-        >
-            <div>
-                <strong>
-                    Temporary Purchase Order Extraction
-                </strong>
-
-                <div class="small text-muted">
-                    Imports po_temp.pdf and automatically
-                    assigns the configured Purchase Order approvers.
-                </div>
-            </div>
-
-            @if ($temporaryPoReady ?? false)
-                <span class="badge bg-success">
-                    Ready
-                </span>
-            @else
-                <span class="badge bg-warning text-dark">
-                    Not Ready
-                </span>
-            @endif
-        </div>
-
-        <div class="card-body">
-
-            <div class="row align-items-center g-3">
-
-                <div class="col-md">
-
-                    <div class="mb-2">
-                        <strong>Source document:</strong>
-
-                        <code>
-                            resources/templates/temp_file/po_temp.pdf
-                        </code>
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>Reference template:</strong>
-
-                        <code>
-                            resources/templates/overlays/po_overlay.pdf
-                        </code>
-                    </div>
-
-                    <div>
-                        <strong>Document type:</strong>
-
-                        <span>
-                            Purchase Order
-                        </span>
-                    </div>
-
-                </div>
-
-                <div class="col-md-auto">
-
-                    <form
-                        method="POST"
-                        action="{{ route(
-                            'admin.documents.temporary-po.store'
-                        ) }}"
-                        onsubmit="return confirm(
-                            'Import the temporary Purchase Order and assign its configured approvers?'
-                        );"
-                    >
-                        @csrf
+                            <input
+                                type="text"
+                                id="purchaseOrderSearchInput"
+                                placeholder="Search PO number or supplier..."
+                                autocomplete="off"
+                            >
+                        </div>
 
                         <button
-                            type="submit"
-                            class="btn btn-primary"
-                            @disabled(
-                                !($temporaryPoReady ?? false)
-                            )
+                            id="purchaseOrderRefreshButton"
+                            class="workflow-clear-btn"
+                            type="button"
                         >
-                            <i
-                                class="bi bi-file-earmark-arrow-up me-1"
-                            ></i>
-
-                            Import Temporary PO
+                            Refresh
                         </button>
-                    </form>
+                    </div>
 
-                </div>
-
-            </div>
-
-            @unless ($temporaryPoReady ?? false)
-                <div
-                    class="alert alert-warning mt-3 mb-0"
-                    role="alert"
-                >
-                    The import button is disabled. Confirm that:
-
-                    <ul class="mb-0 mt-2">
-                        <li>
-                            The Purchase Order workflow is active.
-                        </li>
-
-                        <li>
-                            At least one approver is configured.
-                        </li>
-
-                        <li>
-                            Both Purchase Order PDF files exist.
-                        </li>
-                    </ul>
-                </div>
-            @endunless
-
-        </div>
-    </div>
-
-    <div class="documents-card">
-
-        @php
-            $workflowDocs = \App\Models\Document::with([
-                    'uploader',
-                    'approvals.user',
-                ])
-                ->latest()
-                ->paginate(10);
-        @endphp
-
-        @if($workflowDocs->count() > 0)
-            <div id="documentsTableContainer">
-
-                <div class="card-header">
-                    <div class="user-filters-card">
-
-                        <div class="workflow-filters-card">
-
-                            <div class="workflow-search-row">
-
-                                <div class="workflow-search-box">
-                                    <i class="bi bi-search"></i>
-
-                                    <input
-                                        type="text"
-                                        id="documentSearchInput"
-                                        placeholder="Search documents...">
-                                </div>
-                                
-                                <div class="workflow-filter-grid">
-
-                                    <select id="documentStatusFilter">
-                                        <option value="">All Status</option>
-                                        <option value="pending">Ongoing</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="rejected">Rejected</option>
-                                    </select>
-
-                                </div>
-
-                                <button
-                                    id="documentClearFilters"
-                                    class="workflow-clear-btn"
-                                    type="button">
-                                    Clear All
-                                </button>
-                            </div>
-
-                        </div>
-
-                        <div
-                            class="results-info"
-                            id="docCountResultsInfo"
-                            data-total="{{ $workflowDocs->total() }}">
-                            Showing {{ $workflowDocs->count() }} of {{ $workflowDocs->total() }} documents
-                        </div>
-
+                    <div
+                        class="results-info"
+                        id="purchaseOrderResultsInfo"
+                    >
+                        Loading Purchase Orders...
                     </div>
                 </div>
-
-                
-                    <div class="table-wrapper">
-                        <table class="admin-docs-table">
-                            <thead>
-                                <tr>
-                                    <th>File name</th>
-                                    <th>Uploaded By</th>
-                                    <th>Uploaded At</th>
-                                    <th>Status</th>
-                                    <th>Progress Bar</th>
-                                    <th>Current Signatory</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="documentsTableBody">
-
-                                @foreach($workflowDocs as $doc)
-
-                                    @php
-                                        $approvals = $doc->approvals->sortBy('step_order');
-
-                                        $totalSteps = $approvals->count();
-
-                                        $approvedSteps = $approvals
-                                            ->where('status', 'approved')
-                                            ->count();
-
-                                        $currentApproval = $approvals
-                                            ->where('status', 'pending')
-                                            ->first();
-
-                                        $rejectedApproval = $approvals
-                                            ->where('status', 'rejected')
-                                            ->first();
-
-                                        $currentSignatoryRole = '';
-
-                                        $rawStatus = strtolower($doc->status ?? 'pending');
-
-                                        $displayStatus = match ($rawStatus) {
-                                            'pending', 'waiting', 'in_progress' => 'Ongoing',
-                                            'approved' => 'Approved',
-                                            'rejected' => 'Rejected',
-                                            default => ucfirst($rawStatus),
-                                        };
-
-                                        $statusClass = match ($rawStatus) {
-                                            'approved' => 'approved',
-                                            'rejected' => 'rejected',
-                                            'pending', 'waiting', 'in_progress' => 'pending',
-                                            default => $rawStatus,
-                                        };
-                                        
-                                
-                                        if ($doc->status === 'approved') {
-                                            $currentStage = 'Completed';
-                                            $currentApprover = 'Completed';
-                                        } elseif ($doc->status === 'rejected') {
-                                            $currentStage = 'Rejected';
-                                            $currentApprover = $rejectedApproval?->user?->name ?? 'Unknown';
-                                            $currentSignatoryRole = ucfirst($rejectedApproval?->user?->role ?? 'Unknown role');
-                                        } elseif ($currentApproval) {
-                                            $currentStage = ucfirst($currentApproval->user?->role ?? 'Pending');
-                                            $currentApprover = $currentApproval->user?->name ?? 'Unknown';
-                                            $currentSignatoryRole = ucfirst($currentApproval?->user?->role ?? 'Unknown role');
-                                        } else {
-                                            $currentStage = 'Waiting';
-                                            $currentApprover = 'Waiting for next approver';
-                                            $currentSignatoryRole = 'Unknown role';
-                                        }
-
-                                        $progressPercent = $totalSteps > 0
-                                            ? round(($approvedSteps / $totalSteps) * 100)
-                                            : 0;
-
-                                        $latestVersion = $doc->latestVersion();
-
-                                        
-                                    @endphp
-
-                                    <tr class="document-row"
-                                        data-title="{{ strtolower($doc->title) }}"
-                                        data-uploader="{{ strtolower($doc->uploader?->name ?? '') }}"
-                                        data-status="{{ strtolower($doc->status) }}">
-                                        
-                                        <td>
-                                            <div class="file-name">
-                                                {{ $doc->title }}
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <div class="table-user">
-                                                    <div class="table-user-info">
-                                                    <strong>{{ $doc->uploader->name ?? 'Unknown' }}</strong>
-                                                    <small>{{ ucfirst($doc->uploader->role ?? '-') }}</small>
-                                                </div>
-                                            </div>
-                                            <br>
-                                        </td>
-                                        
-                                        <td>
-                                            {{ $doc->created_at->format('M d, Y') }}
-                                            <br>
-                                            <small>{{ $doc->created_at->format('h:i A') }}</small>
-                                        </td>
-                                        
-                                        <td>
-                                            <span class="status-pill {{ $statusClass }}">
-                                                {{ $displayStatus }}
-                                            </span>
-                                        </td>
-
-                                          
-                                        <td>
-                                            <div class="progress-container">
-
-                                                <div class="progress-track">
-
-                                                    <div class="progress-fill"
-                                                        style="width: {{ $progressPercent }}%;">
-                                                    </div>
-
-                                                    @for($i = 1; $i < $totalSteps; $i++)
-                                                        <span class="progress-marker"
-                                                            style="left: {{ ($i / $totalSteps) * 100 }}%;">
-                                                        </span>
-                                                    @endfor
-
-                                                </div>
-                                                
-                                                <small>{{ $progressPercent }}%</small>
-                                                
-
-                                            </div>
-                                        </td>
-                                        
-                                         <td>
-                                            {{ $currentApprover }}
-                                            
-                                            <br>
-                                            <small>{{ $currentSignatoryRole }}</small>
-                                        </td>
-
-                                <td>
-                                    <div class="more-menu">
-                                        <button type="button"
-                                                class="table-action-btn btn-clear"
-                                                onclick="toggleMoreMenu(event, this)">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-
-                                        <div class="more-menu-dropdown">
-
-                                            @if($latestVersion)
-                                                <button type="button"
-                                                        onclick="openPdfModal('{{ route('files.view', encrypt($latestVersion->id)) }}')">
-                                                    View PDF
-                                                </button>
-
-                                                <a href="{{ route('files.download', encrypt($latestVersion->id)) }}">
-                                                    Download PDF
-                                                </a>
-                                            @endif
-
-                                        </div>
-                                    </div>
-                                </td>
-                                    </tr>
-
-                                @endforeach
-
-                            </tbody>
-                        </table>
-
-                        <div id="noResultsMessage"
-                            style="display:none; text-align:center; padding:20px; color:#777;">
-                            No documents found.
-                        </div>
-                    
-                                                <div class="documents-footer">
-                            {{ $workflowDocs->appends(['section' => 'workflow'])->links() }}
-                        </div>
-
-                    </div> {{-- closes .table-wrapper --}}
-
-            </div> {{-- closes #documentsTableContainer --}}
-
-        @else
-
-            <div style="padding:24px;">
-                <p class="alert alert-error">
-                    No documents found.
-                </p>
             </div>
+        </div>
 
-        @endif
+        <div class="table-wrapper">
+            <table class="admin-docs-table">
+                <thead>
+                    <tr>
+                        <th>PO Number</th>
+                        <th>Supplier</th>
+                        <th>PO Date</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Workflow</th>
+                        <th>Progress</th>
+                        <th>Current Signatory</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-    </div> 
+                <tbody id="purchaseOrderTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            Loading Purchase Orders...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-</div> 
+            <div
+                class="documents-footer"
+                id="purchaseOrderPagination"
+            ></div>
+        </div>
+    </div>
+</div>
 
 {{-- Users Section --}}
 <div id="section-users" class="dashboard-section role-section">
